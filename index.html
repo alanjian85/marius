@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <style>
+            canvas {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+        </style>
+        <title>Marius</title>
+    </head>
+    <body>
+        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+        <script type="text/javascript">
+            var Module = {
+                canvas: document.getElementById('canvas')
+            }
+
+            var resize = function() {
+                var canvas = Module.canvas
+                const ppu = {
+                    width: 256,
+                    height: 240
+                }
+                const size = {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                }
+
+                const scale = Math.min(
+                    size.width / ppu.width,
+                    size.height / ppu.height
+                )
+                canvas.style.width = Math.trunc(ppu.width * scale) + 'px'
+                canvas.style.height = Math.trunc(ppu.height * scale) + 'px'
+            }
+            resize()
+
+            window.addEventListener('resize', resize)
+        </script>
+        <script src="marius.js"></script>
+    </body>
+</html>
