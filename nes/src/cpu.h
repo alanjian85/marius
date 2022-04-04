@@ -5,11 +5,15 @@
 
 #include "bus.h"
 
-namespace {
+namespace nes {
     class CPU {
     public:
         CPU(Bus& bus);
     private:
+        void execGroup1(std::uint8_t opcode);
+        void execGroup2(std::uint8_t opcode);
+        void execGroup3(std::uint8_t opcode);
+
         Bus& bus_;
 
         std::uint8_t a_;
