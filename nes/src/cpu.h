@@ -9,7 +9,11 @@ namespace nes {
     class CPU {
     public:
         CPU(Bus& bus);
+
+        void step();
     private:
+        std::uint8_t fetch();
+
         void execGroup0(std::uint8_t opcode);
         void execGroup1(std::uint8_t opcode);
         void execGroup2(std::uint8_t opcode);
