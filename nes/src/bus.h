@@ -8,8 +8,6 @@
 namespace nes {
     class Bus {
     public:
-        Bus();
-
         std::byte read(std::uint16_t addr) const;
 
         void write(std::uint16_t addr, std::byte val);

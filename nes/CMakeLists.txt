@@ -1,4 +1,5 @@
 set(NES_SRCS
+    src/bus.cc
     src/bus.h
     src/main.cc
 )
