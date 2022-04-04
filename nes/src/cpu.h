@@ -14,9 +14,9 @@ namespace nes {
     private:
         std::uint8_t fetch();
 
-        void execGroup0(std::uint8_t opcode);
-        void execGroup1(std::uint8_t opcode);
-        void execGroup2(std::uint8_t opcode);
+        bool execGroup0(std::uint8_t opcode);
+        bool execGroup1(std::uint8_t opcode);
+        bool execGroup2(std::uint8_t opcode);
 
         Bus& bus_;
 
