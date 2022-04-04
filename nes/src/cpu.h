@@ -10,9 +10,9 @@ namespace nes {
     public:
         CPU(Bus& bus);
     private:
+        void execGroup0(std::uint8_t opcode);
         void execGroup1(std::uint8_t opcode);
         void execGroup2(std::uint8_t opcode);
-        void execGroup3(std::uint8_t opcode);
 
         Bus& bus_;
 
