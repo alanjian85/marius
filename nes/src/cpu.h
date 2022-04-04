@@ -14,6 +14,7 @@ namespace nes {
     private:
         std::uint8_t fetch();
 
+        bool execBranch(std::uint8_t opcode);
         bool execImplied(std::uint8_t opcode);
         bool execGroup0(std::uint8_t opcode);
         bool execGroup1(std::uint8_t opcode);

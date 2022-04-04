@@ -19,6 +19,23 @@ void CPU::step() {
         return;
 }
 
+bool CPU::execBranch(std::uint8_t opcode) {
+    if (opcode & 0x10) {
+        auto condition = opcode & 0x20;
+        switch ((opcode & 0xC0) >> 6) {
+            case 0b00: // negative
+                break;
+            case 0b01: // overflow
+                break;
+            case 0b10: // carry
+                break;
+            case 0b11: // zero
+                break;
+        }
+    }
+    return false;
+}
+
 bool CPU::execImplied(std::uint8_t opcode) {
     switch (opcode) {
         case 0x00: // BRK
