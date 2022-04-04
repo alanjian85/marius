@@ -9,6 +9,8 @@ CPU::CPU(Bus& bus)
 
 void CPU::step() {
     auto opcode = fetch();
+    if (execBranch(opcode))
+        return;
     if (execImplied(opcode))
         return;
     if (execGroup0(opcode))
@@ -23,13 +25,13 @@ bool CPU::execBranch(std::uint8_t opcode) {
     if (opcode & 0x10) {
         auto condition = opcode & 0x20;
         switch ((opcode & 0xC0) >> 6) {
-            case 0b00: // negative
+            case 0b00: // N
                 break;
-            case 0b01: // overflow
+            case 0b01: // V
                 break;
-            case 0b10: // carry
+            case 0b10: // C
                 break;
-            case 0b11: // zero
+            case 0b11: // Z
                 break;
         }
     }
@@ -98,6 +100,20 @@ bool CPU::execImplied(std::uint8_t opcode) {
 
 bool CPU::execGroup0(std::uint8_t opcode) {
     if ((opcode & 0x03) == 0x00) {
+        switch ((opcode & 0x1C) >> 2) {
+            case 0b000: // immediate
+                break;
+            case 0b001: // zero-page
+                break;
+            case 0b011: // absolute
+                break;
+            case 0b101: // zero-page, X-indexed
+                break;
+            case 0b111: // absolute, X-indexed
+                break;
+            default:
+                return false;
+        }
         switch ((opcode & 0xE0) >> 5) {
             case 0b001: // BIT
                 break;
@@ -121,6 +137,24 @@ bool CPU::execGroup0(std::uint8_t opcode) {
 
 bool CPU::execGroup1(std::uint8_t opcode) {
     if ((opcode & 0x03) == 0x01) {
+        switch ((opcode & 0x1C) >> 2) {
+            case 0b000: // X-indexed, indirect
+                break;
+            case 0b001: // zero-page
+                break;
+            case 0b010: // immediate
+                break;
+            case 0b011: // absolute
+                break;
+            case 0b100: // indirect, Y-indexed
+                break;
+            case 0b101: // zero-page, X-indexed
+                break;
+            case 0b110: // absolute, Y-indexed
+                break;
+            case 0b111: // absolute, X-indexed
+                break;
+        }
         switch ((opcode & 0xE0) >> 5) {
             case 0b000: // ORA
                 break;
@@ -146,6 +180,22 @@ bool CPU::execGroup1(std::uint8_t opcode) {
 
 bool CPU::execGroup2(std::uint8_t opcode) {
     if ((opcode & 0x03) == 0x02) {
+        switch ((opcode & 0x1C) >> 2) {
+            case 0b000: // immediate
+                break;
+            case 0b001: // zero-page
+                break;
+            case 0b010: // accumulator
+                break;
+            case 0b011: // absolute
+                break;
+            case 0b101: // zero-page, X-indexed
+                break;
+            case 0b111: // absolute, X-indexed
+                break;
+            default:
+                return false;
+        }
         switch ((opcode & 0xE0) >> 5) {
             case 0b000: // ASL
                 break;
