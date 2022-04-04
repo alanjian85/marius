@@ -8,7 +8,7 @@ CPU::CPU(Bus& bus)
 }
 
 void CPU::step() {
-    auto opcode = fetch();
+    auto opcode = bus_.read(pc_++);
     if (execBranch(opcode))
         return;
     if (execImplied(opcode))
@@ -101,15 +101,24 @@ bool CPU::execImplied(std::uint8_t opcode) {
 bool CPU::execGroup0(std::uint8_t opcode) {
     if ((opcode & 0x03) == 0x00) {
         switch ((opcode & 0x1C) >> 2) {
-            case 0b000: // immediate
+            case 0b000:
+                addrImmediate();
                 break;
-            case 0b001: // zero-page
+            case 0b001:
+                addrZeroPage();
                 break;
-            case 0b011: // absolute
+            case 0b011:
+                if (opcode == 0x6C) { // JMP (abs)
+                    addrIndirect();
+                } else {
+                    addrAbsolute();
+                }
                 break;
-            case 0b101: // zero-page, X-indexed
+            case 0b101:
+                addrZeroPageX();
                 break;
-            case 0b111: // absolute, X-indexed
+            case 0b111:
+                addrAbsoluteX();
                 break;
             default:
                 return false;
@@ -119,7 +128,7 @@ bool CPU::execGroup0(std::uint8_t opcode) {
                 break;
             case 0b010: // JMP
                 break;
-            case 0b011: // JMP
+            case 0b011: // JMP (abs)
                 break;
             case 0b100: // STY
                 break;
@@ -137,22 +146,31 @@ bool CPU::execGroup0(std::uint8_t opcode) {
 
 bool CPU::execGroup1(std::uint8_t opcode) {
     if ((opcode & 0x03) == 0x01) {
+        std::uint16_t addr;
         switch ((opcode & 0x1C) >> 2) {
-            case 0b000: // X-indexed, indirect
+            case 0b000:
+                addrIndexedIndirect();
                 break;
-            case 0b001: // zero-page
+            case 0b001:
+                addrZeroPage();
                 break;
-            case 0b010: // immediate
+            case 0b010:
+                addrImmediate();
                 break;
-            case 0b011: // absolute
+            case 0b011:
+                addrAbsolute();
                 break;
-            case 0b100: // indirect, Y-indexed
+            case 0b100:
+                addrIndirectIndexed();
                 break;
-            case 0b101: // zero-page, X-indexed
+            case 0b101:
+                addrZeroPageX();
                 break;
-            case 0b110: // absolute, Y-indexed
+            case 0b110:
+                addrAbsoluteY();
                 break;
-            case 0b111: // absolute, X-indexed
+            case 0b111:
+                addrAbsoluteX();
                 break;
         }
         switch ((opcode & 0xE0) >> 5) {
@@ -181,17 +199,31 @@ bool CPU::execGroup1(std::uint8_t opcode) {
 bool CPU::execGroup2(std::uint8_t opcode) {
     if ((opcode & 0x03) == 0x02) {
         switch ((opcode & 0x1C) >> 2) {
-            case 0b000: // immediate
+            case 0b000:
+                addrImmediate();
                 break;
-            case 0b001: // zero-page
+            case 0b001:
+                addrZeroPage();
                 break;
-            case 0b010: // accumulator
+            case 0b010:
+                addrAccumulator();
                 break;
-            case 0b011: // absolute
+            case 0b011:
+                addrAbsolute();
                 break;
-            case 0b101: // zero-page, X-indexed
+            case 0b101:
+                if (opcode == 0x96 || opcode == 0xB6) {
+                    addrZeroPageY();
+                } else {
+                    addrZeroPageX();
+                }
                 break;
-            case 0b111: // absolute, X-indexed
+            case 0b111:
+                if (opcode == 0xBE) { // LDX
+                    addrAbsoluteY();
+                } else {
+                    addrAbsoluteX();
+                }
                 break;
             default:
                 return false;
@@ -217,8 +249,4 @@ bool CPU::execGroup2(std::uint8_t opcode) {
         return true;
     }
     return false;
-}
-
-std::uint8_t CPU::fetch() {
-    return bus_.read(pc_++);
 }

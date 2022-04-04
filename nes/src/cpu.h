@@ -12,7 +12,18 @@ namespace nes {
 
         void step();
     private:
-        std::uint8_t fetch();
+        void addrAccumulator();
+        void addrImmediate();
+        void addrRelative();
+        void addrAbsolute();
+        void addrZeroPage();
+        void addrIndirect();
+        void addrAbsoluteX();
+        void addrAbsoluteY();
+        void addrZeroPageX();
+        void addrZeroPageY();
+        void addrIndexedIndirect();
+        void addrIndirectIndexed();
 
         bool execBranch(std::uint8_t opcode);
         bool execImplied(std::uint8_t opcode);
@@ -21,6 +32,7 @@ namespace nes {
         bool execGroup2(std::uint8_t opcode);
 
         Bus& bus_;
+        std::uint16_t addr_;
 
         std::uint8_t a_;
         std::uint8_t x_;
