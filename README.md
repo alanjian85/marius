@@ -1,2 +1,5 @@
 # NES
-NES Emulation Suite
+NES Emulation Software
+
+## References
+* [NESdev Wiki](https://www.nesdev.org/wiki/Nesdev_Wiki)

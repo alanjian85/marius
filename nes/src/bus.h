@@ -2,17 +2,16 @@
 #define NES_BUS_H_
 
 #include <array>
-#include <cstddef>
 #include <cstdint>
 
 namespace nes {
     class Bus {
     public:
-        std::byte read(std::uint16_t addr) const;
+        std::uint8_t read(std::uint16_t addr) const;
 
-        void write(std::uint16_t addr, std::byte val);
+        void write(std::uint16_t addr, std::uint8_t val);
     private:
-        std::array<std::byte, 0x800> ram_;
+        std::array<std::uint8_t, 0x800> ram_;
     };
 }
 
