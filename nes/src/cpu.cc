@@ -7,6 +7,10 @@ CPU::CPU(Bus& bus)
 
 }
 
+void CPU::reset() {
+    pc_ = 0x0000;
+}
+
 void CPU::step() {
     auto opcode = bus_.read(pc_++);
     if (execBranch(opcode))
@@ -123,11 +127,13 @@ bool CPU::execImplied(std::uint8_t opcode) {
             push(pc_);
             break;
         case 0x20: // JSR
-            push(pc_ + 2 >> 8);
-            push(pc_ + 2);
-            auto old_pc = pc_;
-            pc_ = bus_.read(old_pc);
-            pc_ |= bus_.read(old_pc + 1) << 8;
+            {
+                push(pc_ + 2 >> 8);
+                push(pc_ + 2);
+                auto old_pc = pc_;
+                pc_ = bus_.read(old_pc);
+                pc_ |= bus_.read(old_pc + 1) << 8;
+            }
             break;
         case 0x40: // RTI
             s_ = pull();

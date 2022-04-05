@@ -12,6 +12,8 @@ namespace nes {
     public:
         CPU(Bus& bus);
 
+        void reset();
+
         void step();
     private:
         static constexpr std::size_t kC = 0;
