@@ -8,7 +8,12 @@ Cpu::Cpu(Bus& bus)
 }
 
 void Cpu::reset() {
-    pc_ = 0x0000;
+    pc_ = bus_.read(0xFFFC) | bus_.read(0xFFFD) << 8;
+    a_ = 0x00;
+    x_ = 0x00;
+    y_ = 0x00;
+    s_ = 0xFD;
+    p_.set(kI);
 }
 
 void Cpu::step() {
@@ -125,33 +130,37 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             ++pc_;
             push(pc_ >> 8);
             push(pc_);
+            push(p_.to_ulong() | 1 << kB | 1 << 5);
+            p_.set(kI);
+            pc_ = bus_.read(0xFFFE) | bus_.read(0xFFFF) << 8;
             break;
         case 0x20: // JSR
             {
-                push(pc_ + 2 >> 8);
-                push(pc_ + 2);
+                push(pc_ + 1 >> 8);
+                push(pc_ + 1);
                 auto old_pc = pc_;
                 pc_ = bus_.read(old_pc);
                 pc_ |= bus_.read(old_pc + 1) << 8;
             }
             break;
         case 0x40: // RTI
-            s_ = pull();
+            p_ = pull();
             pc_ = pull();
             pc_ |= pull() << 8;
             break;
         case 0x60: // RTS
             pc_ = pull();
             pc_ |= pull() << 8;
+            ++pc_;
             break;
         case 0x08: // PHP
-            push(s_);
+            push(p_.to_ulong() | 1 << 5);
             break;
         case 0x18: // CLC
             p_.reset(kC);
             break;
         case 0x28: // PLP
-            s_ = pull();
+            p_ = pull();
             break;
         case 0x38: // SEC
             p_.set(kC);

@@ -12,16 +12,21 @@ namespace nes {
     public:
         Cpu(Bus& bus);
 
+        void irq();
+
+        void nmi();
+
         void reset();
 
         void step();
     private:
-        static constexpr std::size_t kC = 0;
-        static constexpr std::size_t kZ = 1;
-        static constexpr std::size_t kI = 2;
-        static constexpr std::size_t kD = 3;
-        static constexpr std::size_t kV = 6;
-        static constexpr std::size_t kN = 7;
+        static constexpr std::uint8_t kC = 0;
+        static constexpr std::uint8_t kZ = 1;
+        static constexpr std::uint8_t kI = 2;
+        static constexpr std::uint8_t kD = 3;
+        static constexpr std::uint8_t kB = 4;
+        static constexpr std::uint8_t kV = 6;
+        static constexpr std::uint8_t kN = 7;
 
         void addrImmediate();
         void addrRelative();
