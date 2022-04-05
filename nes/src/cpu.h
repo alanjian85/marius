@@ -8,9 +8,9 @@
 #include "bus.h"
 
 namespace nes {
-    class CPU {
+    class Cpu {
     public:
-        CPU(Bus& bus);
+        Cpu(Bus& bus);
 
         void reset();
 

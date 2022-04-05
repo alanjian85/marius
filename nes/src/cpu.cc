@@ -1,17 +1,17 @@
 #include "cpu.h"
 using namespace nes;
 
-CPU::CPU(Bus& bus) 
+Cpu::Cpu(Bus& bus) 
     : bus_(bus)
 {
 
 }
 
-void CPU::reset() {
+void Cpu::reset() {
     pc_ = 0x0000;
 }
 
-void CPU::step() {
+void Cpu::step() {
     auto opcode = bus_.read(pc_++);
     if (execBranch(opcode))
         return;
@@ -25,75 +25,75 @@ void CPU::step() {
         return;
 }
 
-void CPU::addrImmediate() {
+void Cpu::addrImmediate() {
     addr_ = pc_++;
 }
 
-void CPU::addrRelative() {
+void Cpu::addrRelative() {
     std::int8_t offset = bus_.read(pc_++);
     addr_ = pc_ + offset;
 }
 
-void CPU::addrAbsolute() {
+void Cpu::addrAbsolute() {
     addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
     pc_ += 2;
 }
 
-void CPU::addrZeroPage() {
+void Cpu::addrZeroPage() {
     addr_ = bus_.read(pc_++);
 }
 
-void CPU::addrIndirect() {
+void Cpu::addrIndirect() {
     addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
     addr_ = bus_.read(addr_);
     pc_ += 2;
 }
 
-void CPU::addrAbsoluteX() {
+void Cpu::addrAbsoluteX() {
     addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8 + x_;
     pc_ += 2;
 }
 
-void CPU::addrAbsoluteY() {
+void Cpu::addrAbsoluteY() {
     addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8 + y_;
     pc_ += 2;
 }
 
-void CPU::addrZeroPageX() {
+void Cpu::addrZeroPageX() {
     addr_ = (bus_.read(pc_++) + x_) & 0xFF;
 }
 
-void CPU::addrZeroPageY() {
+void Cpu::addrZeroPageY() {
     addr_ = (bus_.read(pc_++) + y_) & 0xFF;
 }
 
-void CPU::addrIndexedIndirect() {
+void Cpu::addrIndexedIndirect() {
     addr_ = bus_.read(pc_++) + x_;
     addr_ = bus_.read(addr_ & 0xFF) | bus_.read((addr_ + 1) & 0xFF) << 8;
 }
 
-void CPU::addrIndirectIndexed() {
+void Cpu::addrIndirectIndexed() {
     addr_ = bus_.read(pc_++);
     addr_ = bus_.read(addr_) | bus_.read((addr_ + 1) & 0xFF) << 8 + y_;
 }
 
-void CPU::setZ(std::uint8_t val) {
+void Cpu::setZ(std::uint8_t val) {
     p_.set(kZ, !val);
 }
 
-void CPU::setN(std::uint8_t val) {
+void Cpu::setN(std::uint8_t val) {
     p_.set(kN, val & 0x80);
 }
 
-void CPU::push(std::uint8_t val) {
+void Cpu::push(std::uint8_t val) {
     bus_.write(0x0100 | s_--, val);
 }
 
-std::uint8_t CPU::pull() {
+std::uint8_t Cpu::pull() {
     return bus_.read(0x0100 | s_++);
 }
 
-bool CPU::execBranch(std::uint8_t opcode) {
+bool Cpu::execBranch(std::uint8_t opcode) {
     if (opcode & 0x10) {
         bool condition = opcode & 0x20;
         switch ((opcode & 0xC0) >> 6) {
@@ -119,7 +119,7 @@ bool CPU::execBranch(std::uint8_t opcode) {
     return false;
 }
 
-bool CPU::execImplied(std::uint8_t opcode) {
+bool Cpu::execImplied(std::uint8_t opcode) {
     switch (opcode) {
         case 0x00: // BRK
             ++pc_;
@@ -235,7 +235,7 @@ bool CPU::execImplied(std::uint8_t opcode) {
     return true;
 }
 
-bool CPU::execGroup0(std::uint8_t opcode) {
+bool Cpu::execGroup0(std::uint8_t opcode) {
     if ((opcode & 0x03) == 0x00) {
         switch ((opcode & 0x1C) >> 2) {
             case 0b000:
@@ -303,7 +303,7 @@ bool CPU::execGroup0(std::uint8_t opcode) {
     return false;
 }
 
-bool CPU::execGroup1(std::uint8_t opcode) {
+bool Cpu::execGroup1(std::uint8_t opcode) {
     if ((opcode & 0x03) == 0x01) {
         std::uint16_t addr;
         switch ((opcode & 0x1C) >> 2) {
@@ -353,7 +353,7 @@ bool CPU::execGroup1(std::uint8_t opcode) {
                     auto operand = bus_.read(addr_);
                     std::uint16_t sum = a_ + operand + p_.test(kC);
                     p_.set(kC, sum & 0x100);
-                    p_.set(kV, (a_ ^ sum) & (operand ^ sum) & 0x80);
+                    p_.set(kV, ~(a_ ^ operand) & (a_ ^ sum) & 0x80);
                     a_ = static_cast<std::uint8_t>(sum);
                     setZ(a_);
                     setN(a_);
@@ -380,7 +380,7 @@ bool CPU::execGroup1(std::uint8_t opcode) {
                     auto operand = bus_.read(addr_);
                     std::uint16_t diff = a_ - operand - !p_.test(kC);
                     p_.set(kC, !(diff & 0x100));
-                    p_.set(kV, (a_ ^ diff) & (~operand ^ diff) ^ 0x80);
+                    p_.set(kV, (a_ ^ operand) & (a_ ^ diff) & 0x80);
                     a_ = static_cast<std::uint8_t>(diff);
                     setZ(a_);
                     setN(a_);
@@ -392,7 +392,7 @@ bool CPU::execGroup1(std::uint8_t opcode) {
     return false;
 }
 
-bool CPU::execGroup2(std::uint8_t opcode) {
+bool Cpu::execGroup2(std::uint8_t opcode) {
     if ((opcode & 0x03) == 0x02) {
         auto mode = (opcode & 0x1C) >> 2;
         if (mode == 0b010) { // Accumulator
