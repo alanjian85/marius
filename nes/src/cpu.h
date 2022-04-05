@@ -12,7 +12,6 @@ namespace nes {
 
         void step();
     private:
-        void addrAccumulator();
         void addrImmediate();
         void addrRelative();
         void addrAbsolute();

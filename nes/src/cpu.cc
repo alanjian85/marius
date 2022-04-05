@@ -21,6 +21,58 @@ void CPU::step() {
         return;
 }
 
+void CPU::addrImmediate() {
+    addr_ = pc_++;
+}
+
+void CPU::addrRelative() {
+    std::int8_t offset = bus_.read(pc_++);
+    addr_ = pc_ + offset;
+}
+
+void CPU::addrAbsolute() {
+    addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
+    pc_ += 2;
+}
+
+void CPU::addrZeroPage() {
+    addr_ = bus_.read(pc_++);
+}
+
+void CPU::addrIndirect() {
+    addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
+    addr_ = bus_.read(addr_);
+    pc_ += 2;
+}
+
+void CPU::addrAbsoluteX() {
+    addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8 + x_;
+    pc_ += 2;
+}
+
+void CPU::addrAbsoluteY() {
+    addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8 + y_;
+    pc_ += 2;
+}
+
+void CPU::addrZeroPageX() {
+    addr_ = (bus_.read(pc_++) + x_) & 0xFF;
+}
+
+void CPU::addrZeroPageY() {
+    addr_ = (bus_.read(pc_++) + y_) & 0xFF;
+}
+
+void CPU::addrIndexedIndirect() {
+    addr_ = bus_.read(pc_++) + x_;
+    addr_ = bus_.read(addr_ & 0xFF) | bus_.read((addr_ + 1) & 0xFF) << 8;
+}
+
+void CPU::addrIndirectIndexed() {
+    addr_ = bus_.read(pc_++);
+    addr_ = bus_.read(addr_) | bus_.read((addr_ + 1) & 0xFF) << 8 + y_;
+}
+
 bool CPU::execBranch(std::uint8_t opcode) {
     if (opcode & 0x10) {
         auto condition = opcode & 0x20;
@@ -198,53 +250,69 @@ bool CPU::execGroup1(std::uint8_t opcode) {
 
 bool CPU::execGroup2(std::uint8_t opcode) {
     if ((opcode & 0x03) == 0x02) {
-        switch ((opcode & 0x1C) >> 2) {
-            case 0b000:
-                addrImmediate();
-                break;
-            case 0b001:
-                addrZeroPage();
-                break;
-            case 0b010:
-                addrAccumulator();
-                break;
-            case 0b011:
-                addrAbsolute();
-                break;
-            case 0b101:
-                if (opcode == 0x96 || opcode == 0xB6) {
-                    addrZeroPageY();
-                } else {
-                    addrZeroPageX();
-                }
-                break;
-            case 0b111:
-                if (opcode == 0xBE) { // LDX
-                    addrAbsoluteY();
-                } else {
-                    addrAbsoluteX();
-                }
-                break;
-            default:
-                return false;
-        }
-        switch ((opcode & 0xE0) >> 5) {
-            case 0b000: // ASL
-                break;
-            case 0b001: // ROL
-                break;
-            case 0b010: // LSR
-                break;
-            case 0b011: // ROR
-                break;
-            case 0b100: // STX
-                break;
-            case 0b101: // LDX
-                break;
-            case 0b110: // DEC
-                break;
-            case 0b111: // INC
-                break;
+        auto mode = (opcode & 0x1C) >> 2;
+        if (mode == 0b010) { // Accumulator
+            switch ((opcode & 0xE0) >> 5) {
+                case 0b000: // ASL
+                    break;
+                case 0b001: // ROL
+                    break;
+                case 0b010: // LSR
+                    break;
+                case 0b011: // ROR
+                    break;
+                case 0b100: // STX
+                    break;
+                default:
+                    return false;
+            }
+        } else {
+            switch (mode) {
+                case 0b000:
+                    addrImmediate();
+                    break;
+                case 0b001:
+                    addrZeroPage();
+                    break;
+                case 0b011:
+                    addrAbsolute();
+                    break;
+                case 0b101:
+                    if (opcode == 0x96 || opcode == 0xB6) {
+                        addrZeroPageY();
+                    } else {
+                        addrZeroPageX();
+                    }
+                    break;
+                case 0b111:
+                    if (opcode == 0xBE) { // LDX
+                        addrAbsoluteY();
+                    } else {
+                        addrAbsoluteX();
+                    }
+                    break;
+                default:
+                    return false;
+            }
+
+            switch ((opcode & 0xE0) >> 5) {
+                case 0b000: // ASL
+                    break;
+                case 0b001: // ROL
+                    break;
+                case 0b010: // LSR
+                    break;
+                case 0b011: // ROR
+                    break;
+                case 0b100: // STX
+                    break;
+                case 0b101: // LDX
+                    break;
+                case 0b110: // DEC
+                    break;
+                case 0b111: // INC
+                    break;
+            }
         }
         return true;
     }
