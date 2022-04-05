@@ -216,7 +216,7 @@ bool CPU::execGroup0(std::uint8_t opcode) {
             case 0b110: // CPY
                 {
                     std::int16_t diff = x_ - bus_.read(addr_);
-                    p_.set(kC, diff >= 0);
+                    p_.set(kC, !(diff & 0x100));
                     setZ(diff);
                     setN(diff);
                 }
@@ -224,7 +224,7 @@ bool CPU::execGroup0(std::uint8_t opcode) {
             case 0b111: // CPX
                 {
                     std::int16_t diff = y_ - bus_.read(addr_);
-                    p_.set(kC, diff >= 0);
+                    p_.set(kC, !(diff & 0x100));
                     setZ(diff);
                     setN(diff);
                 }
@@ -283,9 +283,9 @@ bool CPU::execGroup1(std::uint8_t opcode) {
             case 0b011: // ADC
                 {
                     auto operand = bus_.read(addr_);
-                    std::int16_t sum = a_ + operand + p_.test(kC);
+                    std::uint16_t sum = a_ + operand + p_.test(kC);
                     p_.set(kC, sum & 0x100);
-                    p_.set(kV, sum < -128 || sum > 127);
+                    p_.set(kV, (a_ ^ sum) & (operand ^ sum) & 0x80);
                     a_ = static_cast<std::uint8_t>(sum);
                     setZ(a_);
                     setN(a_);
@@ -302,16 +302,17 @@ bool CPU::execGroup1(std::uint8_t opcode) {
             case 0b110: // CMP
                 {
                     std::int16_t diff = a_ - bus_.read(addr_);
-                    p_.set(kC, diff >= 0);
+                    p_.set(kC, !(diff & 0x100));
                     setZ(diff);
                     setN(diff);
                 }
                 break;
             case 0b111: // SBC
                 {
-                    std::int16_t diff = a_ - bus_.read(addr_) - p_.test(kC);
-                    p_.set(kC, diff >= 0);
-                    p_.set(kV, diff < -128 || diff > 127);
+                    auto operand = bus_.read(addr_);
+                    std::uint16_t diff = a_ - operand - !p_.test(kC);
+                    p_.set(kC, !(diff & 0x100));
+                    p_.set(kV, (a_ ^ diff) & (~operand ^ diff) ^ 0x80);
                     a_ = static_cast<std::uint8_t>(diff);
                     setZ(a_);
                     setN(a_);
