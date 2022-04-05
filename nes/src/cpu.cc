@@ -75,17 +75,26 @@ void CPU::addrIndirectIndexed() {
 
 bool CPU::execBranch(std::uint8_t opcode) {
     if (opcode & 0x10) {
-        auto condition = opcode & 0x20;
+        auto condition = opcode & 0x20 >> 5;
         switch ((opcode & 0xC0) >> 6) {
             case 0b00: // N
+                condition <<= 7;
                 break;
             case 0b01: // V
+                condition <<= 6;
                 break;
             case 0b10: // C
                 break;
             case 0b11: // Z
+                condition <<= 1;
                 break;
         }
+        condition = !(p_ ^ condition);
+        if (condition) {
+            addrRelative();
+            pc_ = addr_;
+        }
+        return true;
     }
     return false;
 }
