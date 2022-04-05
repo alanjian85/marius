@@ -194,18 +194,40 @@ bool CPU::execGroup0(std::uint8_t opcode) {
         }
         switch ((opcode & 0xE0) >> 5) {
             case 0b001: // BIT
+                {
+                    auto operand = bus_.read(addr_);
+                    p_.set(kN, operand & 0x80);
+                    p_.set(kV, operand & 0x40);
+                    p_.set(kZ, !(operand & a_));
+                }
                 break;
             case 0b010: // JMP
-                break;
             case 0b011: // JMP (abs)
+                pc_ = bus_.read(addr_);
                 break;
             case 0b100: // STY
+                bus_.write(addr_, y_);
                 break;
             case 0b101: // LDY
+                y_ = bus_.read(addr_);
+                setZ(y_);
+                setN(y_);
                 break;
             case 0b110: // CPY
+                {
+                    std::int16_t diff = x_ - bus_.read(addr_);
+                    p_.set(kC, diff >= 0);
+                    setZ(diff);
+                    setN(diff);
+                }
                 break;
             case 0b111: // CPX
+                {
+                    std::int16_t diff = y_ - bus_.read(addr_);
+                    p_.set(kC, diff >= 0);
+                    setZ(diff);
+                    setN(diff);
+                }
                 break;
         }
         return true;
