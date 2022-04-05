@@ -20,13 +20,24 @@ namespace nes {
 
         void step();
     private:
-        static constexpr std::uint8_t kC = 0;
-        static constexpr std::uint8_t kZ = 1;
-        static constexpr std::uint8_t kI = 2;
-        static constexpr std::uint8_t kD = 3;
-        static constexpr std::uint8_t kB = 4;
-        static constexpr std::uint8_t kV = 6;
-        static constexpr std::uint8_t kN = 7;
+        enum {
+            kC = 0,
+            kZ = 1,
+            kI = 2,
+            kD = 3,
+            kB = 4,
+            kV = 6,
+            kN = 7
+        };
+
+        enum {
+            kBrkVector = 0xFFFE,
+            kIrqVector = 0xFFFE,
+            kNmiVector = 0xFFFA,
+            kResetVector = 0xFFFC
+        };
+
+        static constexpr std::uint16_t kStackBase = 0x0100;
 
         void addrImmediate();
         void addrRelative();

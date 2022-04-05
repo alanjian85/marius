@@ -11,7 +11,7 @@ namespace nes {
 
         void write(std::uint16_t addr, std::uint8_t val);
     private:
-        std::array<std::uint8_t, 0x800> ram_;
+        std::array<std::uint8_t, 0xFFFF> ram_;
     };
 }
 

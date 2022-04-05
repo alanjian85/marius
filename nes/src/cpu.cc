@@ -7,8 +7,26 @@ Cpu::Cpu(Bus& bus)
 
 }
 
+void Cpu::irq() {
+    if (!p_.test(kI)) {
+        push(pc_ >> 8);
+        push(pc_);
+        push(p_.to_ulong() | 1 << 5 & ~(1 << kB));
+        p_.set(kI);
+        pc_ = bus_.read(kIrqVector) | bus_.read(kIrqVector + 1) << 8;   
+    }
+}
+
+void Cpu::nmi() {
+    push(pc_ >> 8);
+    push(pc_);
+    push(p_.to_ulong() | 1 << 5 & ~(1 << kB));
+    p_.set(kI);
+    pc_ = bus_.read(kNmiVector) | bus_.read(kNmiVector + 1) << 8;   
+}
+
 void Cpu::reset() {
-    pc_ = bus_.read(0xFFFC) | bus_.read(0xFFFD) << 8;
+    pc_ = bus_.read(kResetVector) | bus_.read(kResetVector + 1) << 8;
     a_ = 0x00;
     x_ = 0x00;
     y_ = 0x00;
@@ -91,11 +109,11 @@ void Cpu::setN(std::uint8_t val) {
 }
 
 void Cpu::push(std::uint8_t val) {
-    bus_.write(0x0100 | s_--, val);
+    bus_.write(kStackBase | s_--, val);
 }
 
 std::uint8_t Cpu::pull() {
-    return bus_.read(0x0100 | s_++);
+    return bus_.read(kStackBase | s_++);
 }
 
 bool Cpu::execBranch(std::uint8_t opcode) {
@@ -130,9 +148,9 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             ++pc_;
             push(pc_ >> 8);
             push(pc_);
-            push(p_.to_ulong() | 1 << kB | 1 << 5);
+            push(p_.to_ulong() | 1 << 5 | 1 << kB);
             p_.set(kI);
-            pc_ = bus_.read(0xFFFE) | bus_.read(0xFFFF) << 8;
+            pc_ = bus_.read(kBrkVector) | bus_.read(kBrkVector + 1) << 8;
             break;
         case 0x20: // JSR
             {
@@ -154,7 +172,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             ++pc_;
             break;
         case 0x08: // PHP
-            push(p_.to_ulong() | 1 << 5);
+            push(p_.to_ulong() | 1 << 5 | 1 << kB);
             break;
         case 0x18: // CLC
             p_.reset(kC);
