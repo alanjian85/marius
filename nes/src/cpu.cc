@@ -81,6 +81,14 @@ void CPU::setN(std::uint8_t val) {
     p_.set(kN, val & 0x80);
 }
 
+void CPU::push(std::uint8_t val) {
+    bus_.write(0x0100 | s_--, val);
+}
+
+std::uint8_t CPU::pull() {
+    return bus_.read(0x0100 | s_++);
+}
+
 bool CPU::execBranch(std::uint8_t opcode) {
     if (opcode & 0x10) {
         bool condition = opcode & 0x20;
@@ -110,54 +118,108 @@ bool CPU::execBranch(std::uint8_t opcode) {
 bool CPU::execImplied(std::uint8_t opcode) {
     switch (opcode) {
         case 0x00: // BRK
+            ++pc_;
+            push(pc_ >> 8);
+            push(pc_);
             break;
         case 0x20: // JSR
+            push(pc_ + 2 >> 8);
+            push(pc_ + 2);
+            auto old_pc = pc_;
+            pc_ = bus_.read(old_pc);
+            pc_ |= bus_.read(old_pc + 1) << 8;
             break;
         case 0x40: // RTI
+            s_ = pull();
+            pc_ = pull();
+            pc_ |= pull() << 8;
             break;
         case 0x60: // RTS
+            pc_ = pull();
+            pc_ |= pull() << 8;
             break;
         case 0x08: // PHP
+            push(s_);
             break;
         case 0x18: // CLC
+            p_.reset(kC);
             break;
         case 0x28: // PLP
+            s_ = pull();
             break;
         case 0x38: // SEC
+            p_.set(kC);
             break;
         case 0x48: // PHA
+            push(a_);
             break;
         case 0x58: // CLI
+            p_.reset(kI);
             break;
         case 0x68: // PLA
+            a_ = pull();
+            setZ(a_);
+            setN(a_);
             break;
         case 0x78: // SEI
+            p_.set(kI);
             break;
         case 0x88: // DEY
+            --y_;
+            setZ(y_);
+            setN(y_);
             break;
         case 0x98: // TYA
+            a_ = y_;
+            setZ(a_);
+            setZ(a_);
             break;
         case 0xA8: // TAY
+            y_ = a_;
+            setZ(y_);
+            setN(y_);
             break;
         case 0xB8: // CLV
+            p_.reset(kV);
             break;
         case 0xC8: // INY
+            ++y_;
+            setZ(y_);
+            setN(y_);
             break;
         case 0xD8: // CLD
+            p_.reset(kD);
             break;
         case 0xE8: // INX
+            ++x_;
+            setZ(x_);
+            setN(x_);
             break;
         case 0xF8: // SED
+            p_.set(kD);
             break;
         case 0x8A: // TXA
+            a_ = x_;
+            setZ(a_);
+            setN(a_);
             break;
         case 0x9A: // TXS
+            s_ = x_;
             break;
         case 0xAA: // TAX
+            x_ = a_;
+            setZ(x_);
+            setN(x_);
             break;
         case 0xBA: // TSX
+            x_ = s_;
+            setZ(x_);
+            setN(x_);
             break;
         case 0xCA: // DEX
+            --x_;
+            setZ(x_);
+            setN(x_);
             break;
         case 0xEA: // NOP
             break;
