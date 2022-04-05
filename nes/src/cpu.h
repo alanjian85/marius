@@ -24,6 +24,10 @@ namespace nes {
         void addrIndexedIndirect();
         void addrIndirectIndexed();
 
+        void setC(std::uint16_t val);
+        void setZ(std::uint8_t val);
+        void setN(std::uint8_t val);
+
         bool execBranch(std::uint8_t opcode);
         bool execImplied(std::uint8_t opcode);
         bool execGroup0(std::uint8_t opcode);

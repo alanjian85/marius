@@ -73,6 +73,30 @@ void CPU::addrIndirectIndexed() {
     addr_ = bus_.read(addr_) | bus_.read((addr_ + 1) & 0xFF) << 8 + y_;
 }
 
+void CPU::setC(std::uint16_t val) {
+    if (!val) {
+        p_ |= 0x01;
+    } else {
+        p_ &= 0xFE;
+    }
+}
+
+void CPU::setZ(std::uint8_t val) {
+    if (!val) {
+        p_ |= 0x02;
+    } else {
+        p_ &= 0xFD;
+    }
+}
+
+void CPU::setN(std::uint8_t val) {
+    if (val & 0x80) {
+        p_ |= 0x80;
+    } else {
+        p_ &= 0x7F;
+    }
+}
+
 bool CPU::execBranch(std::uint8_t opcode) {
     if (opcode & 0x10) {
         auto condition = opcode & 0x20 >> 5;
@@ -236,12 +260,32 @@ bool CPU::execGroup1(std::uint8_t opcode) {
         }
         switch ((opcode & 0xE0) >> 5) {
             case 0b000: // ORA
+                a_ |= bus_.read(addr_);
+                setZ(a_);
+                setN(a_);
                 break;
             case 0b001: // AND
+                a_ &= bus_.read(addr_);
+                setZ(a_);
+                setN(a_);
                 break;
             case 0b010: // EOR
+                a_ ^= bus_.read(addr_);
+                setZ(a_);
+                setN(a_);
                 break;
             case 0b011: // ADC
+                {
+                    auto operand = bus_.read(addr_);
+                    std::uint16_t sum = a_ + operand;
+                    if (p_ & 0x01) // C
+                        sum += 1;
+                    setC(sum);
+                    
+                    a_ = static_cast<std::uint8_t>(sum);
+                    setZ(a_);
+                    setN(a_);
+                }
                 break;
             case 0b100: // STA
                 break;
