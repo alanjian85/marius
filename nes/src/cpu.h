@@ -14,6 +14,13 @@ namespace nes {
 
         void step();
     private:
+        static constexpr std::size_t kC = 0;
+        static constexpr std::size_t kZ = 1;
+        static constexpr std::size_t kI = 2;
+        static constexpr std::size_t kD = 3;
+        static constexpr std::size_t kV = 6;
+        static constexpr std::size_t kN = 7;
+
         void addrImmediate();
         void addrRelative();
         void addrAbsolute();
@@ -34,13 +41,6 @@ namespace nes {
         bool execGroup0(std::uint8_t opcode);
         bool execGroup1(std::uint8_t opcode);
         bool execGroup2(std::uint8_t opcode);
-
-        static constexpr std::size_t kC = 0;
-        static constexpr std::size_t kZ = 1;
-        static constexpr std::size_t kI = 2;
-        static constexpr std::size_t kD = 3;
-        static constexpr std::size_t kV = 6;
-        static constexpr std::size_t kN = 7;
 
         Bus& bus_;
         std::uint16_t addr_;

@@ -307,14 +307,36 @@ bool CPU::execGroup2(std::uint8_t opcode) {
         if (mode == 0b010) { // Accumulator
             switch ((opcode & 0xE0) >> 5) {
                 case 0b000: // ASL
+                    p_.set(kC, a_ & 0x80);
+                    a_ <<= 1;
+                    setZ(a_);
+                    setN(a_);
                     break;
                 case 0b001: // ROL
+                    {
+                        auto old_c = p_.test(kC);
+                        p_.set(kC, a_ & 0x80);
+                        a_ <<= 1;
+                        a_ |= old_c;
+                        setZ(a_);
+                        setN(a_);
+                    }
                     break;
                 case 0b010: // LSR
+                    p_.set(kC, a_ & 0x01);
+                    a_ >>= 1;
+                    setZ(a_);
+                    p_.set(kN, false);
                     break;
                 case 0b011: // ROR
-                    break;
-                case 0b100: // STX
+                    {
+                        auto old_c = p_.test(kC);
+                        p_.set(kC, a_ & 0x01);
+                        a_ >>= 1;
+                        a_ |= old_c;
+                        setZ(a_);
+                        setN(a_);
+                    }
                     break;
                 default:
                     return false;
@@ -350,20 +372,69 @@ bool CPU::execGroup2(std::uint8_t opcode) {
 
             switch ((opcode & 0xE0) >> 5) {
                 case 0b000: // ASL
+                    {
+                        auto operand = bus_.read(addr_);
+                        p_.set(kC, operand & 0x80);
+                        operand <<= 1;
+                        setZ(operand);
+                        setN(operand);
+                    }
                     break;
                 case 0b001: // ROL
+                    {
+                        auto operand = bus_.read(addr_);
+                        auto old_c = p_.test(kC);
+                        p_.set(kC, operand & 0x80);
+                        operand <<= 1;
+                        operand |= old_c;
+                        setZ(operand);
+                        setN(operand);
+                    }
                     break;
                 case 0b010: // LSR
+                    {
+                        auto operand = bus_.read(addr_);
+                        p_.set(kC, operand & 0x01);
+                        operand >>= 1;
+                        setZ(operand);
+                        p_.set(kN, false);
+                    }
                     break;
                 case 0b011: // ROR
+                    {
+                        auto operand = bus_.read(addr_);
+                        auto old_c = p_.test(kC);
+                        p_.set(kC, operand & 0x01);
+                        operand >>= 1;
+                        operand |= old_c;
+                        bus_.write(addr_, operand);
+                        setZ(operand);
+                        setN(operand);
+                    }
                     break;
                 case 0b100: // STX
+                    bus_.write(addr_, x_);
                     break;
                 case 0b101: // LDX
+                    x_ = bus_.read(addr_);
+                    setZ(x_);
+                    setN(x_);
                     break;
                 case 0b110: // DEC
+                    {
+                        auto operand = bus_.read(addr_);
+                        bus_.write(addr_, --operand);
+                        setZ(operand);
+                        setN(operand);
+                    }
                     break;
                 case 0b111: // INC
+                    {
+                        auto operand = bus_.read(addr_);
+                        bus_.write(addr_, ++operand);
+                        setZ(operand);
+                        setN(operand);
+                    }
                     break;
             }
         }
