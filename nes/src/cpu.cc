@@ -73,47 +73,31 @@ void CPU::addrIndirectIndexed() {
     addr_ = bus_.read(addr_) | bus_.read((addr_ + 1) & 0xFF) << 8 + y_;
 }
 
-void CPU::setC(std::uint16_t val) {
-    if (!val) {
-        p_ |= 0x01;
-    } else {
-        p_ &= 0xFE;
-    }
-}
-
 void CPU::setZ(std::uint8_t val) {
-    if (!val) {
-        p_ |= 0x02;
-    } else {
-        p_ &= 0xFD;
-    }
+    p_.set(kZ, !val);
 }
 
 void CPU::setN(std::uint8_t val) {
-    if (val & 0x80) {
-        p_ |= 0x80;
-    } else {
-        p_ &= 0x7F;
-    }
+    p_.set(kN, val & 0x80);
 }
 
 bool CPU::execBranch(std::uint8_t opcode) {
     if (opcode & 0x10) {
-        auto condition = opcode & 0x20 >> 5;
+        bool condition = opcode & 0x20;
         switch ((opcode & 0xC0) >> 6) {
             case 0b00: // N
-                condition <<= 7;
+                condition = !(condition ^ p_.test(kN));
                 break;
             case 0b01: // V
-                condition <<= 6;
+                condition = !(condition ^ p_.test(kV));
                 break;
             case 0b10: // C
+                condition = !(condition ^ p_.test(kC));
                 break;
             case 0b11: // Z
-                condition <<= 1;
+                condition = !(condition ^ p_.test(kZ));
                 break;
         }
-        condition = !(p_ ^ condition);
         if (condition) {
             addrRelative();
             pc_ = addr_;
@@ -277,23 +261,39 @@ bool CPU::execGroup1(std::uint8_t opcode) {
             case 0b011: // ADC
                 {
                     auto operand = bus_.read(addr_);
-                    std::uint16_t sum = a_ + operand;
-                    if (p_ & 0x01) // C
-                        sum += 1;
-                    setC(sum);
-                    
+                    std::int16_t sum = a_ + operand + p_.test(kC);
+                    p_.set(kC, sum & 0x100);
+                    p_.set(kV, sum < -128 || sum > 127);
                     a_ = static_cast<std::uint8_t>(sum);
                     setZ(a_);
                     setN(a_);
                 }
                 break;
             case 0b100: // STA
+                bus_.write(addr_, a_);
                 break;
             case 0b101: // LDA
+                a_ = bus_.read(addr_);
+                setZ(a_);
+                setN(a_);
                 break;
             case 0b110: // CMP
+                {
+                    std::int16_t diff = a_ - bus_.read(addr_);
+                    p_.set(kC, diff >= 0);
+                    setZ(diff);
+                    setN(diff);
+                }
                 break;
             case 0b111: // SBC
+                {
+                    std::int16_t diff = a_ - bus_.read(addr_) - p_.test(kC);
+                    p_.set(kC, diff >= 0);
+                    p_.set(kV, diff < -128 || diff > 127);
+                    a_ = static_cast<std::uint8_t>(diff);
+                    setZ(a_);
+                    setN(a_);
+                }
                 break;
         }
         return true;

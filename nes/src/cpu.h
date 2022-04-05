@@ -1,7 +1,9 @@
 #ifndef NES_CPU_H_
 #define NES_CPU_H_
 
+#include <bitset>
 #include <cstdint>
+#include <cstdlib>
 
 #include "bus.h"
 
@@ -24,7 +26,6 @@ namespace nes {
         void addrIndexedIndirect();
         void addrIndirectIndexed();
 
-        void setC(std::uint16_t val);
         void setZ(std::uint8_t val);
         void setN(std::uint8_t val);
 
@@ -34,6 +35,13 @@ namespace nes {
         bool execGroup1(std::uint8_t opcode);
         bool execGroup2(std::uint8_t opcode);
 
+        static constexpr std::size_t kC = 0;
+        static constexpr std::size_t kZ = 1;
+        static constexpr std::size_t kI = 2;
+        static constexpr std::size_t kD = 3;
+        static constexpr std::size_t kV = 6;
+        static constexpr std::size_t kN = 7;
+
         Bus& bus_;
         std::uint16_t addr_;
 
@@ -42,7 +50,7 @@ namespace nes {
         std::uint8_t y_;
         std::uint16_t pc_;
         std::uint8_t s_;
-        std::uint8_t p_;
+        std::bitset<8> p_;
     };
 }
 
