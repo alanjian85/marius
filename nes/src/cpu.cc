@@ -57,6 +57,7 @@ void Cpu::addrImmediate() {
 void Cpu::addrRelative() {
     std::int8_t offset = bus_.read(pc_++);
     addr_ = pc_ + offset;
+    cycles_ += 1;
 }
 
 void Cpu::addrAbsolute() {
@@ -194,17 +195,20 @@ bool Cpu::execImplied(std::uint8_t opcode) {
                 auto old_pc = pc_;
                 pc_ = bus_.read(old_pc);
                 pc_ |= bus_.read(old_pc + 1) << 8;
+                cycles_ += 4;
             }
             break;
         case 0x40: // RTI
             p_ = pull();
             pc_ = pull();
             pc_ |= pull() << 8;
+            cycles_ += 4;
             break;
         case 0x60: // RTS
             pc_ = pull();
             pc_ |= pull() << 8;
             ++pc_;
+            cycles_ += 4;
             break;
         case 0x08: // PHP
             push(p_ | 1 << 5 | kB);
@@ -214,6 +218,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             break;
         case 0x28: // PLP
             p_ = pull();
+            cycles_ += 2;
             break;
         case 0x38: // SEC
             p_ |= kC;
@@ -228,6 +233,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             a_ = pull();
             setZ(a_);
             setN(a_);
+            cycles_ += 2;
             break;
         case 0x78: // SEI
             p_ |= kI;
@@ -532,6 +538,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         bus_.write(addr_, operand);
                         setZ(operand);
                         setN(operand);
+                        cycles_ += 2;
                     }
                     break;
                 case 0b001: // ROL
@@ -544,6 +551,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         bus_.write(addr_, operand);
                         setZ(operand);
                         setN(operand);
+                        cycles_ += 2;
                     }
                     break;
                 case 0b010: // LSR
@@ -554,6 +562,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         bus_.write(addr_, operand);
                         setZ(operand);
                         p_ &= ~kN;
+                        cycles_ += 2;
                     }
                     break;
                 case 0b011: // ROR
@@ -566,6 +575,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         bus_.write(addr_, operand);
                         setZ(operand);
                         setN(operand);
+                        cycles_ += 2;
                     }
                     break;
                 case 0b100: // STX
@@ -582,6 +592,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         bus_.write(addr_, --operand);
                         setZ(operand);
                         setN(operand);
+                        cycles_ += 2;
                     }
                     break;
                 case 0b111: // INC
@@ -590,6 +601,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         bus_.write(addr_, ++operand);
                         setZ(operand);
                         setN(operand);
+                        cycles_ += 2;
                     }
                     break;
             }
