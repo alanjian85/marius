@@ -79,15 +79,23 @@ void Cpu::addrIndirect() {
 }
 
 void Cpu::addrAbsoluteX() {
-    addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8 + x_;
+    std::uint16_t base = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
+    addr_ = base + x_;
     pc_ += 2;
-    cycles_ += 3;
+    cycles_ += 2;
+    if (base & 0xFF00 != addr_ & 0xFF00) {
+        ++cycles_;
+    }
 }
 
 void Cpu::addrAbsoluteY() {
-    addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8 + y_;
+    std::uint16_t base = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
+    addr_ = base + y_;
     pc_ += 2;
-    cycles_ += 3;
+    cycles_ += 2;
+    if (base & 0xFF00 != addr_ & 0xFF00) {
+        ++cycles_;
+    }
 }
 
 void Cpu::addrZeroPageX() {
@@ -108,8 +116,12 @@ void Cpu::addrIndexedIndirect() {
 
 void Cpu::addrIndirectIndexed() {
     addr_ = bus_.read(pc_++);
-    addr_ = bus_.read(addr_) | bus_.read((addr_ + 1) & 0xFF) << 8 + y_;
-    cycles_ += 4;
+    std::uint16_t base = bus_.read(addr_) | bus_.read((addr_ + 1) & 0xFF) << 8;
+    addr_ = base + y_;
+    cycles_ += 3;
+    if (base & 0xFF00 != addr_ & 0xFF00) {
+        ++cycles_;
+    }
 }
 
 void Cpu::setC(bool val) {
