@@ -21,13 +21,13 @@ namespace nes {
         void step();
     private:
         enum {
-            kC = 0,
-            kZ = 1,
-            kI = 2,
-            kD = 3,
-            kB = 4,
-            kV = 6,
-            kN = 7
+            kC = 1 << 0,
+            kZ = 1 << 1,
+            kI = 1 << 2,
+            kD = 1 << 3,
+            kB = 1 << 4,
+            kV = 1 << 6,
+            kN = 1 << 7
         };
 
         enum {
@@ -51,7 +51,9 @@ namespace nes {
         void addrIndexedIndirect();
         void addrIndirectIndexed();
 
+        void setC(bool val);
         void setZ(std::uint8_t val);
+        void setV(bool val);
         void setN(std::uint8_t val);
 
         void push(std::uint8_t val);
@@ -71,7 +73,7 @@ namespace nes {
         std::uint8_t y_;
         std::uint16_t pc_;
         std::uint8_t s_;
-        std::bitset<8> p_;
+        std::uint8_t p_;
     };
 }
 

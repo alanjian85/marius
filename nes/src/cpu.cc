@@ -8,11 +8,11 @@ Cpu::Cpu(Bus& bus)
 }
 
 void Cpu::irq() {
-    if (!p_.test(kI)) {
+    if (!(p_ & kI)) {
         push(pc_ >> 8);
         push(pc_);
-        push(p_.to_ulong() | 1 << 5 & ~(1 << kB));
-        p_.set(kI);
+        push(p_ | 1 << 5 & ~kB);
+        p_ |= kI;
         pc_ = bus_.read(kIrqVector) | bus_.read(kIrqVector + 1) << 8;   
     }
 }
@@ -20,8 +20,8 @@ void Cpu::irq() {
 void Cpu::nmi() {
     push(pc_ >> 8);
     push(pc_);
-    push(p_.to_ulong() | 1 << 5 & ~(1 << kB));
-    p_.set(kI);
+    push(p_ | 1 << 5 & ~kB);
+    p_ |= kI;
     pc_ = bus_.read(kNmiVector) | bus_.read(kNmiVector + 1) << 8;   
 }
 
@@ -31,7 +31,7 @@ void Cpu::reset() {
     x_ = 0x00;
     y_ = 0x00;
     s_ = 0xFD;
-    p_.set(kI);
+    p_ |= kI;
 }
 
 void Cpu::step() {
@@ -100,12 +100,36 @@ void Cpu::addrIndirectIndexed() {
     addr_ = bus_.read(addr_) | bus_.read((addr_ + 1) & 0xFF) << 8 + y_;
 }
 
+void Cpu::setC(bool val) {
+    if (val) {
+        p_ |= kC;
+    } else {
+        p_ &= ~kC;
+    }
+}
+
 void Cpu::setZ(std::uint8_t val) {
-    p_.set(kZ, !val);
+    if (!val) {
+        p_ |= kZ;
+    } else {
+        p_ &= ~kZ;
+    }
 }
 
 void Cpu::setN(std::uint8_t val) {
-    p_.set(kN, val & 0x80);
+    if (val & 0x80) {
+        p_ |= kN;
+    } else {
+        p_ &= ~kN;
+    }
+}
+
+void Cpu::setV(bool val) {
+    if (val) {
+        p_ |= kV;
+    } else {
+        p_ &= ~kV;
+    }
 }
 
 void Cpu::push(std::uint8_t val) {
@@ -120,17 +144,17 @@ bool Cpu::execBranch(std::uint8_t opcode) {
     if (opcode & 0x10) {
         bool condition = opcode & 0x20;
         switch ((opcode & 0xC0) >> 6) {
-            case 0b00: // N
-                condition = !(condition ^ p_.test(kN));
+            case 0b00:
+                condition = !(condition ^ p_ & kN);
                 break;
-            case 0b01: // V
-                condition = !(condition ^ p_.test(kV));
+            case 0b01:
+                condition = !(condition ^ p_ & kV);
                 break;
-            case 0b10: // C
-                condition = !(condition ^ p_.test(kC));
+            case 0b10:
+                condition = !(condition ^ p_ & kC);
                 break;
-            case 0b11: // Z
-                condition = !(condition ^ p_.test(kZ));
+            case 0b11:
+                condition = !(condition ^ p_ & kZ);
                 break;
         }
         if (condition) {
@@ -148,8 +172,8 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             ++pc_;
             push(pc_ >> 8);
             push(pc_);
-            push(p_.to_ulong() | 1 << 5 | 1 << kB);
-            p_.set(kI);
+            push(p_ | 1 << 5 | kB);
+            p_ |= kI;
             pc_ = bus_.read(kBrkVector) | bus_.read(kBrkVector + 1) << 8;
             break;
         case 0x20: // JSR
@@ -172,22 +196,22 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             ++pc_;
             break;
         case 0x08: // PHP
-            push(p_.to_ulong() | 1 << 5 | 1 << kB);
+            push(p_ | 1 << 5 | kB);
             break;
         case 0x18: // CLC
-            p_.reset(kC);
+            p_ &= ~kC;
             break;
         case 0x28: // PLP
             p_ = pull();
             break;
         case 0x38: // SEC
-            p_.set(kC);
+            p_ |= kC;
             break;
         case 0x48: // PHA
             push(a_);
             break;
         case 0x58: // CLI
-            p_.reset(kI);
+            p_ &= ~kI;
             break;
         case 0x68: // PLA
             a_ = pull();
@@ -195,7 +219,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             setN(a_);
             break;
         case 0x78: // SEI
-            p_.set(kI);
+            p_ |= kI;
             break;
         case 0x88: // DEY
             --y_;
@@ -213,7 +237,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             setN(y_);
             break;
         case 0xB8: // CLV
-            p_.reset(kV);
+            p_ &= ~kV;
             break;
         case 0xC8: // INY
             ++y_;
@@ -221,7 +245,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             setN(y_);
             break;
         case 0xD8: // CLD
-            p_.reset(kD);
+            p_ &= ~kD;
             break;
         case 0xE8: // INX
             ++x_;
@@ -229,7 +253,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             setN(x_);
             break;
         case 0xF8: // SED
-            p_.set(kD);
+            p_ |= kD;
             break;
         case 0x8A: // TXA
             a_ = x_;
@@ -291,9 +315,9 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
             case 0b001: // BIT
                 {
                     auto operand = bus_.read(addr_);
-                    p_.set(kN, operand & 0x80);
-                    p_.set(kV, operand & 0x40);
-                    p_.set(kZ, !(operand & a_));
+                    setN(operand);
+                    setV(operand & 0x40);
+                    setZ(operand & a_);
                 }
                 break;
             case 0b010: // JMP
@@ -311,7 +335,7 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
             case 0b110: // CPY
                 {
                     std::int16_t diff = x_ - bus_.read(addr_);
-                    p_.set(kC, !(diff & 0x100));
+                    setC(!(diff & 0x100));
                     setZ(diff);
                     setN(diff);
                 }
@@ -319,7 +343,7 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
             case 0b111: // CPX
                 {
                     std::int16_t diff = y_ - bus_.read(addr_);
-                    p_.set(kC, !(diff & 0x100));
+                    setC(!(diff & 0x100));
                     setZ(diff);
                     setN(diff);
                 }
@@ -378,9 +402,9 @@ bool Cpu::execGroup1(std::uint8_t opcode) {
             case 0b011: // ADC
                 {
                     auto operand = bus_.read(addr_);
-                    std::uint16_t sum = a_ + operand + p_.test(kC);
-                    p_.set(kC, sum & 0x100);
-                    p_.set(kV, ~(a_ ^ operand) & (a_ ^ sum) & 0x80);
+                    std::uint16_t sum = a_ + operand + (p_ & kC);
+                    setC(sum & 0x100);
+                    setV(~(a_ ^ operand) & (a_ ^ sum) & 0x80);
                     a_ = static_cast<std::uint8_t>(sum);
                     setZ(a_);
                     setN(a_);
@@ -397,7 +421,7 @@ bool Cpu::execGroup1(std::uint8_t opcode) {
             case 0b110: // CMP
                 {
                     std::int16_t diff = a_ - bus_.read(addr_);
-                    p_.set(kC, !(diff & 0x100));
+                    setC(!(diff & 0x100));
                     setZ(diff);
                     setN(diff);
                 }
@@ -405,9 +429,9 @@ bool Cpu::execGroup1(std::uint8_t opcode) {
             case 0b111: // SBC
                 {
                     auto operand = bus_.read(addr_);
-                    std::uint16_t diff = a_ - operand - !p_.test(kC);
-                    p_.set(kC, !(diff & 0x100));
-                    p_.set(kV, (a_ ^ operand) & (a_ ^ diff) & 0x80);
+                    std::uint16_t diff = a_ - operand - !(p_ & kC);
+                    setC(!(diff & 0x100));
+                    setV((a_ ^ operand) & (a_ ^ diff) & 0x80);
                     a_ = static_cast<std::uint8_t>(diff);
                     setZ(a_);
                     setN(a_);
@@ -425,15 +449,15 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
         if (mode == 0b010) { // Accumulator
             switch ((opcode & 0xE0) >> 5) {
                 case 0b000: // ASL
-                    p_.set(kC, a_ & 0x80);
+                    setC(a_ & 0x80);
                     a_ <<= 1;
                     setZ(a_);
                     setN(a_);
                     break;
                 case 0b001: // ROL
                     {
-                        auto old_c = p_.test(kC);
-                        p_.set(kC, a_ & 0x80);
+                        auto old_c = p_ & kC;
+                        setC(a_ & 0x80);
                         a_ <<= 1;
                         a_ |= old_c;
                         setZ(a_);
@@ -441,15 +465,15 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                     }
                     break;
                 case 0b010: // LSR
-                    p_.set(kC, a_ & 0x01);
+                    setC(a_ & 0x01);
                     a_ >>= 1;
                     setZ(a_);
-                    p_.set(kN, false);
+                    p_ &= ~kN;
                     break;
                 case 0b011: // ROR
                     {
-                        auto old_c = p_.test(kC);
-                        p_.set(kC, a_ & 0x01);
+                        auto old_c = p_ & kC;
+                        setC(a_ & 0x01);
                         a_ >>= 1;
                         a_ |= old_c;
                         setZ(a_);
@@ -492,8 +516,9 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                 case 0b000: // ASL
                     {
                         auto operand = bus_.read(addr_);
-                        p_.set(kC, operand & 0x80);
+                        setC(operand & 0x80);
                         operand <<= 1;
+                        bus_.write(addr_, operand);
                         setZ(operand);
                         setN(operand);
                     }
@@ -501,10 +526,11 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                 case 0b001: // ROL
                     {
                         auto operand = bus_.read(addr_);
-                        auto old_c = p_.test(kC);
-                        p_.set(kC, operand & 0x80);
+                        auto old_c = p_ & kC;
+                        setC(operand & 0x80);
                         operand <<= 1;
                         operand |= old_c;
+                        bus_.write(addr_, operand);
                         setZ(operand);
                         setN(operand);
                     }
@@ -512,17 +538,18 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                 case 0b010: // LSR
                     {
                         auto operand = bus_.read(addr_);
-                        p_.set(kC, operand & 0x01);
+                        setC(operand & 0x01);
                         operand >>= 1;
+                        bus_.write(addr_, operand);
                         setZ(operand);
-                        p_.set(kN, false);
+                        p_ &= ~kN;
                     }
                     break;
                 case 0b011: // ROR
                     {
                         auto operand = bus_.read(addr_);
-                        auto old_c = p_.test(kC);
-                        p_.set(kC, operand & 0x01);
+                        auto old_c = p_ & kC;
+                        setC(operand & 0x01);
                         operand >>= 1;
                         operand |= old_c;
                         bus_.write(addr_, operand);
