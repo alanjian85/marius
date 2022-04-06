@@ -34,7 +34,8 @@ void Cpu::reset() {
     p_ |= kI;
 }
 
-void Cpu::step() {
+int Cpu::step() {
+    cycles_ = 2;
     auto opcode = bus_.read(pc_++);
     if (execBranch(opcode))
         return;
@@ -46,6 +47,7 @@ void Cpu::step() {
         return;
     if (execGroup2(opcode))
         return;
+    return cycles_;
 }
 
 void Cpu::addrImmediate() {

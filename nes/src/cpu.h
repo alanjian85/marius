@@ -18,7 +18,7 @@ namespace nes {
 
         void reset();
 
-        void step();
+        int step();
     private:
         enum {
             kC = 1 << 0,
@@ -66,6 +66,7 @@ namespace nes {
         bool execGroup2(std::uint8_t opcode);
 
         Bus& bus_;
+        int cycles_;
         std::uint16_t addr_;
 
         std::uint8_t a_;
