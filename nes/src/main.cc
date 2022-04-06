@@ -23,8 +23,9 @@ int main() {
     cpu.reset();
 
     for (int i = 0; i < 24; ++i) {
-        cpu.step();
+        std::cout << cpu.step() << ' ';
     }
+    std::cout << '\n';
 
     for (std::uint16_t i = 0; i < 12; ++i) {
         std::cout << static_cast<char>(bus.read(0x100 + i));

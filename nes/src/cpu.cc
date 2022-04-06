@@ -38,15 +38,15 @@ int Cpu::step() {
     cycles_ = 2;
     auto opcode = bus_.read(pc_++);
     if (execBranch(opcode))
-        return;
+        return cycles_;
     if (execImplied(opcode))
-        return;
+        return cycles_;
     if (execGroup0(opcode))
-        return;
+        return cycles_;
     if (execGroup1(opcode))
-        return;
+        return cycles_;
     if (execGroup2(opcode))
-        return;
+        return cycles_;
     return cycles_;
 }
 
@@ -62,44 +62,53 @@ void Cpu::addrRelative() {
 void Cpu::addrAbsolute() {
     addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
     pc_ += 2;
+    cycles_ += 2;
 }
 
 void Cpu::addrZeroPage() {
     addr_ = bus_.read(pc_++);
+    cycles_ += 1;
 }
 
 void Cpu::addrIndirect() {
     addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
-    addr_ = bus_.read(addr_);
+    addr_ = bus_.read(addr_) | bus_.read(addr_ + 1) << 8;
     pc_ += 2;
+    cycles_ += 3;
 }
 
 void Cpu::addrAbsoluteX() {
     addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8 + x_;
     pc_ += 2;
+    cycles_ += 3;
 }
 
 void Cpu::addrAbsoluteY() {
     addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8 + y_;
     pc_ += 2;
+    cycles_ += 3;
 }
 
 void Cpu::addrZeroPageX() {
     addr_ = (bus_.read(pc_++) + x_) & 0xFF;
+    cycles_ += 2;
 }
 
 void Cpu::addrZeroPageY() {
     addr_ = (bus_.read(pc_++) + y_) & 0xFF;
+    cycles_ += 2;
 }
 
 void Cpu::addrIndexedIndirect() {
     addr_ = bus_.read(pc_++) + x_;
     addr_ = bus_.read(addr_ & 0xFF) | bus_.read((addr_ + 1) & 0xFF) << 8;
+    cycles_ += 4;
 }
 
 void Cpu::addrIndirectIndexed() {
     addr_ = bus_.read(pc_++);
     addr_ = bus_.read(addr_) | bus_.read((addr_ + 1) & 0xFF) << 8 + y_;
+    cycles_ += 4;
 }
 
 void Cpu::setC(bool val) {
