@@ -13,7 +13,7 @@ void Cpu::irq() {
         push(pc_);
         push(p_ | 1 << 5 & ~kB);
         setI(true);
-        pc_ = bus_.read(kIrqVector) | bus_.read(kIrqVector + 1) << 8;   
+        pc_ = readAddress(kIrqVector);
     }
 }
 
@@ -22,21 +22,20 @@ void Cpu::nmi() {
     push(pc_);
     push(p_ | 1 << 5 & ~kB);
     setI(true);
-    pc_ = bus_.read(kNmiVector) | bus_.read(kNmiVector + 1) << 8;   
+    pc_ = readAddress(kNmiVector);   
 }
 
 void Cpu::reset() {
-    pc_ = bus_.read(kResetVector) | bus_.read(kResetVector + 1) << 8;
+    setI(true);
+    pc_ = readAddress(kResetVector);
     a_ = 0x00;
     x_ = 0x00;
     y_ = 0x00;
     s_ = 0xFD;
-    setI(true);
 }
 
 int Cpu::step() {
-    cycles_ = 2;
-    auto opcode = bus_.read(pc_++);
+    auto opcode = readByte(pc_++);
     if (execBranch(opcode))
         return cycles_;
     if (execImplied(opcode))
@@ -50,75 +49,93 @@ int Cpu::step() {
     return cycles_;
 }
 
+std::uint8_t Cpu::readByte(std::uint16_t addr) {
+    ++cycles_;
+    return bus_.read(addr);
+}
+
+void Cpu::writeByte(std::uint16_t addr, std::uint8_t val) {
+    ++cycles_;
+    bus_.write(addr, val);
+}
+
+std::uint16_t Cpu::readAddress(std::uint16_t addr) {
+    return readByte(addr) | readByte(addr + 1) << 8;
+}
+
+void Cpu::push(std::uint8_t val) {
+    writeByte(kStackBase | s_--, val);
+}
+
+std::uint8_t Cpu::pull() {
+    return readByte(kStackBase | s_++);
+}
+
 void Cpu::addrImmediate() {
     addr_ = pc_++;
 }
 
 void Cpu::addrRelative() {
-    std::int8_t offset = bus_.read(pc_++);
+    std::int8_t offset = readByte(pc_++);
     addr_ = pc_ + offset;
-    cycles_ += 1;
+    if (addr_ & 0xFF00 != pc_ & 0xFF00) {
+        ++cycles_;
+    }
 }
 
 void Cpu::addrAbsolute() {
-    addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
+    addr_ = readAddress(pc_);
     pc_ += 2;
-    cycles_ += 2;
 }
 
 void Cpu::addrZeroPage() {
-    addr_ = bus_.read(pc_++);
-    cycles_ += 1;
+    addr_ = readByte(pc_++);
 }
 
 void Cpu::addrIndirect() {
-    addr_ = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
-    addr_ = bus_.read(addr_) | bus_.read(addr_ + 1) << 8;
+    addr_ = readAddress(pc_);
     pc_ += 2;
-    cycles_ += 4;
+    addr_ = readAddress(addr_);
 }
 
 void Cpu::addrAbsoluteX() {
-    std::uint16_t base = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
-    addr_ = base + x_;
+    std::uint16_t base = readAddress(pc_);
     pc_ += 2;
-    cycles_ += 2;
+    addr_ = base + x_;
     if (base & 0xFF00 != addr_ & 0xFF00) {
         ++cycles_;
     }
 }
 
 void Cpu::addrAbsoluteY() {
-    std::uint16_t base = bus_.read(pc_) | bus_.read(pc_ + 1) << 8;
-    addr_ = base + y_;
+    std::uint16_t base = readAddress(pc_);
     pc_ += 2;
-    cycles_ += 2;
+    addr_ = base + y_;
     if (base & 0xFF00 != addr_ & 0xFF00) {
         ++cycles_;
     }
 }
 
 void Cpu::addrZeroPageX() {
-    addr_ = (bus_.read(pc_++) + x_) & 0xFF;
-    cycles_ += 2;
+    addr_ = (readByte(pc_++) + x_) & 0xFF;
+    ++cycles_;
 }
 
 void Cpu::addrZeroPageY() {
-    addr_ = (bus_.read(pc_++) + y_) & 0xFF;
-    cycles_ += 2;
+    addr_ = (readByte(pc_++) + y_) & 0xFF;
+    ++cycles_;
 }
 
 void Cpu::addrIndexedIndirect() {
-    addr_ = bus_.read(pc_++) + x_;
-    addr_ = bus_.read(addr_ & 0xFF) | bus_.read((addr_ + 1) & 0xFF) << 8;
-    cycles_ += 4;
+    addr_ = readByte(pc_++) + x_;
+    ++cycles_;
+    addr_ = readByte(addr_) | readByte((addr_ + 1) & 0xFF) << 8;
 }
 
 void Cpu::addrIndirectIndexed() {
-    addr_ = bus_.read(pc_++);
-    std::uint16_t base = bus_.read(addr_) | bus_.read((addr_ + 1) & 0xFF) << 8;
+    addr_ = readByte(pc_++);
+    std::uint16_t base = readByte(addr_) | readByte((addr_ + 1) & 0xFF) << 8;
     addr_ = base + y_;
-    cycles_ += 3;
     if (base & 0xFF00 != addr_ & 0xFF00) {
         ++cycles_;
     }
@@ -177,14 +194,6 @@ void Cpu::setZN(std::uint8_t val) {
     setN(val & 0x80);
 }
 
-void Cpu::push(std::uint8_t val) {
-    bus_.write(kStackBase | s_--, val);
-}
-
-std::uint8_t Cpu::pull() {
-    return bus_.read(kStackBase | s_++);
-}
-
 bool Cpu::execBranch(std::uint8_t opcode) {
     if (opcode & 0x10) {
         bool condition = opcode & 0x20;
@@ -205,6 +214,8 @@ bool Cpu::execBranch(std::uint8_t opcode) {
         if (condition) {
             addrRelative();
             pc_ = addr_;
+        } else {
+            ++cycles_;
         }
         return true;
     }
@@ -219,29 +230,27 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             push(pc_);
             push(p_ | 1 << 5 | kB);
             setI(true);
-            pc_ = bus_.read(kBrkVector) | bus_.read(kBrkVector + 1) << 8;
+            pc_ = readAddress(kBrkVector);
             break;
         case 0x20: // JSR
             {
                 push(pc_ + 1 >> 8);
                 push(pc_ + 1);
-                auto old_pc = pc_;
-                pc_ = bus_.read(old_pc);
-                pc_ |= bus_.read(old_pc + 1) << 8;
-                cycles_ += 4;
+                pc_ = readAddress(pc_);
             }
             break;
         case 0x40: // RTI
             p_ = pull();
             pc_ = pull();
             pc_ |= pull() << 8;
-            cycles_ += 4;
+            ++cycles_;
             break;
         case 0x60: // RTS
             pc_ = pull();
             pc_ |= pull() << 8;
+            ++cycles_;
             ++pc_;
-            cycles_ += 4;
+            ++cycles_;
             break;
         case 0x08: // PHP
             push(p_ | 1 << 5 | kB);
@@ -251,7 +260,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             break;
         case 0x28: // PLP
             p_ = pull();
-            cycles_ += 2;
+            ++cycles_;
             break;
         case 0x38: // SEC
             setC(true);
@@ -264,9 +273,9 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             break;
         case 0x68: // PLA
             a_ = pull();
+            ++cycles_;
             setZ(a_);
             setN(a_);
-            cycles_ += 2;
             break;
         case 0x78: // SEI
             setI(true);
@@ -333,6 +342,9 @@ bool Cpu::execImplied(std::uint8_t opcode) {
         default:
             return false;
     }
+    if (opcode != 0x20) { // JSR
+        ++cycles_;
+    }
     return true;
 }
 
@@ -364,7 +376,7 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
         switch ((opcode & 0xE0) >> 5) {
             case 0b001: // BIT
                 {
-                    auto operand = bus_.read(addr_);
+                    auto operand = readByte(addr_);
                     setZ(!(operand & a_));
                     setV(operand & 0x40);
                     setN(operand & 0x80);
@@ -372,26 +384,26 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
                 break;
             case 0b010: // JMP
             case 0b011: // JMP (abs)
-                pc_ = bus_.read(addr_);
+                pc_ = addr_;
                 break;
             case 0b100: // STY
-                bus_.write(addr_, y_);
+                writeByte(addr_, y_);
                 break;
             case 0b101: // LDY
-                y_ = bus_.read(addr_);
+                y_ = readByte(addr_);
                 setZ(y_);
                 setN(y_);
                 break;
             case 0b110: // CPY
                 {
-                    std::int16_t diff = x_ - bus_.read(addr_);
+                    std::int16_t diff = x_ - readByte(addr_);
                     setC(!(diff & 0x100));
                     setZN(diff);
                 }
                 break;
             case 0b111: // CPX
                 {
-                    std::int16_t diff = y_ - bus_.read(addr_);
+                    std::int16_t diff = y_ - readByte(addr_);
                     setC(!(diff & 0x100));
                     setZN(diff);
                 }
@@ -433,20 +445,20 @@ bool Cpu::execGroup1(std::uint8_t opcode) {
         }
         switch ((opcode & 0xE0) >> 5) {
             case 0b000: // ORA
-                a_ |= bus_.read(addr_);
+                a_ |= readByte(addr_);
                 setZN(a_);
                 break;
             case 0b001: // AND
-                a_ &= bus_.read(addr_);
+                a_ &= readByte(addr_);
                 setZN(a_);
                 break;
             case 0b010: // EOR
-                a_ ^= bus_.read(addr_);
+                a_ ^= readByte(addr_);
                 setZN(a_);
                 break;
             case 0b011: // ADC
                 {
-                    auto operand = bus_.read(addr_);
+                    auto operand = readByte(addr_);
                     std::uint16_t sum = a_ + operand + (p_ & kC);
                     setC(sum & 0x100);
                     setV(~(a_ ^ operand) & (a_ ^ sum) & 0x80);
@@ -455,22 +467,22 @@ bool Cpu::execGroup1(std::uint8_t opcode) {
                 }
                 break;
             case 0b100: // STA
-                bus_.write(addr_, a_);
+                writeByte(addr_, a_);
                 break;
             case 0b101: // LDA
-                a_ = bus_.read(addr_);
+                a_ = readByte(addr_);
                 setZN(a_);
                 break;
             case 0b110: // CMP
                 {
-                    std::int16_t diff = a_ - bus_.read(addr_);
+                    std::int16_t diff = a_ - readByte(addr_);
                     setC(!(diff & 0x100));
                     setZN(diff);
                 }
                 break;
             case 0b111: // SBC
                 {
-                    auto operand = bus_.read(addr_);
+                    auto operand = readByte(addr_);
                     std::uint16_t diff = a_ - operand - !(p_ & kC);
                     setC(!(diff & 0x100));
                     setV((a_ ^ operand) & (a_ ^ diff) & 0x80);
@@ -553,70 +565,72 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
             switch ((opcode & 0xE0) >> 5) {
                 case 0b000: // ASL
                     {
-                        auto operand = bus_.read(addr_);
+                        auto operand = readByte(addr_);
                         setC(operand & 0x80);
                         operand <<= 1;
-                        bus_.write(addr_, operand);
+                        ++cycles_;
+                        writeByte(addr_, operand);
                         setZN(operand);
-                        cycles_ += 2;
                     }
                     break;
                 case 0b001: // ROL
                     {
-                        auto operand = bus_.read(addr_);
+                        auto operand = readByte(addr_);
                         auto old_c = p_ & kC;
                         setC(operand & 0x80);
                         operand <<= 1;
+                        ++cycles_;
                         operand |= old_c;
-                        bus_.write(addr_, operand);
+                        writeByte(addr_, operand);
                         setZN(operand);
-                        cycles_ += 2;
                     }
                     break;
                 case 0b010: // LSR
                     {
-                        auto operand = bus_.read(addr_);
+                        auto operand = readByte(addr_);
                         setC(operand & 0x01);
                         operand >>= 1;
-                        bus_.write(addr_, operand);
+                        ++cycles_;
+                        writeByte(addr_, operand);
                         setZ(!operand);
                         setN(false);
-                        cycles_ += 2;
                     }
                     break;
                 case 0b011: // ROR
                     {
-                        auto operand = bus_.read(addr_);
+                        auto operand = readByte(addr_);
                         auto old_c = p_ & kC;
                         setC(operand & 0x01);
                         operand >>= 1;
+                        ++cycles_;
                         operand |= old_c;
-                        bus_.write(addr_, operand);
+                        writeByte(addr_, operand);
                         setZN(operand);
-                        cycles_ += 2;
                     }
                     break;
                 case 0b100: // STX
-                    bus_.write(addr_, x_);
+                    writeByte(addr_, x_);
                     break;
                 case 0b101: // LDX
-                    x_ = bus_.read(addr_);
+                    x_ = readByte(addr_);
                     setZN(x_);
                     break;
                 case 0b110: // DEC
                     {
-                        auto operand = bus_.read(addr_);
-                        bus_.write(addr_, --operand);
+                        auto operand = readByte(addr_);
+                        --operand;
+                        ++cycles_;
+                        writeByte(addr_, operand);
                         setZN(operand);
-                        cycles_ += 2;
                     }
                     break;
                 case 0b111: // INC
                     {
-                        auto operand = bus_.read(addr_);
-                        bus_.write(addr_, ++operand);
+                        auto operand = readByte(addr_);
+                        ++operand;
+                        ++cycles_;
+                        writeByte(addr_, operand);
                         setZN(operand);
-                        cycles_ += 2;
                     }
                     break;
             }

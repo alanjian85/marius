@@ -34,10 +34,16 @@ namespace nes {
             kBrkVector = 0xFFFE,
             kIrqVector = 0xFFFE,
             kNmiVector = 0xFFFA,
-            kResetVector = 0xFFFC
+            kResetVector = 0xFFFC,
+            kStackBase = 0x0100
         };
 
-        static constexpr std::uint16_t kStackBase = 0x0100;
+        std::uint8_t readByte(std::uint16_t addr);
+        void writeByte(std::uint16_t addr, std::uint8_t val);
+        std::uint16_t readAddress(std::uint16_t addr);
+
+        void push(std::uint8_t val);
+        std::uint8_t pull();
 
         void addrImmediate();
         void addrRelative();
@@ -58,9 +64,6 @@ namespace nes {
         void setV(bool val);
         void setN(bool val);
         void setZN(std::uint8_t val);
-
-        void push(std::uint8_t val);
-        std::uint8_t pull();
 
         bool execBranch(std::uint8_t opcode);
         bool execImplied(std::uint8_t opcode);
