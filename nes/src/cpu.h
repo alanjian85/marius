@@ -52,9 +52,12 @@ namespace nes {
         void addrIndirectIndexed();
 
         void setC(bool val);
-        void setZ(std::uint8_t val);
+        void setZ(bool val);
+        void setI(bool val);
+        void setD(bool val);
         void setV(bool val);
-        void setN(std::uint8_t val);
+        void setN(bool val);
+        void setZN(std::uint8_t val);
 
         void push(std::uint8_t val);
         std::uint8_t pull();
