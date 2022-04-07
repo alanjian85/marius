@@ -4,7 +4,7 @@ using namespace nes;
 Cpu::Cpu(Bus& bus) 
     : bus_(bus)
 {
-
+    cycles_ = 0;
 }
 
 void Cpu::irq() {
