@@ -35,6 +35,7 @@ void Cpu::reset() {
 }
 
 int Cpu::step() {
+    cycles_ = 0;
     auto opcode = readByte(pc_++);
     if (execBranch(opcode))
         return cycles_;
