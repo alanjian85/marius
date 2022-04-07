@@ -275,68 +275,58 @@ bool Cpu::execImplied(std::uint8_t opcode) {
         case 0x68: // PLA
             a_ = pull();
             ++cycles_;
-            setZ(a_);
-            setN(a_);
+            setZN(a_);
             break;
         case 0x78: // SEI
             setI(true);
             break;
         case 0x88: // DEY
             --y_;
-            setZ(y_);
-            setN(y_);
+            setZN(y_);
             break;
         case 0x98: // TYA
             a_ = y_;
-            setZ(a_);
-            setZ(a_);
+            setZN(a_);
             break;
         case 0xA8: // TAY
             y_ = a_;
-            setZ(y_);
-            setN(y_);
+            setZN(y_);
             break;
         case 0xB8: // CLV
             setV(false);
             break;
         case 0xC8: // INY
             ++y_;
-            setZ(y_);
-            setN(y_);
+            setZN(y_);
             break;
         case 0xD8: // CLD
             setD(false);
             break;
         case 0xE8: // INX
             ++x_;
-            setZ(x_);
-            setN(x_);
+            setZN(x_);
             break;
         case 0xF8: // SED
             setD(true);
             break;
         case 0x8A: // TXA
             a_ = x_;
-            setZ(a_);
-            setN(a_);
+            setZN(a_);
             break;
         case 0x9A: // TXS
             s_ = x_;
             break;
         case 0xAA: // TAX
             x_ = a_;
-            setZ(x_);
-            setN(x_);
+            setZN(x_);
             break;
         case 0xBA: // TSX
             x_ = s_;
-            setZ(x_);
-            setN(x_);
+            setZN(x_);
             break;
         case 0xCA: // DEX
             --x_;
-            setZ(x_);
-            setN(x_);
+            setZN(x_);
             break;
         case 0xEA: // NOP
             break;
@@ -392,8 +382,7 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
                 break;
             case 0b101: // LDY
                 y_ = readByte(addr_);
-                setZ(y_);
-                setN(y_);
+                setZN(y_);
                 break;
             case 0b110: // CPY
                 {
