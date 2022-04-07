@@ -9,45 +9,52 @@ Cpu::Cpu(Bus& bus)
 
 void Cpu::irq() {
     if (!(p_ & kI)) {
+        cycles_ += 2;
         push(pc_ >> 8);
         push(pc_);
         push(p_ | 1 << 5 & ~kB);
         setI(true);
         pc_ = readAddress(kIrqVector);
+        --cycles_;
     }
 }
 
 void Cpu::nmi() {
+    cycles_ += 2;
     push(pc_ >> 8);
     push(pc_);
     push(p_ | 1 << 5 & ~kB);
     setI(true);
-    pc_ = readAddress(kNmiVector);   
+    pc_ = readAddress(kNmiVector);
+    --cycles_;
 }
 
 void Cpu::reset() {
+    cycles_ += 2;
     setI(true);
+    cycles_ += 3;
     pc_ = readAddress(kResetVector);
     a_ = 0x00;
     x_ = 0x00;
     y_ = 0x00;
     s_ = 0xFD;
+    --cycles_;
 }
 
-int Cpu::step() {
-    cycles_ = 0;
-    auto opcode = readByte(pc_++);
-    if (execBranch(opcode))
-        return cycles_;
-    if (execImplied(opcode))
-        return cycles_;
-    if (execGroup0(opcode))
-        return cycles_;
-    if (execGroup1(opcode))
-        return cycles_;
-    if (execGroup2(opcode))
-        return cycles_;
-    return cycles_;
+void Cpu::cycle() {
+    if (cycles_-- == 0) {
+        auto opcode = readByte(pc_++);
+        if (execBranch(opcode))
+            return;
+        if (execImplied(opcode))
+            return;
+        if (execGroup0(opcode))
+            return;
+        if (execGroup1(opcode))
+            return;
+        if (execGroup2(opcode))
+            return;
+    }
 }
 
 std::uint8_t Cpu::readByte(std::uint16_t addr) {
@@ -55,21 +62,21 @@ std::uint8_t Cpu::readByte(std::uint16_t addr) {
     return bus_.read(addr);
 }
 
+std::uint16_t Cpu::readAddress(std::uint16_t addr) {
+    return readByte(addr) | readByte(addr + 1) << 8;
+}
+
 void Cpu::writeByte(std::uint16_t addr, std::uint8_t val) {
     ++cycles_;
     bus_.write(addr, val);
 }
 
-std::uint16_t Cpu::readAddress(std::uint16_t addr) {
-    return readByte(addr) | readByte(addr + 1) << 8;
+std::uint8_t Cpu::pull() {
+    return readByte(kStackBase | s_++);
 }
 
 void Cpu::push(std::uint8_t val) {
     writeByte(kStackBase | s_--, val);
-}
-
-std::uint8_t Cpu::pull() {
-    return readByte(kStackBase | s_++);
 }
 
 void Cpu::addrImmediate() {

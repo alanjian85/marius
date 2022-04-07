@@ -7,11 +7,11 @@
 namespace nes {
     class Bus {
     public:
-        std::uint8_t read(std::uint16_t addr) const;
+        [[nodiscard]] std::uint8_t read(std::uint16_t addr) const;
 
         void write(std::uint16_t addr, std::uint8_t val);
     private:
-        std::array<std::uint8_t, 0xFFFF> ram_;
+        std::array<std::uint8_t, 0x10000> ram_;
     };
 }
 

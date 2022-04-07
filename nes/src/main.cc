@@ -22,10 +22,9 @@ int main() {
     bus.write(0xFFFD, 0x00);
     cpu.reset();
 
-    for (int i = 0; i < 24; ++i) {
-        std::cout << cpu.step() << ' ';
+    for (int i = 0; i < 79; ++i) {
+        cpu.cycle();
     }
-    std::cout << '\n';
 
     for (std::uint16_t i = 0; i < 12; ++i) {
         std::cout << static_cast<char>(bus.read(0x100 + i));

@@ -18,7 +18,7 @@ namespace nes {
 
         void reset();
 
-        int step();
+        void cycle();
     private:
         enum {
             kC = 1 << 0,
@@ -38,12 +38,12 @@ namespace nes {
             kStackBase = 0x0100
         };
 
-        std::uint8_t readByte(std::uint16_t addr);
+        [[nodiscard]] std::uint8_t readByte(std::uint16_t addr);
+        [[nodiscard]] std::uint16_t readAddress(std::uint16_t addr);
         void writeByte(std::uint16_t addr, std::uint8_t val);
-        std::uint16_t readAddress(std::uint16_t addr);
 
+        [[nodiscard]] std::uint8_t pull();
         void push(std::uint8_t val);
-        std::uint8_t pull();
 
         void addrImmediate();
         void addrRelative();
@@ -65,11 +65,11 @@ namespace nes {
         void setN(bool val);
         void setZN(std::uint8_t val);
 
-        bool execBranch(std::uint8_t opcode);
-        bool execImplied(std::uint8_t opcode);
-        bool execGroup0(std::uint8_t opcode);
-        bool execGroup1(std::uint8_t opcode);
-        bool execGroup2(std::uint8_t opcode);
+        [[nodiscard]] bool execBranch(std::uint8_t opcode);
+        [[nodiscard]] bool execImplied(std::uint8_t opcode);
+        [[nodiscard]] bool execGroup0(std::uint8_t opcode);
+        [[nodiscard]] bool execGroup1(std::uint8_t opcode);
+        [[nodiscard]] bool execGroup2(std::uint8_t opcode);
 
         Bus& bus_;
         int cycles_;
