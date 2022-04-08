@@ -2,7 +2,9 @@
 #define NES_EMULATOR_H_
 
 #include <chrono>
+#include <iostream>
 
+#include "cartridge.h"
 #include "cpu_bus.h"
 #include "cpu.h"
 
@@ -11,9 +13,11 @@ namespace nes {
     public:
         Emulator();
 
-        void run();
+        void run(std::istream& rom);
     private:
         using Clock = std::chrono::high_resolution_clock;
+
+        Cartridge cartridge_;
 
         CpuBus cpu_bus_;
         Cpu cpu_;

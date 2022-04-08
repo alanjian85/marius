@@ -1,4 +1,5 @@
 set(NES_SRCS
+    src/cartridge.h
     src/cpu_bus.cc
     src/cpu_bus.h
     src/cpu.cc
