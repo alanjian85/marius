@@ -1,7 +1,7 @@
 #include "cpu.h"
 using namespace nes;
 
-Cpu::Cpu(Bus& bus) 
+Cpu::Cpu(CpuBus& bus) 
     : bus_(bus)
 {
     cycles_ = 0;

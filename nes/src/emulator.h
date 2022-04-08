@@ -3,7 +3,7 @@
 
 #include <chrono>
 
-#include "bus.h"
+#include "cpu_bus.h"
 #include "cpu.h"
 
 namespace nes {
@@ -15,7 +15,7 @@ namespace nes {
     private:
         using Clock = std::chrono::high_resolution_clock;
 
-        Bus bus_;
+        CpuBus cpu_bus_;
         Cpu cpu_;
 
         std::chrono::nanoseconds cycle_interval_;

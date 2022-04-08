@@ -1,11 +1,11 @@
-#ifndef NES_BUS_H_
-#define NES_BUS_H_
+#ifndef NES_CPU_BUS_H_
+#define NES_CPU_BUS_H_
 
 #include <array>
 #include <cstdint>
 
 namespace nes {
-    class Bus {
+    class CpuBus {
     public:
         [[nodiscard]] std::uint8_t read(std::uint16_t addr) const;
 
@@ -15,4 +15,4 @@ namespace nes {
     };
 }
 
-#endif // NES_BUS_H_
+#endif // NES_CPU_BUS_H_

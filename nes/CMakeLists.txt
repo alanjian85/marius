@@ -1,6 +1,6 @@
 set(NES_SRCS
-    src/bus.cc
-    src/bus.h
+    src/cpu_bus.cc
+    src/cpu_bus.h
     src/cpu.cc
     src/cpu.h
     src/emulator.cc

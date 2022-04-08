@@ -4,10 +4,12 @@ using namespace nes;
 #include <iostream>
 
 Emulator::Emulator()
-    : cpu_(bus_)
+    : cpu_(cpu_bus_)
 {
     cycle_interval_ = std::chrono::nanoseconds(559);
+}
 
+void Emulator::run() {
     const std::uint8_t binary[] = {
         0xa9, 0x48, 0x8d, 0x00, 0x01, 0xa9, 0x65, 0x8d, 0x01, 0x01, 0xa9, 0x6c, 0x8d, 0x02, 0x01, 0xa9, 
         0x6c, 0x8d, 0x03, 0x01, 0xa9, 0x6f, 0x8d, 0x04, 0x01, 0xa9, 0x20, 0x8d, 0x05, 0x01, 0xa9, 0x77, 
@@ -16,15 +18,13 @@ Emulator::Emulator()
     };
 
     for (std::uint16_t i = 0; i < sizeof(binary); ++i) {
-        bus_.write(i, binary[i]);
+        cpu_bus_.write(i, binary[i]);
     }
 
-    bus_.write(0xFFFC, 0x00);
-    bus_.write(0xFFFD, 0x00);
+    cpu_bus_.write(0xFFFC, 0x00);
+    cpu_bus_.write(0xFFFD, 0x00);
     cpu_.reset();
-}
 
-void Emulator::run() {
     prev_time_ = Clock::now();
     elapsed_time_ = prev_time_ - prev_time_;
     for (;;) {
@@ -37,7 +37,7 @@ void Emulator::run() {
 
         std::cout << '\r';
         for (std::uint16_t i = 0; i < 12; ++i) {
-            std::cout << static_cast<char>(bus_.read(0x100 + i));
+            std::cout << static_cast<char>(cpu_bus_.read(0x100 + i));
         }
     }
 }

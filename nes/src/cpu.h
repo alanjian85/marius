@@ -5,12 +5,12 @@
 #include <cstdint>
 #include <cstdlib>
 
-#include "bus.h"
+#include "cpu_bus.h"
 
 namespace nes {
     class Cpu {
     public:
-        Cpu(Bus& bus);
+        Cpu(CpuBus& bus);
 
         void irq();
 
@@ -71,7 +71,7 @@ namespace nes {
         [[nodiscard]] bool execGroup1(std::uint8_t opcode);
         [[nodiscard]] bool execGroup2(std::uint8_t opcode);
 
-        Bus& bus_;
+        CpuBus& bus_;
         int cycles_;
         std::uint16_t addr_;
 
