@@ -28,14 +28,12 @@ void Emulator::run() {
     prev_time_ = Clock::now();
     elapsed_time_ = prev_time_ - prev_time_;
     for (;;) {
-        auto curr_time = Clock::now();
-        elapsed_time_ += curr_time - prev_time_;
-        prev_time_ = curr_time;
-
+        elapsed_time_ += Clock::now() - prev_time_;
         while (elapsed_time_ > cycle_interval_) {
             cpu_.cycle();
             elapsed_time_ -= cycle_interval_;
         }
+        prev_time_ = Clock::now();
 
         std::cout << '\r';
         for (std::uint16_t i = 0; i < 12; ++i) {

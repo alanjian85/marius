@@ -5,6 +5,11 @@ Cpu::Cpu(Bus& bus)
     : bus_(bus)
 {
     cycles_ = 0;
+    a_ = 0x00;
+    x_ = 0x00;
+    y_ = 0x00;
+    s_ = 0x00;
+    p_ = 0x00;
 }
 
 void Cpu::irq() {
@@ -15,7 +20,6 @@ void Cpu::irq() {
         push(p_ | 1 << 5 & ~kB);
         setI(true);
         pc_ = readAddress(kIrqVector);
-        --cycles_;
     }
 }
 
@@ -26,7 +30,6 @@ void Cpu::nmi() {
     push(p_ | 1 << 5 & ~kB);
     setI(true);
     pc_ = readAddress(kNmiVector);
-    --cycles_;
 }
 
 void Cpu::reset() {
@@ -34,11 +37,7 @@ void Cpu::reset() {
     setI(true);
     cycles_ += 3;
     pc_ = readAddress(kResetVector);
-    a_ = 0x00;
-    x_ = 0x00;
-    y_ = 0x00;
-    s_ = 0xFD;
-    --cycles_;
+    s_ -= 0x03;
 }
 
 void Cpu::cycle() {
