@@ -10,9 +10,10 @@ namespace nes {
         friend std::istream& operator>>(std::istream& lhs, Cartridge& rhs);
     private:
         std::vector<std::uint8_t> prg_rom_;
+        std::vector<std::uint8_t> chr_rom_;
     };
 
-    std::istream& operator>>(std::istream& lhs, Cartridge& rhs);
+    [[nodiscard]] std::istream& operator>>(std::istream& lhs, Cartridge& rhs);
 }
 
 #endif // NES_CARTRIDGE_H_

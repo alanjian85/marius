@@ -1,6 +1,9 @@
 #include "emulator.h"
 using namespace nes;
 
+#include <iostream>
+#include <stdexcept>
+
 Emulator::Emulator()
     : cpu_(cpu_bus_)
 {
@@ -8,7 +11,12 @@ Emulator::Emulator()
 }
 
 void Emulator::run(std::istream& rom) {
-    rom >> cartridge_;
+    try {
+        rom >> cartridge_;
+    } catch (std::exception& e) {
+        std::cerr << "Error loading ROM: " << e.what() << std::endl;
+        return;
+    }
     cpu_.reset();
 
     prev_time_ = Clock::now();
@@ -20,10 +28,5 @@ void Emulator::run(std::istream& rom) {
             elapsed_time_ -= cycle_interval_;
         }
         prev_time_ = Clock::now();
-
-        std::cout << '\r';
-        for (std::uint16_t i = 0; i < 12; ++i) {
-            std::cout << static_cast<char>(cpu_bus_.read(0x100 + i));
-        }
     }
 }
