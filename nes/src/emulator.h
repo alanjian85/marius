@@ -10,7 +10,7 @@
 #include "mappers/mapper.h"
 
 namespace nes {
-    class Emulator {
+    class Emulator final {
     public:
         Emulator();
 

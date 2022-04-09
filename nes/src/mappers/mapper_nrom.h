@@ -4,9 +4,9 @@
 #include "mapper.h"
 
 namespace nes {
-    class MapperNrom : public Mapper {
+    class MapperNrom final : public Mapper {
     public:
-        MapperNrom(Cartridge& cartridge);
+        using Mapper::Mapper;
 
         [[nodiscard]] virtual std::uint8_t readPrg(std::uint16_t addr) override;
 

@@ -7,7 +7,7 @@
 #include "mappers/mapper.h"
 
 namespace nes {
-    class CpuBus {
+    class CpuBus final {
     public:
         void setMapper(Mapper* mapper);
 

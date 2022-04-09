@@ -6,18 +6,24 @@
 #include <vector>
 
 namespace nes {
-    class Cartridge {
+    class Cartridge final {
         friend std::istream& operator>>(std::istream& lhs, Cartridge& rhs);
     public:
-        [[nodiscard]] std::uint8_t getMapperNum() const;
+        [[nodiscard]] std::uint8_t getPrgRomBanks() const;
 
         [[nodiscard]] const std::vector<std::uint8_t>& getPrgRom() const;
 
+        [[nodiscard]] std::uint8_t getChrRomBanks() const;
+
         [[nodiscard]] const std::vector<std::uint8_t>& getChrRom() const;
+    
+        [[nodiscard]] std::uint8_t getMapperNum() const;
     private:
-        std::uint8_t mapper_num_;
+        std::uint8_t prg_rom_banks_;
         std::vector<std::uint8_t> prg_rom_;
+        std::uint8_t chr_rom_banks_;
         std::vector<std::uint8_t> chr_rom_;
+        std::uint8_t mapper_num_;
     };
 
     std::istream& operator>>(std::istream& lhs, Cartridge& rhs);

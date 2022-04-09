@@ -43,9 +43,9 @@ void Cpu::reset() {
 void Cpu::cycle() {
     if (cycles_-- == 0) {
         auto opcode = readByte(pc_++);
-        if (execBranch(opcode))
-            return;
         if (execImplied(opcode))
+            return;
+        if (execBranch(opcode))
             return;
         if (execGroup0(opcode))
             return;

@@ -8,7 +8,7 @@
 #include "cpu_bus.h"
 
 namespace nes {
-    class Cpu {
+    class Cpu final {
     public:
         Cpu(CpuBus& bus);
 
