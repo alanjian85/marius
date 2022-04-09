@@ -7,7 +7,7 @@
 #include "cartridge.h"
 #include "cpu_bus.h"
 #include "cpu.h"
-#include "mapper.h"
+#include "mappers/mapper.h"
 
 namespace nes {
     class Emulator {

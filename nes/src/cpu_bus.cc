@@ -15,6 +15,7 @@ std::uint8_t CpuBus::read(std::uint16_t addr) const {
     } else if (addr < 0x4020) {
     
     } else {
+        assert(mapper_);
         return mapper_->readPrg(addr);
     }
     return 0;
@@ -28,6 +29,7 @@ void CpuBus::write(std::uint16_t addr, std::uint8_t val) {
     } else if (addr < 0x4020) {
     
     } else {
+        assert(mapper_);
         mapper_->writePrg(addr, val);
     }
 }

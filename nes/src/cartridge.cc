@@ -5,15 +5,21 @@ using namespace nes;
 #include <stdexcept>
 #include <string_view>
 
+std::uint8_t Cartridge::getMapperNum() const {
+    return mapper_num_;
+}
+
 std::istream& nes::operator>>(std::istream& lhs, Cartridge& rhs) {
     std::array<char, 16> header;
     if (!lhs.read(header.data(), 16)) {
         throw std::runtime_error("Unable to read cartridge header");
     }
 
-    if (std::string_view(header.begin(), 4) != "NES\x1A") {
+    if (std::string_view(&header[0], 4) != "NES\x1A") {
         throw std::runtime_error("iNES header constant is not NES\\x1A");
     }
+
+    rhs.mapper_num_ = (header[6] & 0xF0) >> 4 | header[7] & 0xF0;
 
     rhs.prg_rom_.resize(0x4000 * header[4]);
     if (!lhs.read(reinterpret_cast<char*>(rhs.prg_rom_.data()), 0x4000 * header[4])) {

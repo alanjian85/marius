@@ -4,7 +4,7 @@
 #include <array>
 #include <cstdint>
 
-#include "mapper.h"
+#include "mappers/mapper.h"
 
 namespace nes {
     class CpuBus {

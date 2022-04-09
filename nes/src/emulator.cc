@@ -18,6 +18,7 @@ void Emulator::run(std::istream& rom) {
         return;
     }
     mapper_ = MakeMapper(cartridge_);
+    cpu_bus_.setMapper(mapper_.get());
     cpu_.reset();
 
     prev_time_ = Clock::now();

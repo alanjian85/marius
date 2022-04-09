@@ -8,5 +8,13 @@ set(NES_SRCS
     src/emulator.cc
     src/emulator.h
     src/main.cc
+    src/mappers/mapper_nrom.cc
+    src/mappers/mapper_nrom.h
+    src/mappers/mapper.cc
+    src/mappers/mapper.h
 )
 add_executable(nes ${NES_SRCS})
+
+target_include_directories(nes PRIVATE
+    src
+)
