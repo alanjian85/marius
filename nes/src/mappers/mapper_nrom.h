@@ -4,7 +4,7 @@
 #include "mapper.h"
 
 namespace nes {
-    class MapperNrom final : public Mapper {
+    class MapperNROM final : public Mapper {
     public:
         using Mapper::Mapper;
 
