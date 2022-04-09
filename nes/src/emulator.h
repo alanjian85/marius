@@ -7,6 +7,7 @@
 #include "cartridge.h"
 #include "cpu_bus.h"
 #include "cpu.h"
+#include "mapper.h"
 
 namespace nes {
     class Emulator {
@@ -18,6 +19,7 @@ namespace nes {
         using Clock = std::chrono::high_resolution_clock;
 
         Cartridge cartridge_;
+        std::unique_ptr<Mapper> mapper_;
 
         CpuBus cpu_bus_;
         Cpu cpu_;

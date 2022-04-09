@@ -17,6 +17,7 @@ void Emulator::run(std::istream& rom) {
         std::cerr << "Error loading ROM: " << e.what() << std::endl;
         return;
     }
+    mapper_ = MakeMapper(cartridge_);
     cpu_.reset();
 
     prev_time_ = Clock::now();

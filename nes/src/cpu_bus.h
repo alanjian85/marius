@@ -4,14 +4,19 @@
 #include <array>
 #include <cstdint>
 
+#include "mapper.h"
+
 namespace nes {
     class CpuBus {
     public:
+        void setMapper(Mapper* mapper);
+
         [[nodiscard]] std::uint8_t read(std::uint16_t addr) const;
 
         void write(std::uint16_t addr, std::uint8_t val);
     private:
-        std::array<std::uint8_t, 0x10000> ram_;
+        std::array<std::uint8_t, 0x800> ram_;
+        Mapper* mapper_;
     };
 }
 

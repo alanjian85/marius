@@ -13,7 +13,7 @@ namespace nes {
         std::vector<std::uint8_t> chr_rom_;
     };
 
-    [[nodiscard]] std::istream& operator>>(std::istream& lhs, Cartridge& rhs);
+    std::istream& operator>>(std::istream& lhs, Cartridge& rhs);
 }
 
 #endif // NES_CARTRIDGE_H_
