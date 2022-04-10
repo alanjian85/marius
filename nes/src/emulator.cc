@@ -27,12 +27,14 @@ void Emulator::run(std::istream& rom) {
     cpu_bus_.setMapper(mapper_.get());
     cpu_.reset();
 
-    SDL_CreateWindowAndRenderer(
+    window_ = SDL_CreateWindow(
+        "NES",
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         1280, 720,
-        0,
-        &window_,
-        &renderer_
+        0
     );
+
+    renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
 
     bool quit = false;
     prev_time_ = Clock::now();
@@ -53,6 +55,11 @@ void Emulator::run(std::istream& rom) {
             elapsed_time_ -= cycle_interval_;
         }
         prev_time_ = Clock::now();
+
+        SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
+        SDL_RenderClear(renderer_);
+
+        
 
         SDL_RenderPresent(renderer_);        
     }

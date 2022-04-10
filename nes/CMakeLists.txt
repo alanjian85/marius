@@ -1,4 +1,8 @@
 set(NES_SRCS
+    src/mappers/mapper_nrom.cc
+    src/mappers/mapper_nrom.h
+    src/mappers/mapper.cc
+    src/mappers/mapper.h
     src/cartridge.cc
     src/cartridge.h
     src/cpu_bus.cc
@@ -8,10 +12,8 @@ set(NES_SRCS
     src/emulator.cc
     src/emulator.h
     src/main.cc
-    src/mappers/mapper_nrom.cc
-    src/mappers/mapper_nrom.h
-    src/mappers/mapper.cc
-    src/mappers/mapper.h
+    src/ppu.cc
+    src/ppu.h
 )
 add_executable(nes ${NES_SRCS})
 

@@ -6,10 +6,11 @@
 
 #include <SDL2/SDL.h>
 
+#include "mappers/mapper.h"
 #include "cartridge.h"
 #include "cpu_bus.h"
 #include "cpu.h"
-#include "mappers/mapper.h"
+#include "ppu.h"
 
 namespace nes {
     class Emulator final {
@@ -34,6 +35,7 @@ namespace nes {
 
         CpuBus cpu_bus_;
         Cpu cpu_;
+        Ppu ppu_;
 
         std::chrono::nanoseconds cycle_interval_;
         Clock::time_point prev_time_;
