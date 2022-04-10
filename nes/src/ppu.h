@@ -8,12 +8,18 @@ namespace nes {
     public:
         Ppu();
 
-        Ppu(const Ppu&) = delete;
+        Ppu(SDL_Renderer* renderer);
 
-        Ppu& operator=(const Ppu&) = delete;
+        Ppu(Ppu&& rhs) noexcept;
+
+        Ppu& operator=(Ppu&& rhs) noexcept;
 
         ~Ppu();
+
+        [[nodiscard]] SDL_Texture* getTexture() const;
     private:
+        static constexpr int kWidth = 256, kHeight = 240;
+
         SDL_Texture* texture_;
     };
 }

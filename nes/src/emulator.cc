@@ -36,6 +36,8 @@ void Emulator::run(std::istream& rom) {
 
     renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
 
+    ppu_ = Ppu(renderer_);
+
     bool quit = false;
     prev_time_ = Clock::now();
     elapsed_time_ = prev_time_ - prev_time_;
