@@ -6,10 +6,12 @@ using namespace nes;
 Ppu::Ppu()
     : texture_(nullptr)
 {
-
+    vblank_ = true;
 }
 
-Ppu::Ppu(SDL_Renderer* renderer) {
+Ppu::Ppu(SDL_Renderer* renderer)
+    : Ppu()
+{
     texture_ = SDL_CreateTexture(
         renderer,
         SDL_PIXELFORMAT_RGBA8888,
@@ -20,6 +22,7 @@ Ppu::Ppu(SDL_Renderer* renderer) {
 
 Ppu::Ppu(Ppu&& rhs) noexcept {
     texture_ = std::exchange(rhs.texture_, nullptr);
+    vblank_ = rhs.vblank_;
 }
 
 Ppu& Ppu::operator=(Ppu&& rhs) noexcept {
@@ -27,6 +30,7 @@ Ppu& Ppu::operator=(Ppu&& rhs) noexcept {
         SDL_DestroyTexture(texture_);
     }
     texture_ = std::exchange(rhs.texture_, nullptr);
+    vblank_ = rhs.vblank_;
     return *this;
 }
 
@@ -42,4 +46,14 @@ SDL_Texture* Ppu::getTexture() const {
 
 float Ppu::getAspect() const {
     return static_cast<float>(kWidth) / kHeight;
+}
+
+std::uint8_t Ppu::getStatus() {
+    std::uint8_t status = vblank_ << 7;
+    vblank_ = false;
+    return status;
+}
+
+void Ppu::update() {
+    vblank_ = true;
 }

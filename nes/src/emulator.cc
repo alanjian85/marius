@@ -36,8 +36,8 @@ void Emulator::run(std::istream& rom) {
     );
 
     renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
-
     ppu_ = Ppu(renderer_);
+    cpu_bus_.setPpu(&ppu_);
 
     bool quit = false;
     prev_time_ = Clock::now();
@@ -58,6 +58,8 @@ void Emulator::run(std::istream& rom) {
             elapsed_time_ -= cycle_interval_;
         }
         prev_time_ = Clock::now();
+
+        ppu_.update();
 
         SDL_SetRenderDrawColor(renderer_, 255, 0, 0, 255);
         SDL_RenderClear(renderer_);

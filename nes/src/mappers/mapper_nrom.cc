@@ -6,7 +6,7 @@ using namespace nes;
 std::uint8_t MapperNROM::readPrg(std::uint16_t addr) {
     assert(addr >= 0x8000);
     if (cartridge_.getPrgRomBanks() == 1) {
-        return cartridge_.getPrgRom()[(addr - 0x8000) & 0x3FFF];
+        return cartridge_.getPrgRom()[addr & 0x3FFF];
     } else {
         return cartridge_.getPrgRom()[addr - 0x8000];
     }

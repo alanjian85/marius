@@ -5,11 +5,16 @@
 #include <cstdint>
 
 #include "mappers/mapper.h"
+#include "ppu.h"
 
 namespace nes {
     class CpuBus final {
     public:
+        CpuBus();
+
         void setMapper(Mapper* mapper);
+
+        void setPpu(Ppu* ppu);
 
         [[nodiscard]] std::uint8_t read(std::uint16_t addr) const;
 
@@ -17,6 +22,7 @@ namespace nes {
     private:
         std::array<std::uint8_t, 0x800> ram_;
         Mapper* mapper_;
+        Ppu* ppu_;
     };
 }
 
