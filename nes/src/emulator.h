@@ -4,6 +4,8 @@
 #include <chrono>
 #include <iostream>
 
+#include <SDL2/SDL.h>
+
 #include "cartridge.h"
 #include "cpu_bus.h"
 #include "cpu.h"
@@ -14,9 +16,18 @@ namespace nes {
     public:
         Emulator();
 
+        Emulator(const Emulator&) = delete;
+
+        Emulator& operator=(const Emulator&) = delete;
+
+        ~Emulator();
+
         void run(std::istream& rom);
     private:
         using Clock = std::chrono::high_resolution_clock;
+
+        SDL_Window* window_;
+        SDL_Renderer* renderer_;
 
         Cartridge cartridge_;
         std::unique_ptr<Mapper> mapper_;

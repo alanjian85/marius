@@ -15,6 +15,13 @@ set(NES_SRCS
 )
 add_executable(nes ${NES_SRCS})
 
+find_package(SDL2 REQUIRED)
+
 target_include_directories(nes PRIVATE
     src
+    ${SDL2_INCLUDE_DIRS}
+)
+
+target_link_libraries(nes
+    ${SDL2_LIBRARIES}
 )
