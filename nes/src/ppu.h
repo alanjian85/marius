@@ -17,6 +17,8 @@ namespace nes {
         ~Ppu();
 
         [[nodiscard]] SDL_Texture* getTexture() const;
+
+        [[nodiscard]] float getAspect() const;
     private:
         static constexpr int kWidth = 256, kHeight = 240;
 

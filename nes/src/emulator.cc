@@ -27,10 +27,11 @@ void Emulator::run(std::istream& rom) {
     cpu_bus_.setMapper(mapper_.get());
     cpu_.reset();
 
+    const int width = 1280, height = 720;
     window_ = SDL_CreateWindow(
         "NES",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        1280, 720,
+        width, height,
         0
     );
 
@@ -58,10 +59,13 @@ void Emulator::run(std::istream& rom) {
         }
         prev_time_ = Clock::now();
 
-        SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer_, 255, 0, 0, 255);
         SDL_RenderClear(renderer_);
 
-        
+        int screen_width = height / ppu_.getAspect();
+        int screen_x = (width - screen_width) / 2.0f;
+        SDL_Rect rect = { screen_x, 0, screen_width, height };
+        SDL_RenderCopy(renderer_, ppu_.getTexture(), nullptr, &rect);
 
         SDL_RenderPresent(renderer_);        
     }

@@ -12,7 +12,7 @@ Ppu::Ppu()
 Ppu::Ppu(SDL_Renderer* renderer) {
     texture_ = SDL_CreateTexture(
         renderer,
-        SDL_PIXELFORMAT_RGB888,
+        SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_STREAMING,
         kWidth, kHeight
     );
@@ -38,4 +38,8 @@ Ppu::~Ppu() {
 
 SDL_Texture* Ppu::getTexture() const {
     return texture_;
+}
+
+float Ppu::getAspect() const {
+    return static_cast<float>(kWidth) / kHeight;
 }
