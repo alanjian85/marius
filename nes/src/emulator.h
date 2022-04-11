@@ -4,14 +4,6 @@
 #include <chrono>
 #include <iostream>
 
-#include <SDL2/SDL.h>
-
-#include "mappers/mapper.h"
-#include "cartridge.h"
-#include "cpu_bus.h"
-#include "cpu.h"
-#include "ppu.h"
-
 namespace nes {
     class Emulator final {
     public:

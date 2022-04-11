@@ -1,8 +1,15 @@
 #include "emulator.h"
 using namespace nes;
 
-#include <iostream>
 #include <stdexcept>
+
+#include <SDL2/SDL.h>
+
+#include "mappers/mapper.h"
+#include "cartridge.h"
+#include "cpu_bus.h"
+#include "cpu.h"
+#include "ppu.h"
 
 Emulator::Emulator() {
     cpu_interval_ = std::chrono::nanoseconds(559);
@@ -38,12 +45,15 @@ void Emulator::run(std::istream& rom) {
     );
 
     auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    Ppu ppu(renderer);
+    Framebuffer framebuffer(renderer, Ppu::kWidth, Ppu::kHeight);
+    Ppu ppu(framebuffer);
     cpu_bus.setPpu(&ppu);
 
     bool quit = false;
     auto prev_time = Clock::now();
     auto elapsed_time = prev_time - prev_time;
+    int screen_width = height / Ppu::kAspect;
+    int screen_x = (width - screen_width) / 2.0f;
     while (!quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -63,13 +73,11 @@ void Emulator::run(std::istream& rom) {
 
         ppu.update();
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
         SDL_RenderClear(renderer);
 
-        int screen_width = height / ppu.getAspect();
-        int screen_x = (width - screen_width) / 2.0f;
         SDL_Rect rect = { screen_x, 0, screen_width, height };
-        SDL_RenderCopy(renderer, ppu.getTexture(), nullptr, &rect);
+        SDL_RenderCopy(renderer, framebuffer.getTexture(), nullptr, &rect);
 
         SDL_RenderPresent(renderer);        
     }

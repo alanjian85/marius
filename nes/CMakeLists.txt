@@ -11,6 +11,8 @@ set(NES_SRCS
     src/cpu.h
     src/emulator.cc
     src/emulator.h
+    src/framebuffer.cc
+    src/framebuffer.h
     src/main.cc
     src/ppu.cc
     src/ppu.h

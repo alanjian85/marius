@@ -1,34 +1,21 @@
 #ifndef NES_PPU_H_
 #define NES_PPU_H_
 
-#include <cstdint>
-
-#include <SDL2/SDL.h>
+#include "framebuffer.h"
 
 namespace nes {
-    class Ppu {
+    class Ppu final {
     public:
-        Ppu();
+        static constexpr int kWidth = 256, kHeight = 240;
+        static constexpr float kAspect = static_cast<float>(kWidth) / kHeight;        
 
-        Ppu(SDL_Renderer* renderer);
-
-        Ppu(const Ppu&) = delete;
-
-        Ppu& operator=(const Ppu&) = delete;
-
-        ~Ppu();
-
-        [[nodiscard]] SDL_Texture* getTexture() const;
-
-        [[nodiscard]] float getAspect() const;
+        Ppu(Framebuffer& framebuffer);
 
         [[nodiscard]] std::uint8_t getStatus();
 
         void update();
     private:
-        static constexpr int kWidth = 256, kHeight = 240;
-
-        SDL_Texture* texture_;
+        Framebuffer& framebuffer_;
 
         bool vblank_;
     };
