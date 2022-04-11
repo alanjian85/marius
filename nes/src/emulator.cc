@@ -13,6 +13,7 @@ using namespace nes;
 
 Emulator::Emulator() {
     cpu_interval_ = std::chrono::nanoseconds(559);
+    ppu_interval_ = std::chrono::nanoseconds(186);
 
     SDL_Init(SDL_INIT_VIDEO);
 }
@@ -65,13 +66,18 @@ void Emulator::run(std::istream& rom) {
         }
 
         elapsed_time += Clock::now() - prev_time;
-        while (elapsed_time > cpu_interval_) {
+        auto cpu_elapsed = elapsed_time;
+        while (cpu_elapsed > cpu_interval_) {
             cpu.cycle();
-            elapsed_time -= cpu_interval_;
+            cpu_elapsed -= cpu_interval_;
+        }
+
+        auto ppu_elapsed = elapsed_time;
+        while (ppu_elapsed > ppu_interval_) {
+            ppu.dot();
+            ppu_elapsed -= ppu_interval_;
         }
         prev_time = Clock::now();
-
-        ppu.update();
 
         SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
         SDL_RenderClear(renderer);

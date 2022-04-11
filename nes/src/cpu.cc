@@ -43,7 +43,7 @@ void Cpu::reset() {
 }
 
 void Cpu::cycle() {
-    if (cycles_-- == 0) {
+    if (cycles_-- <= 0) {
         auto opcode = readByte(pc_++);
         if (execImplied(opcode))
             return;

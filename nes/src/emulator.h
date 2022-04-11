@@ -20,6 +20,7 @@ namespace nes {
         using Clock = std::chrono::high_resolution_clock;
 
         std::chrono::nanoseconds cpu_interval_;
+        std::chrono::nanoseconds ppu_interval_;
     };
 }
 

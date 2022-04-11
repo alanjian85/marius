@@ -11,12 +11,15 @@ namespace nes {
 
         Ppu(Framebuffer& framebuffer);
 
-        [[nodiscard]] std::uint8_t getStatus();
+        void reset();
 
-        void update();
+        void dot();
+
+        [[nodiscard]] std::uint8_t getStatus();
     private:
         Framebuffer& framebuffer_;
 
+        int dots_;
         bool vblank_;
     };
 }
