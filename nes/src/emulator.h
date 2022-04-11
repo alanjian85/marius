@@ -27,19 +27,7 @@ namespace nes {
     private:
         using Clock = std::chrono::high_resolution_clock;
 
-        SDL_Window* window_;
-        SDL_Renderer* renderer_;
-
-        Cartridge cartridge_;
-        std::unique_ptr<Mapper> mapper_;
-
-        CpuBus cpu_bus_;
-        Cpu cpu_;
-        Ppu ppu_;
-
-        std::chrono::nanoseconds cycle_interval_;
-        Clock::time_point prev_time_;
-        Clock::duration elapsed_time_;
+        std::chrono::nanoseconds cpu_interval_;
     };
 }
 

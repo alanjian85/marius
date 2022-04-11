@@ -4,10 +4,8 @@ using namespace nes;
 #include <iostream>
 #include <stdexcept>
 
-Emulator::Emulator()
-    : cpu_(cpu_bus_)
-{
-    cycle_interval_ = std::chrono::nanoseconds(559);
+Emulator::Emulator() {
+    cpu_interval_ = std::chrono::nanoseconds(559);
 
     SDL_Init(SDL_INIT_VIDEO);
 }
@@ -17,31 +15,35 @@ Emulator::~Emulator() {
 }
 
 void Emulator::run(std::istream& rom) {
+    Cartridge cartridge;
     try {
-        rom >> cartridge_;
+        rom >> cartridge;
     } catch (std::exception& e) {
         std::cerr << "Error loading ROM: " << e.what() << std::endl;
         return;
     }
-    mapper_ = MakeMapper(cartridge_);
-    cpu_bus_.setMapper(mapper_.get());
-    cpu_.reset();
+
+    auto mapper = MakeMapper(cartridge);
+    CpuBus cpu_bus;
+    Cpu cpu(cpu_bus);
+    cpu_bus.setMapper(mapper.get());
+    cpu.reset();
 
     const int width = 1280, height = 720;
-    window_ = SDL_CreateWindow(
+    auto window = SDL_CreateWindow(
         "NES",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         width, height,
         0
     );
 
-    renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
-    ppu_ = Ppu(renderer_);
-    cpu_bus_.setPpu(&ppu_);
+    auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    Ppu ppu(renderer);
+    cpu_bus.setPpu(&ppu);
 
     bool quit = false;
-    prev_time_ = Clock::now();
-    elapsed_time_ = prev_time_ - prev_time_;
+    auto prev_time = Clock::now();
+    auto elapsed_time = prev_time - prev_time;
     while (!quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -52,26 +54,26 @@ void Emulator::run(std::istream& rom) {
             }
         }
 
-        elapsed_time_ += Clock::now() - prev_time_;
-        while (elapsed_time_ > cycle_interval_) {
-            cpu_.cycle();
-            elapsed_time_ -= cycle_interval_;
+        elapsed_time += Clock::now() - prev_time;
+        while (elapsed_time > cpu_interval_) {
+            cpu.cycle();
+            elapsed_time -= cpu_interval_;
         }
-        prev_time_ = Clock::now();
+        prev_time = Clock::now();
 
-        ppu_.update();
+        ppu.update();
 
-        SDL_SetRenderDrawColor(renderer_, 255, 0, 0, 255);
-        SDL_RenderClear(renderer_);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
 
-        int screen_width = height / ppu_.getAspect();
+        int screen_width = height / ppu.getAspect();
         int screen_x = (width - screen_width) / 2.0f;
         SDL_Rect rect = { screen_x, 0, screen_width, height };
-        SDL_RenderCopy(renderer_, ppu_.getTexture(), nullptr, &rect);
+        SDL_RenderCopy(renderer, ppu.getTexture(), nullptr, &rect);
 
-        SDL_RenderPresent(renderer_);        
+        SDL_RenderPresent(renderer);        
     }
 
-    SDL_DestroyRenderer(renderer_);
-    SDL_DestroyWindow(window_);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
 }

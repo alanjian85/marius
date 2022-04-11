@@ -12,9 +12,9 @@ namespace nes {
 
         Ppu(SDL_Renderer* renderer);
 
-        Ppu(Ppu&& rhs) noexcept;
+        Ppu(const Ppu&) = delete;
 
-        Ppu& operator=(Ppu&& rhs) noexcept;
+        Ppu& operator=(const Ppu&) = delete;
 
         ~Ppu();
 
