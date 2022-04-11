@@ -13,13 +13,13 @@ namespace nes {
 
         void reset();
 
-        void dot();
+        void cycle();
 
         [[nodiscard]] std::uint8_t getStatus();
     private:
         Framebuffer& framebuffer_;
 
-        int dots_;
+        int cycles_;
         bool vblank_;
     };
 }

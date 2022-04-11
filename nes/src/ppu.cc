@@ -6,16 +6,16 @@ using namespace nes;
 Ppu::Ppu(Framebuffer& framebuffer)
     : framebuffer_(framebuffer)
 {
-    dots_ = 0;
+    cycles_ = 0;
     vblank_ = true;
 }
 
 void Ppu::reset() {
-    
+
 }
 
-void Ppu::dot() {
-    if (dots_-- <= 0) {
+void Ppu::cycle() {
+    if (cycles_-- <= 0) {
         vblank_ = true;
     }
 }

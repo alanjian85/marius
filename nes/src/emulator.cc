@@ -74,7 +74,7 @@ void Emulator::run(std::istream& rom) {
 
         auto ppu_elapsed = elapsed_time;
         while (ppu_elapsed > ppu_interval_) {
-            ppu.dot();
+            ppu.cycle();
             ppu_elapsed -= ppu_interval_;
         }
         prev_time = Clock::now();
