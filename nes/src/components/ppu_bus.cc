@@ -13,7 +13,7 @@ std::uint8_t PpuBus::read(std::uint16_t addr) const {
     } else if (addr < 0x3F00) {
         return ram_[addr & 0xFFF];
     } else {
-
+        return ram_[addr & 0x001F];
     }
     return 0;
 }
@@ -22,9 +22,17 @@ void PpuBus::write(std::uint16_t addr, std::uint8_t val) {
     if (addr < 0x2000) {
         mapper_.writeChr(addr, val);
     } else if (addr < 0x3F00) {
-        ram_[addr & 0xFFF] = val; 
+        ram_[addr & 0x0FFF] = val; 
     } else {
-
+        palette_[addr & 0x001F] = val;
+        std::uint8_t nibble = addr & 0xF;
+        if (!nibble || !(nibble ^ 0x4) || !(nibble ^ 0x8) || !(nibble ^ 0xC)) {
+            if (addr & 0x0010) {
+                palette_[nibble] = val;
+            } else {
+                palette_[nibble | 0x0010] = val;
+            }
+        }
     }
 }
 

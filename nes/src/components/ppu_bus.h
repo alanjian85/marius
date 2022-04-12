@@ -21,6 +21,7 @@ namespace nes {
     private:
         Mapper& mapper_;
         std::array<std::uint8_t, 0x800> ram_;
+        std::array<std::uint8_t, 0x20> palette_;
         std::array<std::uint32_t, 0xFF> oam_;
     };
 }
