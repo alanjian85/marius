@@ -27,3 +27,11 @@ void PpuBus::write(std::uint16_t addr, std::uint8_t val) {
 
     }
 }
+
+std::uint8_t PpuBus::readOam(std::uint8_t addr) const {
+    return oam_[addr];
+}
+
+void PpuBus::writeOam(std::uint8_t addr, std::uint8_t val) {
+    oam_[addr] = val;
+}
