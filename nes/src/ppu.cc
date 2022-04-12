@@ -6,17 +6,25 @@ using namespace nes;
 Ppu::Ppu(Framebuffer& framebuffer)
     : framebuffer_(framebuffer)
 {
-    cycles_ = 0;
+    cycle_ = 0;
+    scanline_ = 261;
     vblank_ = true;
 }
 
 void Ppu::reset() {
-
+    cycle_ = 0;
+    scanline_ = 261;
 }
 
 void Ppu::cycle() {
-    if (cycles_-- <= 0) {
+    if (scanline_ == 241) {
         vblank_ = true;
+    }
+
+    ++cycle_;
+    if (cycle_ == 341) {
+        cycle_ = 0;
+        scanline_ = (scanline_ + 1) % 262;
     }
 }
 

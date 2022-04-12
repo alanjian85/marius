@@ -19,7 +19,8 @@ namespace nes {
     private:
         Framebuffer& framebuffer_;
 
-        int cycles_;
+        int cycle_;
+        int scanline_;
         bool vblank_;
     };
 }

@@ -6,17 +6,19 @@ using namespace nes;
 Cpu::Cpu(CpuBus& bus) 
     : bus_(bus)
 {
-    cycles_ = 0;
     a_ = 0x00;
     x_ = 0x00;
     y_ = 0x00;
-    s_ = 0x00;
+    pc_ = readAddress(kResetVector);
+    s_ = 0xFD;
     p_ = 0x00;
+    setI(true);
+    cycle_ = 0;
 }
 
 void Cpu::irq() {
     if (!(p_ & kI)) {
-        cycles_ += 2;
+        cycle_ += 2;
         push(pc_ >> 8);
         push(pc_);
         push(p_ | 1 << 5 & ~kB);
@@ -26,7 +28,7 @@ void Cpu::irq() {
 }
 
 void Cpu::nmi() {
-    cycles_ += 2;
+    cycle_ += 2;
     push(pc_ >> 8);
     push(pc_);
     push(p_ | 1 << 5 & ~kB);
@@ -35,15 +37,14 @@ void Cpu::nmi() {
 }
 
 void Cpu::reset() {
-    cycles_ += 2;
-    setI(true);
-    cycles_ += 3;
+    cycle_ += 5;
     pc_ = readAddress(kResetVector);
     s_ -= 0x03;
+    setI(true);
 }
 
 void Cpu::cycle() {
-    if (cycles_-- <= 0) {
+    if (cycle_-- == 0) {
         auto opcode = readByte(pc_++);
         if (execImplied(opcode))
             return;
@@ -60,7 +61,7 @@ void Cpu::cycle() {
 }
 
 std::uint8_t Cpu::readByte(std::uint16_t addr) {
-    ++cycles_;
+    ++cycle_;
     return bus_.read(addr);
 }
 
@@ -69,7 +70,7 @@ std::uint16_t Cpu::readAddress(std::uint16_t addr) {
 }
 
 void Cpu::writeByte(std::uint16_t addr, std::uint8_t val) {
-    ++cycles_;
+    ++cycle_;
     bus_.write(addr, val);
 }
 
@@ -89,7 +90,7 @@ void Cpu::addrRelative() {
     std::int8_t offset = readByte(pc_++);
     addr_ = pc_ + offset;
     if (addr_ & 0xFF00 != pc_ & 0xFF00) {
-        ++cycles_;
+        ++cycle_;
     }
 }
 
@@ -113,7 +114,7 @@ void Cpu::addrAbsoluteX() {
     pc_ += 2;
     addr_ = base + x_;
     if (base & 0xFF00 != addr_ & 0xFF00) {
-        ++cycles_;
+        ++cycle_;
     }
 }
 
@@ -122,23 +123,23 @@ void Cpu::addrAbsoluteY() {
     pc_ += 2;
     addr_ = base + y_;
     if (base & 0xFF00 != addr_ & 0xFF00) {
-        ++cycles_;
+        ++cycle_;
     }
 }
 
 void Cpu::addrZeroPageX() {
     addr_ = (readByte(pc_++) + x_) & 0xFF;
-    ++cycles_;
+    ++cycle_;
 }
 
 void Cpu::addrZeroPageY() {
     addr_ = (readByte(pc_++) + y_) & 0xFF;
-    ++cycles_;
+    ++cycle_;
 }
 
 void Cpu::addrIndexedIndirect() {
     addr_ = readByte(pc_++) + x_;
-    ++cycles_;
+    ++cycle_;
     addr_ = readByte(addr_) | readByte((addr_ + 1) & 0xFF) << 8;
 }
 
@@ -147,7 +148,7 @@ void Cpu::addrIndirectIndexed() {
     std::uint16_t base = readByte(addr_) | readByte((addr_ + 1) & 0xFF) << 8;
     addr_ = base + y_;
     if (base & 0xFF00 != addr_ & 0xFF00) {
-        ++cycles_;
+        ++cycle_;
     }
 }
 
@@ -225,7 +226,7 @@ bool Cpu::execBranch(std::uint8_t opcode) {
             addrRelative();
             pc_ = addr_;
         } else {
-            ++cycles_;
+            ++cycle_;
         }
         return true;
     }
@@ -253,14 +254,14 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             p_ = pull();
             pc_ = pull();
             pc_ |= pull() << 8;
-            ++cycles_;
+            ++cycle_;
             break;
         case 0x60: // RTS
             pc_ = pull();
             pc_ |= pull() << 8;
-            ++cycles_;
+            ++cycle_;
             ++pc_;
-            ++cycles_;
+            ++cycle_;
             break;
         case 0x08: // PHP
             push(p_ | 1 << 5 | kB);
@@ -270,7 +271,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             break;
         case 0x28: // PLP
             p_ = pull();
-            ++cycles_;
+            ++cycle_;
             break;
         case 0x38: // SEC
             setC(true);
@@ -283,7 +284,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             break;
         case 0x68: // PLA
             a_ = pull();
-            ++cycles_;
+            ++cycle_;
             setZN(a_);
             break;
         case 0x78: // SEI
@@ -343,7 +344,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             return false;
     }
     if (opcode != 0x20) { // JSR
-        ++cycles_;
+        ++cycle_;
     }
     return true;
 }
@@ -567,7 +568,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         auto operand = readByte(addr_);
                         setC(operand & 0x80);
                         operand <<= 1;
-                        ++cycles_;
+                        ++cycle_;
                         writeByte(addr_, operand);
                         setZN(operand);
                     }
@@ -578,7 +579,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         auto old_c = p_ & kC;
                         setC(operand & 0x80);
                         operand <<= 1;
-                        ++cycles_;
+                        ++cycle_;
                         operand |= old_c;
                         writeByte(addr_, operand);
                         setZN(operand);
@@ -589,7 +590,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         auto operand = readByte(addr_);
                         setC(operand & 0x01);
                         operand >>= 1;
-                        ++cycles_;
+                        ++cycle_;
                         writeByte(addr_, operand);
                         setZ(!operand);
                         setN(false);
@@ -601,7 +602,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         auto old_c = p_ & kC;
                         setC(operand & 0x01);
                         operand >>= 1;
-                        ++cycles_;
+                        ++cycle_;
                         operand |= old_c;
                         writeByte(addr_, operand);
                         setZN(operand);
@@ -618,7 +619,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                     {
                         auto operand = readByte(addr_);
                         --operand;
-                        ++cycles_;
+                        ++cycle_;
                         writeByte(addr_, operand);
                         setZN(operand);
                     }
@@ -627,7 +628,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                     {
                         auto operand = readByte(addr_);
                         ++operand;
-                        ++cycles_;
+                        ++cycle_;
                         writeByte(addr_, operand);
                         setZN(operand);
                     }

@@ -72,7 +72,7 @@ namespace nes {
         [[nodiscard]] bool execGroup2(std::uint8_t opcode);
 
         CpuBus& bus_;
-        int cycles_;
+        int cycle_;
         std::uint16_t addr_;
 
         std::uint8_t a_;

@@ -12,8 +12,7 @@ using namespace nes;
 #include "ppu.h"
 
 Emulator::Emulator() {
-    cpu_interval_ = std::chrono::nanoseconds(559);
-    ppu_interval_ = std::chrono::nanoseconds(186);
+    cycle_interval_ = std::chrono::nanoseconds(559);
 
     SDL_Init(SDL_INIT_VIDEO);
 }
@@ -33,9 +32,8 @@ void Emulator::run(std::istream& rom) {
 
     auto mapper = MakeMapper(cartridge);
     CpuBus cpu_bus;
-    Cpu cpu(cpu_bus);
     cpu_bus.setMapper(mapper.get());
-    cpu.reset();
+    Cpu cpu(cpu_bus);
 
     const int width = 1280, height = 720;
     auto window = SDL_CreateWindow(
@@ -67,16 +65,15 @@ void Emulator::run(std::istream& rom) {
         }
 
         elapsed_time += Clock::now() - prev_time;
-        auto cpu_elapsed = elapsed_time;
-        while (cpu_elapsed > cpu_interval_) {
+        while (elapsed_time > cycle_interval_) {
             cpu.cycle();
-            cpu_elapsed -= cpu_interval_;
-        }
 
-        auto ppu_elapsed = elapsed_time;
-        while (ppu_elapsed > ppu_interval_) {
+            // PPU clock is three times faster than CPU
             ppu.cycle();
-            ppu_elapsed -= ppu_interval_;
+            ppu.cycle();
+            ppu.cycle();
+
+            elapsed_time -= cycle_interval_;
         }
         prev_time = Clock::now();
 
