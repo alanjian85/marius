@@ -1,25 +1,23 @@
-#ifndef NES_CPU_BUS_H_
-#define NES_CPU_BUS_H_
+#ifndef PPU_BUS_H_
+#define PPU_BUS_H_
 
 #include <array>
 #include <cstdint>
 
 #include "mappers/mapper.h"
-#include "ppu.h"
 
 namespace nes {
-    class CpuBus final {
+    class PpuBus {
     public:
-        CpuBus(Mapper& mapper, Ppu& ppu);
+        explicit PpuBus(Mapper& mapper);
 
         [[nodiscard]] std::uint8_t read(std::uint16_t addr) const;
 
         void write(std::uint16_t addr, std::uint8_t val);
     private:
-        std::array<std::uint8_t, 0x800> ram_;
         Mapper& mapper_;
-        Ppu& ppu_;
+        std::array<std::uint8_t, 0x800> ram_;
     };
 }
 
-#endif // NES_CPU_BUS_H_
+#endif // PPU_BUS_H_

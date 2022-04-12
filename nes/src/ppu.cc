@@ -3,8 +3,9 @@ using namespace nes;
 
 #include <algorithm>
 
-Ppu::Ppu(Framebuffer& framebuffer)
-    : framebuffer_(framebuffer)
+Ppu::Ppu(Framebuffer& framebuffer, PpuBus& ppu_bus)
+    : framebuffer_(framebuffer),
+      ppu_bus_(ppu_bus)
 {
     cycle_ = 0;
     scanline_ = 261;

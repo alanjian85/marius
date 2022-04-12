@@ -12,6 +12,6 @@ void Framebuffer::setPixel(int x, int y, std::uint32_t color) {
     pixels_[y * width_ + x] = color;
 }
 
-[[nodiscard]] const std::uint32_t* Framebuffer::getPixels() const {
+const void* Framebuffer::getPixels() const {
     return pixels_.data();
 }

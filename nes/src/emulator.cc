@@ -9,6 +9,7 @@ using namespace nes;
 #include "cartridge.h"
 #include "cpu_bus.h"
 #include "cpu.h"
+#include "ppu_bus.h"
 #include "ppu.h"
 
 Emulator::Emulator() {
@@ -22,19 +23,6 @@ Emulator::~Emulator() {
 }
 
 void Emulator::run(std::istream& rom) {
-    Cartridge cartridge;
-    try {
-        rom >> cartridge;
-    } catch (std::exception& e) {
-        std::cerr << "Error loading ROM: " << e.what() << std::endl;
-        return;
-    }
-
-    auto mapper = MakeMapper(cartridge);
-    CpuBus cpu_bus;
-    cpu_bus.setMapper(mapper.get());
-    Cpu cpu(cpu_bus);
-
     const int width = 1280, height = 720;
     auto window = SDL_CreateWindow(
         "NES",
@@ -45,9 +33,21 @@ void Emulator::run(std::istream& rom) {
 
     auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     auto texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, Ppu::kWidth, Ppu::kHeight);
+    
+    Cartridge cartridge;
+    try {
+        rom >> cartridge;
+    } catch (std::exception& e) {
+        std::cerr << "Error loading ROM: " << e.what() << std::endl;
+        return;
+    }
+
+    auto mapper = MakeMapper(cartridge);
     Framebuffer framebuffer(Ppu::kWidth, Ppu::kWidth);
-    Ppu ppu(framebuffer);
-    cpu_bus.setPpu(&ppu);
+    PpuBus ppu_bus(*mapper);
+    Ppu ppu(framebuffer, ppu_bus);
+    CpuBus cpu_bus(*mapper, ppu);
+    Cpu cpu(cpu_bus);
 
     bool quit = false;
     auto prev_time = Clock::now();

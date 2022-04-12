@@ -14,6 +14,8 @@ set(NES_SRCS
     src/framebuffer.cc
     src/framebuffer.h
     src/main.cc
+    src/ppu_bus.cc
+    src/ppu_bus.h
     src/ppu.cc
     src/ppu.h
 )

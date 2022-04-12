@@ -13,7 +13,7 @@ namespace nes {
 
         void setPixel(int x, int y, std::uint32_t color);
 
-        [[nodiscard]] const std::uint32_t* getPixels() const;
+        [[nodiscard]] const void* getPixels() const;
     private:
         int width_, height_;
         std::vector<std::uint32_t> pixels_;
