@@ -5,12 +5,12 @@ using namespace nes;
 
 #include <SDL2/SDL.h>
 
+#include "components/cpu_bus.h"
+#include "components/cpu.h"
+#include "components/ppu_bus.h"
+#include "components/ppu.h"
+#include "io/cartridge.h"
 #include "mappers/mapper.h"
-#include "cartridge.h"
-#include "cpu_bus.h"
-#include "cpu.h"
-#include "ppu_bus.h"
-#include "ppu.h"
 
 Emulator::Emulator() {
     cycle_interval_ = std::chrono::nanoseconds(559);

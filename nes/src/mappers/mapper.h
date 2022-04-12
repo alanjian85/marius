@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "cartridge.h"
+#include "io/cartridge.h"
 
 namespace nes {
     class Mapper {

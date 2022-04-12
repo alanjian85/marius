@@ -1,23 +1,23 @@
 set(NES_SRCS
+    src/components/cpu_bus.cc
+    src/components/cpu_bus.h
+    src/components/cpu.cc
+    src/components/cpu.h
+    src/components/ppu_bus.cc
+    src/components/ppu_bus.h
+    src/components/ppu.cc
+    src/components/ppu.h
+    src/io/cartridge.cc
+    src/io/cartridge.h
+    src/io/framebuffer.cc
+    src/io/framebuffer.h
     src/mappers/mapper_nrom.cc
     src/mappers/mapper_nrom.h
     src/mappers/mapper.cc
     src/mappers/mapper.h
-    src/cartridge.cc
-    src/cartridge.h
-    src/cpu_bus.cc
-    src/cpu_bus.h
-    src/cpu.cc
-    src/cpu.h
     src/emulator.cc
     src/emulator.h
-    src/framebuffer.cc
-    src/framebuffer.h
     src/main.cc
-    src/ppu_bus.cc
-    src/ppu_bus.h
-    src/ppu.cc
-    src/ppu.h
 )
 add_executable(nes ${NES_SRCS})
 

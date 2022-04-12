@@ -1,7 +1,7 @@
 #ifndef NES_PPU_H_
 #define NES_PPU_H_
 
-#include "framebuffer.h"
+#include "io/framebuffer.h"
 #include "ppu_bus.h"
 
 namespace nes {
