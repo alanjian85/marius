@@ -18,6 +18,8 @@ namespace nes {
         [[nodiscard]] virtual std::uint8_t readChr(std::uint16_t addr) = 0;
 
         virtual void writeChr(std::uint16_t addr, std::uint8_t val) = 0;
+
+        [[nodiscard]] virtual Mirroring getMirroring() = 0;
     protected:
         Cartridge& cartridge_;
     };

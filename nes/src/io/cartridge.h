@@ -6,6 +6,11 @@
 #include <vector>
 
 namespace nes {
+    enum class Mirroring {
+        kHorizontal,
+        kVertical
+    };
+
     class Cartridge final {
         friend std::istream& operator>>(std::istream& lhs, Cartridge& rhs);
     public:
@@ -17,12 +22,15 @@ namespace nes {
 
         [[nodiscard]] const std::vector<std::uint8_t>& getChrRom() const;
     
-        [[nodiscard]] std::uint8_t getMapperNum() const;
+        [[nodiscard]] Mirroring getMirroring() const;
+    
+        [[nodiscard]] std::uint8_t getMapperNum() const;    
     private:
         std::uint8_t prg_rom_banks_;
         std::vector<std::uint8_t> prg_rom_;
         std::uint8_t chr_rom_banks_;
         std::vector<std::uint8_t> chr_rom_;
+        Mirroring mirroring_;
         std::uint8_t mapper_num_;
     };
 

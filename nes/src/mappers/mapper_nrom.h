@@ -8,13 +8,15 @@ namespace nes {
     public:
         using Mapper::Mapper;
 
-        [[nodiscard]] virtual std::uint8_t readPrg(std::uint16_t addr) override;
+        virtual std::uint8_t readPrg(std::uint16_t addr) override;
 
         virtual void writePrg(std::uint16_t addr, std::uint8_t val) override;
     
-        [[nodiscard]] virtual std::uint8_t readChr(std::uint16_t addr) override;
+        virtual std::uint8_t readChr(std::uint16_t addr) override;
 
         virtual void writeChr(std::uint16_t addr, std::uint8_t val) override;
+
+        virtual Mirroring getMirroring() override;
     };
 }
 

@@ -24,3 +24,7 @@ std::uint8_t MapperNrom::readChr(std::uint16_t addr) {
 void MapperNrom::writeChr(std::uint16_t addr, std::uint8_t val) {
     assert(false && "Attempted to write to CHR ROM");
 }
+
+Mirroring MapperNrom::getMirroring() {
+    return cartridge_.getMirroring();
+}

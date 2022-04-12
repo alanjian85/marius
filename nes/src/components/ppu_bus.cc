@@ -26,7 +26,7 @@ void PpuBus::write(std::uint16_t addr, std::uint8_t val) {
     } else {
         palette_[addr & 0x001F] = val;
         std::uint8_t nibble = addr & 0xF;
-        if (!nibble || !(nibble ^ 0x4) || !(nibble ^ 0x8) || !(nibble ^ 0xC)) {
+        if (nibble == 0x0 || nibble == 0x4 || nibble == 0x8 || nibble == 0xC) {
             if (addr & 0x0010) {
                 palette_[nibble] = val;
             } else {

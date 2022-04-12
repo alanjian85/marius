@@ -21,6 +21,10 @@ const std::vector<std::uint8_t>& Cartridge::getChrRom() const {
     return chr_rom_;
 }
 
+Mirroring Cartridge::getMirroring() const {
+    return mirroring_;
+}
+
 std::uint8_t Cartridge::getMapperNum() const {
     return mapper_num_;
 }
@@ -46,6 +50,8 @@ std::istream& nes::operator>>(std::istream& lhs, Cartridge& rhs) {
     if (!lhs.read(reinterpret_cast<char*>(rhs.chr_rom_.data()), 0x2000 * rhs.chr_rom_banks_)) {
         throw std::runtime_error("Reading CHR ROM image from cartridge failed");
     }
+
+    rhs.mirroring_ = (header[6] & 0x01) ? Mirroring::kHorizontal : Mirroring::kVertical; 
 
     rhs.mapper_num_ = (header[6] & 0xF0) >> 4 | header[7] & 0xF0;
 
