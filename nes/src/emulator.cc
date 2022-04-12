@@ -46,7 +46,8 @@ void Emulator::run(std::istream& rom) {
     );
 
     auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    Framebuffer framebuffer(renderer, Ppu::kWidth, Ppu::kHeight);
+    auto texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, Ppu::kWidth, Ppu::kHeight);
+    Framebuffer framebuffer(Ppu::kWidth, Ppu::kWidth);
     Ppu ppu(framebuffer);
     cpu_bus.setPpu(&ppu);
 
@@ -82,8 +83,10 @@ void Emulator::run(std::istream& rom) {
         SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
         SDL_RenderClear(renderer);
 
+        SDL_UpdateTexture(texture, nullptr, framebuffer.getPixels(), sizeof(std::uint32_t) * Ppu::kWidth);
+
         SDL_Rect rect = { screen_x, 0, screen_width, height };
-        SDL_RenderCopy(renderer, framebuffer.getTexture(), nullptr, &rect);
+        SDL_RenderCopy(renderer, texture, nullptr, &rect);
 
         SDL_RenderPresent(renderer);        
     }
