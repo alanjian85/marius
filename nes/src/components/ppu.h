@@ -22,6 +22,8 @@ namespace nes {
 
         void setCtrl(std::uint8_t ctrl);
 
+        void setMask(std::uint8_t mask);
+
         void setAddr(std::uint8_t addr);
 
         void setData(std::uint8_t data);
@@ -37,11 +39,13 @@ namespace nes {
         int cycle_;
         int scanline_;
 
-        std::uint8_t addr_inc_;
-        bool vblank_nmi_;
+        bool show_background_;
+
         std::uint16_t addr_;
+        std::uint8_t addr_inc_;
 
         bool vblank_;
+        bool vblank_nmi_;
     };
 }
 

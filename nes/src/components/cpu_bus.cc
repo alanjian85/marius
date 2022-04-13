@@ -36,6 +36,9 @@ void CpuBus::write(std::uint16_t addr, std::uint8_t val) {
             case 0x0:
                 ppu_.setCtrl(val);
                 break;
+            case 0x1:
+                ppu_.setMask(val);
+                break;
             case 0x6:
                 ppu_.setAddr(val);
                 break;

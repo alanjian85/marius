@@ -80,7 +80,7 @@ void Emulator::run(std::istream& rom) {
         }
         prev_time = Clock::now();
 
-        SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
         SDL_UpdateTexture(texture, nullptr, framebuffer.getPixels(), sizeof(std::uint32_t) * Ppu::kWidth);

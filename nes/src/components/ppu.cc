@@ -13,23 +13,29 @@ Ppu::Ppu(Framebuffer& framebuffer, PpuBus& ppu_bus)
     cycle_ = 0;
     scanline_ = 261;
 
-    addr_inc_ = 1;
-    vblank_nmi_ = false;
+    show_background_ = false;
+
     addr_ = 0x00;
+    addr_inc_ = 1;
 
     vblank_ = true;
+    vblank_nmi_ = false;
 }
 
 void Ppu::reset() {
     cycle_ = 0;
     scanline_ = 261;
 
+    show_background_ = false;
+
     addr_inc_ = 1;
+
+    vblank_ = true;
     vblank_nmi_ = false;
 }
 
 void Ppu::cycle() {
-    if (cycle_ == 0 && scanline_ < 240) {
+    if (show_background_ && cycle_ == 0 && scanline_ < 240) {
         for (int x = 0; x < 256; ++x) {
             std::uint8_t tile = ppu_bus_.read(0x2000 + scanline_ / 8 * 32 + x / 8);
             std::uint8_t pattern1 = ppu_bus_.read(0x1000 + tile * 16 + scanline_ % 8);
@@ -65,6 +71,10 @@ void Ppu::bindCpu(Cpu& cpu) {
 void Ppu::setCtrl(std::uint8_t ctrl) {
     addr_inc_ = (ctrl & 0x04) ? 32 : 1;
     vblank_nmi_ = ctrl & 0x80;
+}
+
+void Ppu::setMask(std::uint8_t mask) {
+    show_background_ = mask & 0x08;
 }
 
 void Ppu::setAddr(std::uint8_t addr) {
