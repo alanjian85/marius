@@ -8,7 +8,6 @@ using namespace nes;
 #include "components/cpu_bus.h"
 #include "components/cpu.h"
 #include "components/ppu_bus.h"
-#include "components/ppu_latch.h"
 #include "components/ppu.h"
 #include "io/cartridge.h"
 #include "mappers/mapper.h"
@@ -47,8 +46,7 @@ void Emulator::run(std::istream& rom) {
     Framebuffer framebuffer(Ppu::kWidth, Ppu::kWidth);
     PpuBus ppu_bus(*mapper);
     Ppu ppu(framebuffer, ppu_bus);
-    PpuLatch ppu_latch(ppu);
-    CpuBus cpu_bus(*mapper, ppu_latch);
+    CpuBus cpu_bus(*mapper, ppu);
     Cpu cpu(cpu_bus);
     ppu.bindCpu(cpu);
 

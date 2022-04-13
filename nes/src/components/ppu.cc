@@ -12,13 +12,18 @@ Ppu::Ppu(Framebuffer& framebuffer, PpuBus& ppu_bus)
 {
     cycle_ = 0;
     scanline_ = 261;
-    vblank_ = true;
+
     vblank_nmi_ = false;
+    addr_ = 0x00;
+
+    vblank_ = true;
 }
 
 void Ppu::reset() {
     cycle_ = 0;
     scanline_ = 261;
+
+    vblank_nmi_ = false;
 }
 
 void Ppu::cycle() {
@@ -45,8 +50,21 @@ void Ppu::setCtrl(std::uint8_t ctrl) {
     vblank_nmi_ = ctrl & 0x80;
 }
 
+void Ppu::setAddr(std::uint8_t addr) {
+    addr_ = addr_ << 8 | addr;
+    addr_ &= 0x3FFF;
+}
+
+void Ppu::setData(std::uint8_t data) {
+    ppu_bus_.write(addr_, data);
+}
+
 std::uint8_t Ppu::getStatus() {
     std::uint8_t status = vblank_ << 7;
     vblank_ = false;
     return status;
+}
+
+std::uint8_t Ppu::getData() {
+    return ppu_bus_.read(addr_);
 }

@@ -1,9 +1,9 @@
 #include "cpu_bus.h"
 using namespace nes;
 
-CpuBus::CpuBus(Mapper& mapper, PpuLatch& ppu_latch)
+CpuBus::CpuBus(Mapper& mapper, Ppu& ppu)
     : mapper_(mapper),
-      ppu_latch_(ppu_latch)
+      ppu_(ppu)
 {
 
 }
@@ -12,7 +12,10 @@ std::uint8_t CpuBus::read(std::uint16_t addr) const {
     if (addr < 0x2000) {
         return ram_[addr & 0x7FF];
     } else if (addr < 0x4000) {
-        return ppu_latch_.read(addr);
+        switch (addr & 0x7) {
+            case 0x2:
+                return ppu_.getStatus();
+        }
     } else if (addr < 0x4020) {
         
     } else {
@@ -25,7 +28,17 @@ void CpuBus::write(std::uint16_t addr, std::uint8_t val) {
     if (addr < 0x2000) {
         ram_[addr & 0x7FF] = val;
     } else if (addr < 0x4000) {
-        ppu_latch_.write(addr, val);
+        switch (addr & 0x7) {
+            case 0x0:
+                ppu_.setCtrl(val);
+                break;
+            case 0x6:
+                ppu_.setAddr(val);
+                break;
+            case 0x7:
+                ppu_.setData(val);
+                break;
+        }
     } else if (addr < 0x4020) {
     
     } else {

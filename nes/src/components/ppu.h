@@ -22,7 +22,13 @@ namespace nes {
 
         void setCtrl(std::uint8_t ctrl);
 
+        void setAddr(std::uint8_t addr);
+
+        void setData(std::uint8_t data);
+
         [[nodiscard]] std::uint8_t getStatus();
+
+        [[nodiscard]] std::uint8_t getData();
     private:
         Framebuffer& framebuffer_;
         PpuBus& ppu_bus_;
@@ -30,8 +36,11 @@ namespace nes {
 
         int cycle_;
         int scanline_;
-        bool vblank_;
+
         bool vblank_nmi_;
+        std::uint16_t addr_;
+
+        bool vblank_;
     };
 }
 
