@@ -89,9 +89,6 @@ void Cpu::addrImmediate() {
 void Cpu::addrRelative() {
     std::int8_t offset = readByte(pc_++);
     addr_ = pc_ + offset;
-    if (addr_ & 0xFF00 != pc_ & 0xFF00) {
-        ++cycle_;
-    }
 }
 
 void Cpu::addrAbsolute() {
@@ -203,34 +200,6 @@ void Cpu::setV(bool val) {
 void Cpu::setZN(std::uint8_t val) {
     setZ(!val);
     setN(val & 0x80);
-}
-
-bool Cpu::execBranch(std::uint8_t opcode) {
-    if (opcode & 0x10) {
-        bool condition = opcode & 0x20;
-        switch ((opcode & 0xC0) >> 6) {
-            case 0b00:
-                condition = condition == (p_ & kN);
-                break;
-            case 0b01:
-                condition = condition == (p_ & kV);
-                break;
-            case 0b10:
-                condition = condition == (p_ & kC);
-                break;
-            case 0b11:
-                condition = condition == (p_ & kZ);
-                break;
-        }
-        if (condition) {
-            addrRelative();
-            pc_ = addr_;
-        } else {
-            ++cycle_;
-        }
-        return true;
-    }
-    return false;
 }
 
 bool Cpu::execImplied(std::uint8_t opcode) {
@@ -347,6 +316,36 @@ bool Cpu::execImplied(std::uint8_t opcode) {
         ++cycle_;
     }
     return true;
+}
+
+bool Cpu::execBranch(std::uint8_t opcode) {
+    if ((opcode & 0x1F) == 0x10) {
+        bool condition = opcode & 0x20;
+        switch ((opcode & 0xC0) >> 6) {
+            case 0b00:
+                condition = condition == (p_ & kN);
+                break;
+            case 0b01:
+                condition = condition == (p_ & kV);
+                break;
+            case 0b10:
+                condition = condition == (p_ & kC);
+                break;
+            case 0b11:
+                condition = condition == (p_ & kZ);
+                break;
+        }
+
+        addrRelative();
+        if (condition) {            
+            if (addr_ & 0xFF00 != pc_ & 0xFF00) {
+                ++cycle_;
+            }
+            pc_ = addr_;
+        }
+        return true;
+    }
+    return false;
 }
 
 bool Cpu::execGroup0(std::uint8_t opcode) {

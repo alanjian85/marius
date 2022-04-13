@@ -1,6 +1,8 @@
 #include "cpu_bus.h"
 using namespace nes;
 
+#include <iostream>
+
 CpuBus::CpuBus(Mapper& mapper, Ppu& ppu)
     : mapper_(mapper),
       ppu_(ppu)
