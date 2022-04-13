@@ -2,6 +2,9 @@
 using namespace nes;
 
 #include <algorithm>
+#include <cassert>
+
+#include "cpu.h"
 
 Ppu::Ppu(Framebuffer& framebuffer, PpuBus& ppu_bus)
     : framebuffer_(framebuffer),
@@ -10,6 +13,7 @@ Ppu::Ppu(Framebuffer& framebuffer, PpuBus& ppu_bus)
     cycle_ = 0;
     scanline_ = 261;
     vblank_ = true;
+    vblank_nmi_ = false;
 }
 
 void Ppu::reset() {
@@ -18,8 +22,12 @@ void Ppu::reset() {
 }
 
 void Ppu::cycle() {
-    if (scanline_ == 241) {
+    if (scanline_ == 241 && cycle_ == 0) {
         vblank_ = true;
+        if (vblank_nmi_) {
+            assert(cpu_);
+            cpu_->nmi();
+        }
     }
 
     ++cycle_;
@@ -27,6 +35,14 @@ void Ppu::cycle() {
         cycle_ = 0;
         scanline_ = (scanline_ + 1) % 262;
     }
+}
+
+void Ppu::bindCpu(Cpu& cpu) {
+    cpu_ = &cpu;
+}
+
+void Ppu::setCtrl(std::uint8_t ctrl) {
+    vblank_nmi_ = ctrl & 0x80;
 }
 
 std::uint8_t Ppu::getStatus() {

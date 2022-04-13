@@ -10,7 +10,9 @@ PpuLatch::PpuLatch(Ppu& ppu)
 void PpuLatch::write(std::uint16_t addr, std::uint8_t val) {
     val_ = val;
     switch (addr & 0x7) {
-        
+        case 0x1:
+            ppu_.setCtrl(val);
+            break;
     }
 }
 

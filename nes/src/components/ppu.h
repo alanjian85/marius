@@ -5,6 +5,8 @@
 #include "ppu_bus.h"
 
 namespace nes {
+    class Cpu;
+
     class Ppu final {
     public:
         static constexpr int kWidth = 256, kHeight = 240;
@@ -16,14 +18,20 @@ namespace nes {
 
         void cycle();
 
+        void bindCpu(Cpu& cpu);
+
+        void setCtrl(std::uint8_t ctrl);
+
         [[nodiscard]] std::uint8_t getStatus();
     private:
         Framebuffer& framebuffer_;
         PpuBus& ppu_bus_;
+        Cpu* cpu_;
 
         int cycle_;
         int scanline_;
         bool vblank_;
+        bool vblank_nmi_;
     };
 }
 

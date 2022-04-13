@@ -50,6 +50,7 @@ void Emulator::run(std::istream& rom) {
     PpuLatch ppu_latch(ppu);
     CpuBus cpu_bus(*mapper, ppu_latch);
     Cpu cpu(cpu_bus);
+    ppu.bindCpu(cpu);
 
     bool quit = false;
     auto prev_time = Clock::now();
