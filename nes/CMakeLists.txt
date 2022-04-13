@@ -5,6 +5,8 @@ set(NES_SRCS
     src/components/cpu.h
     src/components/ppu_bus.cc
     src/components/ppu_bus.h
+    src/components/ppu_latch.cc
+    src/components/ppu_latch.h
     src/components/ppu.cc
     src/components/ppu.h
     src/io/cartridge.cc

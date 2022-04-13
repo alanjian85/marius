@@ -5,12 +5,12 @@
 #include <cstdint>
 
 #include "mappers/mapper.h"
-#include "ppu.h"
+#include "ppu_latch.h"
 
 namespace nes {
     class CpuBus final {
     public:
-        CpuBus(Mapper& mapper, Ppu& ppu);
+        CpuBus(Mapper& mapper, PpuLatch& ppu_latch);
 
         [[nodiscard]] std::uint8_t read(std::uint16_t addr) const;
 
@@ -18,7 +18,7 @@ namespace nes {
     private:
         std::array<std::uint8_t, 0x800> ram_;
         Mapper& mapper_;
-        Ppu& ppu_;
+        PpuLatch& ppu_latch_;
     };
 }
 

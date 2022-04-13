@@ -7,7 +7,7 @@
 #include "mappers/mapper.h"
 
 namespace nes {
-    class PpuBus {
+    class PpuBus final {
     public:
         explicit PpuBus(Mapper& mapper);
 
