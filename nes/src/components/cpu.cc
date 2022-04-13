@@ -395,14 +395,14 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
                 break;
             case 0b110: // CPY
                 {
-                    std::int16_t diff = x_ - readByte(addr_);
+                    std::int16_t diff = y_ - readByte(addr_);
                     setC(!(diff & 0x100));
                     setZN(diff);
                 }
                 break;
             case 0b111: // CPX
                 {
-                    std::int16_t diff = y_ - readByte(addr_);
+                    std::int16_t diff = x_ - readByte(addr_);
                     setC(!(diff & 0x100));
                     setZN(diff);
                 }
