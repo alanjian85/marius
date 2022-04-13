@@ -1,6 +1,7 @@
 #include "emulator.h"
 using namespace nes;
 
+#include <cassert>
 #include <stdexcept>
 
 #include <SDL2/SDL.h>
@@ -43,6 +44,7 @@ void Emulator::run(std::istream& rom) {
     }
 
     auto mapper = MakeMapper(cartridge);
+    assert(mapper);
     Framebuffer framebuffer(Ppu::kWidth, Ppu::kWidth);
     PpuBus ppu_bus(*mapper);
     Ppu ppu(framebuffer, ppu_bus);

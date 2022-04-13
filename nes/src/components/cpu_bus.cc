@@ -17,6 +17,8 @@ std::uint8_t CpuBus::read(std::uint16_t addr) const {
         switch (addr & 0x7) {
             case 0x2:
                 return ppu_.getStatus();
+            case 0x7:
+                return ppu_.getData();
         }
     } else if (addr < 0x4020) {
         

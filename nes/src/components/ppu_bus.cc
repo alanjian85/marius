@@ -4,7 +4,7 @@ using namespace nes;
 PpuBus::PpuBus(Mapper& mapper)
     : mapper_(mapper)
 {
-
+    std::fill(ram_.begin(), ram_.end(), 0x00);
 }
 
 std::uint8_t PpuBus::read(std::uint16_t addr) const {
@@ -17,17 +17,17 @@ std::uint8_t PpuBus::read(std::uint16_t addr) const {
                 if (nametable == 0x2000 || nametable == 0x2400) {
                     return ram_[addr & 0x3FF];
                 } else {
-                    return ram_[addr & 0x3FF + 0x400];
+                    return ram_[0x400 | addr & 0x3FF];
                 }
             case Mirroring::kVertical:
                 if (nametable == 0x2000 || nametable == 0x2800) {
                     return ram_[addr & 0x3FF];
                 } else {
-                    return ram_[addr & 0x3FF + 0x400];
+                    return ram_[0x400 | addr & 0x3FF];
                 }
         }
     } else {
-        return ram_[addr & 0x001F];
+        return palette_[addr & 0x001F];
     }
     return 0;
 }
@@ -42,14 +42,16 @@ void PpuBus::write(std::uint16_t addr, std::uint8_t val) {
                 if (nametable == 0x2000 || nametable == 0x2400) {
                     ram_[addr & 0x3FF] = val;
                 } else {
-                    ram_[addr & 0x3FF + 0x400] = val;
+                    ram_[0x400 | addr & 0x3FF] = val;
                 }
+                break;
             case Mirroring::kVertical:
                 if (nametable == 0x2000 || nametable == 0x2800) {
                     ram_[addr & 0x3FF] = val;
                 } else {
-                    ram_[addr & 0x3FF + 0x400] = val;
+                    ram_[0x400 | addr & 0x3FF] = val;
                 }
+                break;
         }
     } else {
         palette_[addr & 0x001F] = val;
