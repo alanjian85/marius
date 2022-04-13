@@ -75,7 +75,7 @@ void Cpu::writeByte(std::uint16_t addr, std::uint8_t val) {
 }
 
 std::uint8_t Cpu::pull() {
-    return readByte(kStackBase | s_++);
+    return readByte(kStackBase | ++s_);
 }
 
 void Cpu::push(std::uint8_t val) {
