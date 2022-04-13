@@ -37,6 +37,7 @@ namespace nes {
         int cycle_;
         int scanline_;
 
+        std::uint8_t addr_inc_;
         bool vblank_nmi_;
         std::uint16_t addr_;
 

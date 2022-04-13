@@ -47,6 +47,7 @@ void Ppu::bindCpu(Cpu& cpu) {
 }
 
 void Ppu::setCtrl(std::uint8_t ctrl) {
+    addr_inc_ = ctrl & 0x04;
     vblank_nmi_ = ctrl & 0x80;
 }
 
@@ -57,6 +58,7 @@ void Ppu::setAddr(std::uint8_t addr) {
 
 void Ppu::setData(std::uint8_t data) {
     ppu_bus_.write(addr_, data);
+    addr_ += addr_inc_;
 }
 
 std::uint8_t Ppu::getStatus() {
@@ -66,5 +68,7 @@ std::uint8_t Ppu::getStatus() {
 }
 
 std::uint8_t Ppu::getData() {
-    return ppu_bus_.read(addr_);
+    std::uint8_t result =  ppu_bus_.read(addr_);
+    addr_ += addr_inc_;
+    return result;
 }
