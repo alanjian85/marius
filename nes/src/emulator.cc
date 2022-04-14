@@ -24,7 +24,7 @@ Emulator::~Emulator() {
 }
 
 void Emulator::run(std::istream& rom) {
-    const int width = 1280, height = 720;
+    const int width = 1024, height = 960;
     auto window = SDL_CreateWindow(
         "NES",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -32,7 +32,7 @@ void Emulator::run(std::istream& rom) {
         0
     );
 
-    auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     auto texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, Ppu::kWidth, Ppu::kHeight);
     
     Cartridge cartridge;
@@ -52,11 +52,24 @@ void Emulator::run(std::istream& rom) {
     Cpu cpu(cpu_bus);
     ppu.bindCpu(cpu);
 
+    SDL_Rect rect;
+    if (static_cast<float>(width) / height > Ppu::kAspect) {
+        int screen_width = height * Ppu::kAspect;
+        rect.x = (width - screen_width) / 2;
+        rect.y = 0;
+        rect.w = screen_width;
+        rect.h = height;
+    } else {
+        int screen_height = width / Ppu::kAspect;
+        rect.x = 0;
+        rect.y = (height - screen_height) / 2;
+        rect.w = width;
+        rect.h = screen_height;
+    }
+
     bool quit = false;
     auto prev_time = Clock::now();
     auto elapsed_time = prev_time - prev_time;
-    int screen_width = height / Ppu::kAspect;
-    int screen_x = (width - screen_width) / 2.0f;
     while (!quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -85,7 +98,6 @@ void Emulator::run(std::istream& rom) {
 
         SDL_UpdateTexture(texture, nullptr, framebuffer.getPixels(), sizeof(std::uint32_t) * Ppu::kWidth);
 
-        SDL_Rect rect = { screen_x, 0, screen_width, height };
         SDL_RenderCopy(renderer, texture, nullptr, &rect);
 
         SDL_RenderPresent(renderer);        

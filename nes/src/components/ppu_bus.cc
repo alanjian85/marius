@@ -4,7 +4,7 @@ using namespace nes;
 PpuBus::PpuBus(Mapper& mapper)
     : mapper_(mapper)
 {
-    std::fill(ram_.begin(), ram_.end(), 0x00);
+
 }
 
 std::uint8_t PpuBus::read(std::uint16_t addr) const {
