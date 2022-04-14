@@ -1,5 +1,5 @@
-#ifndef NES_MAPPER_NROM_H_
-#define NES_MAPPER_NROM_H_
+#ifndef NES_MAPPERS_MAPPER_NROM_H_
+#define NES_MAPPERS_MAPPER_NROM_H_
 
 #include "mapper.h"
 
@@ -20,4 +20,4 @@ namespace nes {
     };
 }
 
-#endif // NES_MAPPER_NROM_H_
+#endif // NES_MAPPERS_MAPPER_NROM_H_

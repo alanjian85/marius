@@ -1,5 +1,5 @@
-#ifndef NES_CPU_BUS_H_
-#define NES_CPU_BUS_H_
+#ifndef NES_COMPONENTS_CPU_BUS_H_
+#define NES_COMPONENTS_CPU_BUS_H_
 
 #include <array>
 #include <cstdint>
@@ -22,4 +22,4 @@ namespace nes {
     };
 }
 
-#endif // NES_CPU_BUS_H_
+#endif // NES_COMPONENTS_CPU_BUS_H_

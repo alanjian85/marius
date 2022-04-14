@@ -1,5 +1,5 @@
-#ifndef PPU_BUS_H_
-#define PPU_BUS_H_
+#ifndef PPU_COMPONENTS_BUS_H_
+#define PPU_COMPONENTS_BUS_H_
 
 #include <array>
 #include <cstdint>
@@ -26,4 +26,4 @@ namespace nes {
     };
 }
 
-#endif // PPU_BUS_H_
+#endif // PPU_COMPONENTS_BUS_H_

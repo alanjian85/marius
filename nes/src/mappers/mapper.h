@@ -1,5 +1,5 @@
-#ifndef NES_MAPPER_H_
-#define NES_MAPPER_H_
+#ifndef NES_MAPPERS_MAPPER_H_
+#define NES_MAPPERS_MAPPER_H_
 
 #include <cstdint>
 #include <memory>
@@ -27,4 +27,4 @@ namespace nes {
     std::unique_ptr<Mapper> MakeMapper(Cartridge& cartridge);
 }
 
-#endif // NES_MAPPER_H_
+#endif // NES_MAPPERS_MAPPER_H_

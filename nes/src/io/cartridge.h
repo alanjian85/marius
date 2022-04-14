@@ -1,5 +1,5 @@
-#ifndef NES_CARTRIDGE_H_
-#define NES_CARTRIDGE_H_
+#ifndef NES_IO_CARTRIDGE_H_
+#define NES_IO_CARTRIDGE_H_
 
 #include <cstdint>
 #include <iostream>
@@ -37,4 +37,4 @@ namespace nes {
     std::istream& operator>>(std::istream& lhs, Cartridge& rhs);
 }
 
-#endif // NES_CARTRIDGE_H_
+#endif // NES_IO_CARTRIDGE_H_

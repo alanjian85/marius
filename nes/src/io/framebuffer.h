@@ -1,5 +1,5 @@
-#ifndef FRAMEBUFFER_H_
-#define FRAMEBUFFER_H_
+#ifndef NES_IO_FRAMEBUFFER_H_
+#define NES_IO_FRAMEBUFFER_H_
 
 #include <cstdint>
 #include <vector>
@@ -20,4 +20,4 @@ namespace nes {
     };
 }
 
-#endif // FRAMEBUFFER_H_
+#endif // NES_IO_FRAMEBUFFER_H_

@@ -1,5 +1,5 @@
-#ifndef NES_PPU_H_
-#define NES_PPU_H_
+#ifndef NES_COMPONENTS_PPU_H_
+#define NES_COMPONENTS_PPU_H_
 
 #include "io/framebuffer.h"
 #include "ppu_bus.h"
@@ -49,4 +49,4 @@ namespace nes {
     };
 }
 
-#endif // NES_PPU_H_
+#endif // NES_COMPONENTS_PPU_H_

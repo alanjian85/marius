@@ -1,5 +1,5 @@
-#ifndef NES_CPU_H_
-#define NES_CPU_H_
+#ifndef NES_COMPONENTS_CPU_H_
+#define NES_COMPONENTS_CPU_H_
 
 #include <bitset>
 #include <cstdint>
@@ -84,4 +84,4 @@ namespace nes {
     };
 }
 
-#endif // NES_CPU_H_
+#endif // NES_COMPONENTS_CPU_H_
