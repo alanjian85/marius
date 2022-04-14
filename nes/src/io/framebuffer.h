@@ -4,8 +4,6 @@
 #include <cstdint>
 #include <vector>
 
-#include <SDL2/SDL.h>
-
 namespace nes {
     class Framebuffer final {
     public:

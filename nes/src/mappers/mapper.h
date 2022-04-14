@@ -11,6 +11,8 @@ namespace nes {
     public:
         Mapper(Cartridge& cartridge);
 
+        virtual ~Mapper() noexcept = default;
+
         [[nodiscard]] virtual std::uint8_t readPrg(std::uint16_t addr) = 0;
 
         virtual void writePrg(std::uint16_t addr, std::uint8_t val) = 0;

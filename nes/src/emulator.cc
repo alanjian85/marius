@@ -4,7 +4,7 @@ using namespace nes;
 #include <cassert>
 #include <stdexcept>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "components/cpu_bus.h"
 #include "components/cpu.h"

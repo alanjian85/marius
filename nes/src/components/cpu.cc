@@ -110,7 +110,7 @@ void Cpu::addrAbsoluteX() {
     std::uint16_t base = readAddress(pc_);
     pc_ += 2;
     addr_ = base + x_;
-    if (base & 0xFF00 != addr_ & 0xFF00) {
+    if ((base & 0xFF00) != (addr_ & 0xFF00)) {
         ++cycle_;
     }
 }
@@ -119,7 +119,7 @@ void Cpu::addrAbsoluteY() {
     std::uint16_t base = readAddress(pc_);
     pc_ += 2;
     addr_ = base + y_;
-    if (base & 0xFF00 != addr_ & 0xFF00) {
+    if ((base & 0xFF00) != (addr_ & 0xFF00)) {
         ++cycle_;
     }
 }
@@ -144,7 +144,7 @@ void Cpu::addrIndirectIndexed() {
     addr_ = readByte(pc_++);
     std::uint16_t base = readByte(addr_) | readByte((addr_ + 1) & 0xFF) << 8;
     addr_ = base + y_;
-    if (base & 0xFF00 != addr_ & 0xFF00) {
+    if ((base & 0xFF00) != (addr_ & 0xFF00)) {
         ++cycle_;
     }
 }
@@ -214,7 +214,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             break;
         case 0x20: // JSR
             {
-                push(pc_ + 1 >> 8);
+                push((pc_ + 1) >> 8);
                 push(pc_ + 1);
                 pc_ = readAddress(pc_);
             }
@@ -338,7 +338,7 @@ bool Cpu::execBranch(std::uint8_t opcode) {
 
         addrRelative();
         if (condition) {            
-            if (addr_ & 0xFF00 != pc_ & 0xFF00) {
+            if ((addr_ & 0xFF00) != (pc_ & 0xFF00)) {
                 ++cycle_;
             }
             pc_ = addr_;
