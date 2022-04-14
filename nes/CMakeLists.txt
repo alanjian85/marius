@@ -3,6 +3,7 @@ set(NES_SRCS
     src/components/cpu_bus.h
     src/components/cpu.cc
     src/components/cpu.h
+    src/components/palette.h
     src/components/ppu_bus.cc
     src/components/ppu_bus.h
     src/components/ppu.cc
