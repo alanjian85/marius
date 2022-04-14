@@ -12,7 +12,7 @@ namespace nes {
         static constexpr int kWidth = 256, kHeight = 240;
         static constexpr float kAspect = static_cast<float>(kWidth) / kHeight;        
 
-        Ppu(Framebuffer& framebuffer, PpuBus& ppu_bus);
+        Ppu(Framebuffer& framebuffer, PpuBus& bus);
 
         void reset();
 
@@ -33,7 +33,7 @@ namespace nes {
         [[nodiscard]] std::uint8_t getData();
     private:
         Framebuffer& framebuffer_;
-        PpuBus& ppu_bus_;
+        PpuBus& bus_;
         Cpu* cpu_;
 
         int cycle_;
