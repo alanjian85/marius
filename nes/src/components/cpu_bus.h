@@ -4,13 +4,14 @@
 #include <array>
 #include <cstdint>
 
+#include "io/controller.h"
 #include "mappers/mapper.h"
 #include "ppu.h"
 
 namespace nes {
     class CpuBus final {
     public:
-        CpuBus(Mapper& mapper, Ppu& ppu);
+        CpuBus(Mapper& mapper, Ppu& ppu, Controller& controller1);
 
         [[nodiscard]] std::uint8_t read(std::uint16_t addr) const;
 
@@ -19,6 +20,7 @@ namespace nes {
         std::array<std::uint8_t, 0x800> ram_;
         Mapper& mapper_;
         Ppu& ppu_;
+        Controller& controller1_;
     };
 }
 

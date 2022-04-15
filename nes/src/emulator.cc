@@ -11,6 +11,7 @@ using namespace nes;
 #include "components/ppu_bus.h"
 #include "components/ppu.h"
 #include "io/cartridge.h"
+#include "io/controller.h"
 #include "mappers/mapper.h"
 
 Emulator::Emulator() {
@@ -48,7 +49,8 @@ void Emulator::run(std::istream& rom) {
     Framebuffer framebuffer(Ppu::kWidth, Ppu::kWidth);
     PpuBus ppu_bus(*mapper);
     Ppu ppu(framebuffer, ppu_bus);
-    CpuBus cpu_bus(*mapper, ppu);
+    Controller controller1;
+    CpuBus cpu_bus(*mapper, ppu, controller1);
     Cpu cpu(cpu_bus);
     ppu.bindCpu(cpu);
 

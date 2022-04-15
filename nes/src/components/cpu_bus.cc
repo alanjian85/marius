@@ -3,9 +3,10 @@ using namespace nes;
 
 #include <iostream>
 
-CpuBus::CpuBus(Mapper& mapper, Ppu& ppu)
+CpuBus::CpuBus(Mapper& mapper, Ppu& ppu, Controller& controller1)
     : mapper_(mapper),
-      ppu_(ppu)
+      ppu_(ppu),
+      controller1_(controller1)
 {
 
 }
@@ -21,7 +22,10 @@ std::uint8_t CpuBus::read(std::uint16_t addr) const {
                 return ppu_.getData();
         }
     } else if (addr < 0x4020) {
-        
+        switch (addr) {
+            case 0x4016:
+                return controller1_.read();
+        }
     } else {
         return mapper_.readPrg(addr);
     }
@@ -47,7 +51,11 @@ void CpuBus::write(std::uint16_t addr, std::uint8_t val) {
                 break;
         }
     } else if (addr < 0x4020) {
-    
+        switch (addr) {
+            case 0x4016:
+                controller1_.write(val);
+                break;
+        }
     } else {
         mapper_.writePrg(addr, val);
     }
