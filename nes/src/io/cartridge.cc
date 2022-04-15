@@ -51,7 +51,7 @@ std::istream& nes::operator>>(std::istream& lhs, Cartridge& rhs) {
         throw std::runtime_error("Reading CHR ROM image from cartridge failed");
     }
 
-    rhs.mirroring_ = (header[6] & 0x01) ? Mirroring::kHorizontal : Mirroring::kVertical; 
+    rhs.mirroring_ = (header[6] & 0x01) ? Mirroring::kVertical : Mirroring::kHorizontal; 
 
     rhs.mapper_num_ = (header[6] & 0xF0) >> 4 | header[7] & 0xF0;
 

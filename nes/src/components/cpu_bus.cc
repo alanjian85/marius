@@ -25,6 +25,8 @@ std::uint8_t CpuBus::read(std::uint16_t addr) const {
         switch (addr) {
             case 0x4016:
                 return controller1_.read();
+            case 0x4017:
+                return 0x40;
         }
     } else {
         return mapper_.readPrg(addr);

@@ -110,7 +110,7 @@ std::uint8_t Ppu::getStatus() {
 }
 
 std::uint8_t Ppu::getData() {
-    std::uint8_t result =  bus_.read(addr_);
+    std::uint8_t result = bus_.read(addr_);
     addr_ += addr_inc_;
     return result;
 }

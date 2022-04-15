@@ -11,13 +11,12 @@ void Controller::write(std::uint8_t val) {
 }
 
 std::uint8_t Controller::read() {
-    std::uint8_t result = state_ & 0x01;
     if (strobe_) {
         update();
-    } else {
-        state_ = state_ >> 1 | 0x80;
     }
-    return result;
+    std::uint8_t result = state_ & 0x01;
+    state_ = state_ >> 1 | 0x80;
+    return result | 0x40;
 }
 
 void Controller::update() {
