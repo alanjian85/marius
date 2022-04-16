@@ -14,9 +14,9 @@ std::uint8_t Controller::read() {
     if (strobe_) {
         update();
     }
-    std::uint8_t result = state_ & 0x01;
+    std::uint8_t result = state_ & 0x01 | 0x40;
     state_ = state_ >> 1 | 0x80;
-    return result | 0x40;
+    return result;
 }
 
 void Controller::update() {

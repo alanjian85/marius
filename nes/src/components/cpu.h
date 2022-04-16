@@ -5,9 +5,9 @@
 #include <cstdint>
 #include <cstdlib>
 
-#include "cpu_bus.h"
-
 namespace nes {
+    class CpuBus;
+
     class Cpu final {
     public:
         Cpu(CpuBus& bus);

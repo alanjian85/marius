@@ -3,6 +3,8 @@ using namespace nes;
 
 #include <cassert>
 
+#include "cpu_bus.h"
+
 Cpu::Cpu(CpuBus& bus) 
     : bus_(bus)
 {

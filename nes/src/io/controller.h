@@ -4,7 +4,7 @@
 #include <cstdint>
 
 namespace nes {
-    class Controller {
+    class Controller final {
     public:
         void write(std::uint8_t val);
 

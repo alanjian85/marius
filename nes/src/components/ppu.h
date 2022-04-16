@@ -1,18 +1,17 @@
 #ifndef NES_COMPONENTS_PPU_H_
 #define NES_COMPONENTS_PPU_H_
 
+#include "cpu.h"
 #include "io/framebuffer.h"
 #include "ppu_bus.h"
 
 namespace nes {
-    class Cpu;
-
     class Ppu final {
     public:
         static constexpr int kWidth = 256, kHeight = 240;
         static constexpr float kAspect = static_cast<float>(kWidth) / kHeight;        
 
-        Ppu(Framebuffer& framebuffer, PpuBus& bus);
+        Ppu(Framebuffer& framebuffer, PpuBus& bus, Cpu& cpu);
 
         void reset();
 
@@ -24,13 +23,13 @@ namespace nes {
 
         void setMask(std::uint8_t mask);
 
-        void setAddr(std::uint8_t addr);
-
-        void setData(std::uint8_t data);
-
         void setOamAddr(std::uint8_t addr);
 
         void setOamData(std::uint8_t data);
+
+        void setAddr(std::uint8_t addr);
+
+        void setData(std::uint8_t data);
 
         [[nodiscard]] std::uint8_t getStatus();
 
@@ -40,7 +39,7 @@ namespace nes {
     private:
         Framebuffer& framebuffer_;
         PpuBus& bus_;
-        Cpu* cpu_;
+        Cpu& cpu_;
 
         int cycle_;
         int scanline_;

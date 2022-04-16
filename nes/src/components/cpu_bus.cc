@@ -1,14 +1,11 @@
 #include "cpu_bus.h"
 using namespace nes;
 
-#include <iostream>
-
-CpuBus::CpuBus(Mapper& mapper, Ppu& ppu, Controller& controller1)
-    : mapper_(mapper),
-      ppu_(ppu),
-      controller1_(controller1)
+CpuBus::CpuBus(Mapper& mapper)
+    : mapper_(mapper)
 {
-
+    cpu_ = nullptr;
+    ppu_ = nullptr;
 }
 
 std::uint8_t CpuBus::read(std::uint16_t addr) const {
@@ -17,19 +14,14 @@ std::uint8_t CpuBus::read(std::uint16_t addr) const {
     } else if (addr < 0x4000) {
         switch (addr & 0x7) {
             case 0x2:
-                return ppu_.getStatus();
+                return ppu_->getStatus();
             case 0x4:
-                return ppu_.getOamData();
+                return ppu_->getOamData();
             case 0x7:
-                return ppu_.getData();
+                return ppu_->getData();
         }
     } else if (addr < 0x4020) {
-        switch (addr) {
-            case 0x4016:
-                return controller1_.read();
-            case 0x4017:
-                return 0x40;
-        }
+
     } else {
         return mapper_.readPrg(addr);
     }
@@ -42,31 +34,35 @@ void CpuBus::write(std::uint16_t addr, std::uint8_t val) {
     } else if (addr < 0x4000) {
         switch (addr & 0x7) {
             case 0x0:
-                ppu_.setCtrl(val);
+                ppu_->setCtrl(val);
                 break;
             case 0x1:
-                ppu_.setMask(val);
+                ppu_->setMask(val);
                 break;
             case 0x3:
-                ppu_.setOamAddr(val);
+                ppu_->setOamAddr(val);
                 break;
             case 0x4:
-                ppu_.setOamData(val);
+                ppu_->setOamData(val);
                 break;
             case 0x6:
-                ppu_.setAddr(val);
+                ppu_->setAddr(val);
                 break;
             case 0x7:
-                ppu_.setData(val);
+                ppu_->setData(val);
                 break;
         }
     } else if (addr < 0x4020) {
-        switch (addr) {
-            case 0x4016:
-                controller1_.write(val);
-                break;
-        }
+
     } else {
         mapper_.writePrg(addr, val);
     }
+}
+
+void CpuBus::setCpu(Cpu& cpu) {
+    cpu_ = &cpu;
+}
+
+void CpuBus::setPpu(Ppu& ppu) {
+    ppu_ = &ppu;
 }

@@ -6,9 +6,10 @@ using namespace nes;
 #include "cpu.h"
 #include "palette.h"
 
-Ppu::Ppu(Framebuffer& framebuffer, PpuBus& bus)
+Ppu::Ppu(Framebuffer& framebuffer, PpuBus& bus, Cpu& cpu)
     : framebuffer_(framebuffer),
-      bus_(bus)
+      bus_(bus),
+      cpu_(cpu)
 {
     cycle_ = 0;
     scanline_ = 261;
@@ -68,8 +69,7 @@ void Ppu::cycle() {
     if (scanline_ == 241 && cycle_ == 0) {
         vblank_ = true;
         if (vblank_nmi_) {
-            assert(cpu_);
-            cpu_->nmi();
+            cpu_.nmi();
         }
     }
 
@@ -78,10 +78,6 @@ void Ppu::cycle() {
         cycle_ = 0;
         scanline_ = (scanline_ + 1) % 262;
     }
-}
-
-void Ppu::bindCpu(Cpu& cpu) {
-    cpu_ = &cpu;
 }
 
 void Ppu::setCtrl(std::uint8_t ctrl) {
@@ -93,6 +89,14 @@ void Ppu::setMask(std::uint8_t mask) {
     show_background_ = mask & 0x08;
 }
 
+void Ppu::setOamAddr(std::uint8_t addr) {
+    oam_addr_ = addr;
+}
+
+void Ppu::setOamData(std::uint8_t data) {
+    bus_.write(oam_addr_++, data);
+}
+
 void Ppu::setAddr(std::uint8_t addr) {
     addr_ = addr_ << 8 | addr;
     addr_ &= 0x3FFF;
@@ -101,15 +105,6 @@ void Ppu::setAddr(std::uint8_t addr) {
 void Ppu::setData(std::uint8_t data) {
     bus_.write(addr_, data);
     addr_ += addr_inc_;
-}
-
-
-void Ppu::setOamAddr(std::uint8_t addr) {
-    oam_addr_ = addr;
-}
-
-void Ppu::setOamData(std::uint8_t data) {
-    bus_.write(oam_addr_++, data);
 }
 
 std::uint8_t Ppu::getStatus() {
