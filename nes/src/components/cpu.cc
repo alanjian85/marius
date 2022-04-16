@@ -137,7 +137,7 @@ void Cpu::addrZeroPageY() {
 void Cpu::addrIndexedIndirect() {
     addr_ = readByte(pc_++) + x_;
     ++cycle_;
-    addr_ = readByte(addr_) | readByte((addr_ + 1) & 0xFF) << 8;
+    addr_ = readByte(addr_ & 0xFF) | readByte((addr_ + 1) & 0xFF) << 8;
 }
 
 void Cpu::addrIndirectIndexed() {
@@ -220,7 +220,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             }
             break;
         case 0x40: // RTI
-            p_ = pull();
+            p_ = pull() & 0xCF;
             pc_ = pull();
             pc_ |= pull() << 8;
             ++cycle_;
@@ -239,7 +239,7 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             setC(false);
             break;
         case 0x28: // PLP
-            p_ = pull();
+            p_ = pull() & 0xCF;
             ++cycle_;
             break;
         case 0x38: // SEC
@@ -395,14 +395,14 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
                 break;
             case 0b110: // CPY
                 {
-                    std::int16_t diff = y_ - readByte(addr_);
+                    std::uint16_t diff = y_ - readByte(addr_);
                     setC(!(diff & 0x100));
                     setZN(diff);
                 }
                 break;
             case 0b111: // CPX
                 {
-                    std::int16_t diff = x_ - readByte(addr_);
+                    std::uint16_t diff = x_ - readByte(addr_);
                     setC(!(diff & 0x100));
                     setZN(diff);
                 }
@@ -474,7 +474,7 @@ bool Cpu::execGroup1(std::uint8_t opcode) {
                 break;
             case 0b110: // CMP
                 {
-                    std::int16_t diff = a_ - readByte(addr_);
+                    std::uint16_t diff = a_ - readByte(addr_);
                     setC(!(diff & 0x100));
                     setZN(diff);
                 }
@@ -507,7 +507,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                     break;
                 case 0b001: // ROL
                     {
-                        auto old_c = p_ & kC;
+                        bool old_c = p_ & kC;
                         setC(a_ & 0x80);
                         a_ <<= 1;
                         a_ |= old_c;
@@ -517,15 +517,14 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                 case 0b010: // LSR
                     setC(a_ & 0x01);
                     a_ >>= 1;
-                    setZ(!a_);
-                    setN(false);
+                    setZN(a_);
                     break;
                 case 0b011: // ROR
                     {
-                        auto old_c = p_ & kC;
+                        bool old_c = p_ & kC;
                         setC(a_ & 0x01);
                         a_ >>= 1;
-                        a_ |= old_c;
+                        a_ |= old_c << 7;
                         setZN(a_);
                     }
                     break;
@@ -574,8 +573,8 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                     break;
                 case 0b001: // ROL
                     {
-                        auto operand = readByte(addr_);
-                        auto old_c = p_ & kC;
+                        std::uint8_t operand = readByte(addr_);
+                        bool old_c = p_ & kC;
                         setC(operand & 0x80);
                         operand <<= 1;
                         ++cycle_;
@@ -591,18 +590,17 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         operand >>= 1;
                         ++cycle_;
                         writeByte(addr_, operand);
-                        setZ(!operand);
-                        setN(false);
+                        setZN(operand);
                     }
                     break;
                 case 0b011: // ROR
                     {
-                        auto operand = readByte(addr_);
-                        auto old_c = p_ & kC;
+                        std::uint8_t operand = readByte(addr_);
+                        bool old_c = p_ & kC;
                         setC(operand & 0x01);
                         operand >>= 1;
                         ++cycle_;
-                        operand |= old_c;
+                        operand |= old_c << 7;
                         writeByte(addr_, operand);
                         setZN(operand);
                     }
