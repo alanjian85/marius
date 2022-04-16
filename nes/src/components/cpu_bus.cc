@@ -18,6 +18,8 @@ std::uint8_t CpuBus::read(std::uint16_t addr) const {
         switch (addr & 0x7) {
             case 0x2:
                 return ppu_.getStatus();
+            case 0x4:
+                return ppu_.getOamData();
             case 0x7:
                 return ppu_.getData();
         }
@@ -44,6 +46,12 @@ void CpuBus::write(std::uint16_t addr, std::uint8_t val) {
                 break;
             case 0x1:
                 ppu_.setMask(val);
+                break;
+            case 0x3:
+                ppu_.setOamAddr(val);
+                break;
+            case 0x4:
+                ppu_.setOamData(val);
                 break;
             case 0x6:
                 ppu_.setAddr(val);

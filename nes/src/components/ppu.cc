@@ -103,6 +103,15 @@ void Ppu::setData(std::uint8_t data) {
     addr_ += addr_inc_;
 }
 
+
+void Ppu::setOamAddr(std::uint8_t addr) {
+    oam_addr_ = addr;
+}
+
+void Ppu::setOamData(std::uint8_t data) {
+    bus_.write(oam_addr_++, data);
+}
+
 std::uint8_t Ppu::getStatus() {
     std::uint8_t status = vblank_ << 7;
     vblank_ = false;
@@ -113,4 +122,8 @@ std::uint8_t Ppu::getData() {
     std::uint8_t result = bus_.read(addr_);
     addr_ += addr_inc_;
     return result;
+}
+
+std::uint8_t Ppu::getOamData() {
+    return bus_.read(oam_addr_++);
 }
