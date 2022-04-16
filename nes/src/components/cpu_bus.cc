@@ -53,7 +53,11 @@ void CpuBus::write(std::uint16_t addr, std::uint8_t val) {
                 break;
         }
     } else if (addr < 0x4020) {
-
+        switch (addr) {
+            case 0x4014:
+                cpu_->oamDma(val);
+                break;
+        }
     } else {
         mapper_.writePrg(addr, val);
     }

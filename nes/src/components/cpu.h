@@ -19,6 +19,8 @@ namespace nes {
         void reset();
 
         void cycle();
+
+        void oamDma(std::uint8_t page);
     private:
         enum {
             kC = 1 << 0,

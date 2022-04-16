@@ -62,6 +62,19 @@ void Cpu::cycle() {
     }
 }
 
+void Cpu::oamDma(std::uint8_t page) {
+    if (cycle_ % 2 != 0) {
+        ++cycle_;
+    }
+
+    addr_ = page << 8;
+    for (int i = 0; i < 256; ++i) {
+        std::uint8_t data = readByte(addr_);
+        writeByte(0x2004, data);
+        ++addr_;
+    }
+}
+
 std::uint8_t Cpu::readByte(std::uint16_t addr) {
     ++cycle_;
     return bus_.read(addr);

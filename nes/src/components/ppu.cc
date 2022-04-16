@@ -94,7 +94,7 @@ void Ppu::setOamAddr(std::uint8_t addr) {
 }
 
 void Ppu::setOamData(std::uint8_t data) {
-    bus_.write(oam_addr_++, data);
+    bus_.writeOam(oam_addr_++, data);
 }
 
 void Ppu::setAddr(std::uint8_t addr) {
@@ -120,5 +120,5 @@ std::uint8_t Ppu::getData() {
 }
 
 std::uint8_t Ppu::getOamData() {
-    return bus_.read(oam_addr_++);
+    return bus_.readOam(oam_addr_++);
 }
