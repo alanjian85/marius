@@ -5,6 +5,7 @@
 #include <cstdint>
 
 #include "cpu.h"
+#include "io/controller.h"
 #include "mappers/mapper.h"
 #include "ppu.h"
 
@@ -20,11 +21,16 @@ namespace nes {
         void setCpu(Cpu& cpu);
 
         void setPpu(Ppu& ppu);
+
+        void setController1(Controller& controller);
     private:
         std::array<std::uint8_t, 0x800> ram_;
         Mapper& mapper_;
+
         Cpu* cpu_;
         Ppu* ppu_;
+
+        Controller* controller1_;
     };
 }
 

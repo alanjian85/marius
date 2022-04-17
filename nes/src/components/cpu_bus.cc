@@ -21,7 +21,12 @@ std::uint8_t CpuBus::read(std::uint16_t addr) const {
                 return ppu_->getData();
         }
     } else if (addr < 0x4020) {
-
+        switch (addr) {
+            case 0x4016:
+                return controller1_->read();
+            case 0x4017:
+                return 0x40;
+        }
     } else {
         return mapper_.readPrg(addr);
     }
@@ -57,6 +62,9 @@ void CpuBus::write(std::uint16_t addr, std::uint8_t val) {
             case 0x4014:
                 cpu_->oamDma(val);
                 break;
+            case 0x4016:
+                controller1_->write(val);
+                break;
         }
     } else {
         mapper_.writePrg(addr, val);
@@ -69,4 +77,8 @@ void CpuBus::setCpu(Cpu& cpu) {
 
 void CpuBus::setPpu(Ppu& ppu) {
     ppu_ = &ppu;
+}
+
+void CpuBus::setController1(Controller& controller) {
+    controller1_ = &controller;
 }

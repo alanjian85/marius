@@ -47,12 +47,18 @@ void Emulator::run(std::istream& rom) {
     auto mapper = MakeMapper(cartridge);
     assert(mapper);
     Framebuffer framebuffer(Ppu::kWidth, Ppu::kWidth);
+    
     CpuBus cpu_bus(*mapper);
     Cpu cpu(cpu_bus);
+    
     PpuBus ppu_bus(*mapper);
     Ppu ppu(framebuffer, ppu_bus, cpu);
+
+    Controller controller1;
+    
     cpu_bus.setCpu(cpu);
     cpu_bus.setPpu(ppu);
+    cpu_bus.setController1(controller1);
 
     SDL_Rect rect;
     if (static_cast<float>(width) / height > Ppu::kAspect) {
