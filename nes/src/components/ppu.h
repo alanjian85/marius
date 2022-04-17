@@ -1,6 +1,8 @@
 #ifndef NES_COMPONENTS_PPU_H_
 #define NES_COMPONENTS_PPU_H_
 
+#include <vector>
+
 #include "cpu.h"
 #include "io/framebuffer.h"
 #include "ppu_bus.h"
@@ -43,14 +45,18 @@ namespace nes {
 
         int cycle_;
         int scanline_;
+        std::vector<std::uint8_t> scanline_sprites_;
 
         bool show_background_;
+        bool show_sprites_;
 
         std::uint16_t addr_;
         std::uint8_t addr_inc_;
 
         std::uint8_t oam_addr_;
 
+        bool sprite_zero_;
+        bool sprite_overflow_;
         bool vblank_;
         bool vblank_nmi_;
     };
