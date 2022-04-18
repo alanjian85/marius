@@ -90,6 +90,14 @@ void Ppu::cycle() {
                             std::uint8_t x_offset = (x - sprite_x) % 8;
                             std::uint8_t y_offset = (scanline_ - 1 - sprite_y) % 8;
 
+                            if (attribute & 0x40) {
+                                x_offset = 7 - x_offset;
+                            }
+
+                            if (attribute & 0x80) {
+                                y_offset = 7 - y_offset;
+                            }
+
                             std::uint8_t palette = attribute & 0x03;
 
                             bool bit0 = bus_.read(0x0000 + tile * 16 + y_offset) & 0x80 >> x_offset % 8;
