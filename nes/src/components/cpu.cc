@@ -118,7 +118,7 @@ void Cpu::addrZeroPage() {
 void Cpu::addrIndirect() {
     addr_ = readAddress(pc_);
     pc_ += 2;
-    addr_ = readAddress(addr_);
+    addr_ = bus_.read(addr_) | bus_.read(addr_ & 0xFF00 | (addr_ + 1) & 0xFF) << 8;
 }
 
 void Cpu::addrAbsoluteX() {

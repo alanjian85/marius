@@ -19,8 +19,10 @@ void MapperNrom::writePrg(std::uint16_t addr, std::uint8_t val) {
 }
 
 std::uint8_t MapperNrom::readChr(std::uint16_t addr) {
-    assert(addr < 0x2000);
-    return cartridge_.getChrRom()[addr];
+    if (addr < 0x2000) {
+        return cartridge_.getChrRom()[addr];
+    }
+    return 0x00;
 }
 
 void MapperNrom::writeChr(std::uint16_t addr, std::uint8_t val) {
