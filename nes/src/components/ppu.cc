@@ -17,6 +17,10 @@ Ppu::Ppu(Framebuffer& framebuffer, PpuBus& bus, Cpu& cpu)
     show_background_ = false;
     show_sprites_ = false;
 
+    nametable_ = 0x2000;
+    background_pattern_ = 0x0000;
+    sprite_pattern_ = 0x0000;
+
     addr_ = 0x00;
     addr_inc_ = 1;
 
@@ -31,10 +35,14 @@ void Ppu::reset() {
     scanline_ = 261;
 
     show_background_ = false;
+    show_sprites_ = false;
+    
+    nametable_ = 0x2000;
+    background_pattern_ = 0x0000;
+    sprite_pattern_ = 0x0000;
 
     addr_inc_ = 1;
 
-    vblank_ = true;
     vblank_nmi_ = false;
 }
 
@@ -55,8 +63,8 @@ void Ppu::cycle() {
                     int tile_x = x / 8, tile_y = scanline_ / 8;
                     int block_x = x / 32, block_y = scanline_ / 32;
 
-                    std::uint8_t tile = bus_.read(0x2000 + tile_y * 32 + tile_x);
-                    std::uint8_t attribute = bus_.read(0x23C0 + block_y * 8 + block_x);
+                    std::uint8_t tile = bus_.read(nametable_ + tile_y * 32 + tile_x);
+                    std::uint8_t attribute = bus_.read(nametable_ + 0x03C0 + block_y * 8 + block_x);
                     std::uint8_t palette;
                     if (tile_x % 4 < 2 && tile_y % 4 < 2) {
                         palette = attribute >> 0 & 0x03;
@@ -68,8 +76,8 @@ void Ppu::cycle() {
                         palette = attribute >> 6 & 0x03;
                     }
 
-                    bool bit0 = bus_.read(0x1000 + tile * 16 + scanline_ % 8) & 0x80 >> x % 8;
-                    bool bit1 = bus_.read(0x1000 + tile * 16 + 8 + scanline_ % 8) & 0x80 >> x % 8;
+                    bool bit0 = bus_.read(background_pattern_ + tile * 16 + scanline_ % 8) & 0x80 >> x % 8;
+                    bool bit1 = bus_.read(background_pattern_ + tile * 16 + 8 + scanline_ % 8) & 0x80 >> x % 8;
                     background_index = bit0 | bit1 << 1;
 
                     if (background_index != 0x00) {
@@ -100,8 +108,8 @@ void Ppu::cycle() {
 
                             std::uint8_t palette = attribute & 0x03;
 
-                            bool bit0 = bus_.read(0x0000 + tile * 16 + y_offset) & 0x80 >> x_offset % 8;
-                            bool bit1 = bus_.read(0x0000 + tile * 16 + 8 + y_offset) & 0x80 >> x_offset % 8;
+                            bool bit0 = bus_.read(sprite_pattern_ + tile * 16 + y_offset) & 0x80 >> x_offset % 8;
+                            bool bit1 = bus_.read(sprite_pattern_ + tile * 16 + 8 + y_offset) & 0x80 >> x_offset % 8;
                             std::uint8_t sprite_index = bit0 | bit1 << 1;
 
                             if (sprite_index != 0x00) {
@@ -149,6 +157,22 @@ void Ppu::cycle() {
 }
 
 void Ppu::setCtrl(std::uint8_t ctrl) {
+    switch (ctrl & 0x03) {
+        case 0x00:
+            nametable_ = 0x2000;
+            break;
+        case 0x01:
+            nametable_ = 0x2400;
+            break;
+        case 0x02:
+            nametable_ = 0x2800;
+            break;
+        case 0x03:
+            nametable_ = 0x2C00;
+            break;
+    }
+    background_pattern_ = (ctrl & 0x10) ? 0x1000 : 0x0000;
+    sprite_pattern_ = (ctrl & 0x08) ? 0x1000 : 0x0000;
     addr_inc_ = (ctrl & 0x04) ? 32 : 1;
     vblank_nmi_ = ctrl & 0x80;
 }

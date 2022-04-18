@@ -46,9 +46,13 @@ namespace nes {
         int cycle_;
         int scanline_;
         std::vector<std::uint8_t> scanline_sprites_;
-
+        
         bool show_background_;
         bool show_sprites_;
+
+        std::uint16_t nametable_;
+        std::uint16_t background_pattern_;
+        std::uint16_t sprite_pattern_;
 
         std::uint16_t addr_;
         std::uint8_t addr_inc_;
