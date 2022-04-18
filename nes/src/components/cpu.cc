@@ -338,16 +338,16 @@ bool Cpu::execBranch(std::uint8_t opcode) {
         bool condition = opcode & 0x20;
         switch ((opcode & 0xC0) >> 6) {
             case 0b00:
-                condition = condition == (p_ & kN);
+                condition = condition == static_cast<bool>(p_ & kN);
                 break;
             case 0b01:
-                condition = condition == (p_ & kV);
+                condition = condition == static_cast<bool>(p_ & kV);
                 break;
             case 0b10:
-                condition = condition == (p_ & kC);
+                condition = condition == static_cast<bool>(p_ & kC);
                 break;
             case 0b11:
-                condition = condition == (p_ & kZ);
+                condition = condition == static_cast<bool>(p_ & kZ);
                 break;
         }
 
