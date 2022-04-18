@@ -33,8 +33,11 @@ void Emulator::run(std::istream& rom) {
         0
     );
 
-    auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    auto texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, Ppu::kWidth, Ppu::kHeight);
+    auto renderer = SDL_CreateRenderer(
+        window, 
+        -1, 
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+    );
     
     Cartridge cartridge;
     try {
@@ -46,7 +49,7 @@ void Emulator::run(std::istream& rom) {
 
     auto mapper = MakeMapper(cartridge);
     assert(mapper);
-    Framebuffer framebuffer(Ppu::kWidth, Ppu::kWidth);
+    Framebuffer framebuffer(renderer, Ppu::kWidth, Ppu::kWidth);
     
     CpuBus cpu_bus(*mapper);
     Cpu cpu(cpu_bus);
@@ -101,16 +104,17 @@ void Emulator::run(std::istream& rom) {
         }
         prev_time = Clock::now();
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
+        if (!framebuffer.isLocked()) {
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
 
-        SDL_UpdateTexture(texture, nullptr, framebuffer.getPixels(), sizeof(std::uint32_t) * Ppu::kWidth);
+            SDL_RenderCopy(renderer, framebuffer.getTexture(), nullptr, &rect);
 
-        SDL_RenderCopy(renderer, texture, nullptr, &rect);
-
-        SDL_RenderPresent(renderer);        
+            SDL_RenderPresent(renderer);
+        }      
     }
 
+    framebuffer.destroy();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 }

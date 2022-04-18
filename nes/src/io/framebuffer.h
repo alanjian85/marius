@@ -2,19 +2,35 @@
 #define NES_IO_FRAMEBUFFER_H_
 
 #include <cstdint>
-#include <vector>
+
+#include <SDL2/SDL.h>
 
 namespace nes {
     class Framebuffer final {
     public:
-        Framebuffer(int width, int height);
+        Framebuffer(SDL_Renderer* renderer, int width, int height);
+
+        Framebuffer(const Framebuffer&) = delete;
+
+        Framebuffer& operator=(const Framebuffer&) = delete;
+
+        ~Framebuffer();
+
+        void destroy();
+
+        [[nodiscard]] SDL_Texture* getTexture() const;
+
+        void lock();
+
+        void unlock();
 
         void setPixel(int x, int y, std::uint32_t color);
 
-        [[nodiscard]] const void* getPixels() const;
+        [[nodiscard]] bool isLocked() const;
     private:
-        int width_, height_;
-        std::vector<std::uint32_t> pixels_;
+        SDL_Texture* texture_;
+        void* pixels_;
+        int pitch_;
     };
 }
 

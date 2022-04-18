@@ -43,6 +43,7 @@ void Ppu::cycle() {
         sprite_zero_ = false;
         sprite_overflow_ = false;
         vblank_ = false;
+        framebuffer_.lock();
     }
 
     if (scanline_ < 240) {
@@ -67,8 +68,8 @@ void Ppu::cycle() {
                         palette = attribute >> 6 & 0x03;
                     }
 
-                    bool bit0 = bus_.read(0x0000 + tile * 16 + scanline_ % 8) & 0x80 >> x % 8;
-                    bool bit1 = bus_.read(0x0000 + tile * 16 + 8 + scanline_ % 8) & 0x80 >> x % 8;
+                    bool bit0 = bus_.read(0x1000 + tile * 16 + scanline_ % 8) & 0x80 >> x % 8;
+                    bool bit1 = bus_.read(0x1000 + tile * 16 + 8 + scanline_ % 8) & 0x80 >> x % 8;
                     background_index = bit0 | bit1 << 1;
 
                     if (background_index != 0x00) {
@@ -129,6 +130,7 @@ void Ppu::cycle() {
         if (vblank_nmi_) {
             cpu_.nmi();
         }
+        framebuffer_.unlock();
     }
 
     ++cycle_;
