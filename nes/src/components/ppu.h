@@ -56,6 +56,7 @@ namespace nes {
 
         std::uint16_t addr_;
         std::uint8_t addr_inc_;
+        std::uint8_t read_buffer_;
 
         std::uint8_t oam_addr_;
 

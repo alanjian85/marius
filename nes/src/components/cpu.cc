@@ -23,7 +23,7 @@ void Cpu::irq() {
         cycle_ += 2;
         push(pc_ >> 8);
         push(pc_);
-        push(p_ | 1 << 5 & ~kB);
+        push((p_ | 1 << 5) & ~kB);
         setI(true);
         pc_ = readAddress(kIrqVector);
     }
@@ -33,7 +33,7 @@ void Cpu::nmi() {
     cycle_ += 2;
     push(pc_ >> 8);
     push(pc_);
-    push(p_ | 1 << 5 & ~kB);
+    push((p_ | 1 << 5) & ~kB);
     setI(true);
     pc_ = readAddress(kNmiVector);
 }

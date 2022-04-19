@@ -212,6 +212,9 @@ std::uint8_t Ppu::getStatus() {
 std::uint8_t Ppu::getData() {
     std::uint8_t result = bus_.read(addr_);
     addr_ += addr_inc_;
+    if (addr_ < 0x3F00) {
+        std::swap(result, read_buffer_);
+    }
     return result;
 }
 
