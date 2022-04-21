@@ -30,12 +30,20 @@ void Controller::update() {
     bool left = state[SDL_SCANCODE_A];
     bool right = state[SDL_SCANCODE_D];
     state_ = 
-        right  << 7 |
-        left   << 6 |
-        down   << 5 |
-        up     << 4 |
-        start  << 3 |
-        select << 2 |
+        a      << 0 |
         b      << 1 |
-        a      << 0;
+        select << 2 |
+        start  << 3;
+    
+    if (up != down) {
+        state_ |= 
+            up   << 4 |
+            down << 5;
+    }
+
+    if (right != left) {
+        state_ |= 
+            left  << 6 |
+            right << 7;
+    }
 }

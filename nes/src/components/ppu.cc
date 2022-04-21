@@ -23,6 +23,7 @@ Ppu::Ppu(Framebuffer& framebuffer, PpuBus& bus, Cpu& cpu)
 
     addr_ = 0x00;
     addr_inc_ = 1;
+    read_buffer_ = 0x00;
 
     sprite_zero_ = false;
     sprite_overflow_ = false;
