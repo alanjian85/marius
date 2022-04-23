@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
             keymap2.right = SDL_SCANCODE_RIGHT;
         }
 
-        Emulator emulator;
+        Emulator emulator(keymap1, keymap2);
         emulator.run(rom);
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;

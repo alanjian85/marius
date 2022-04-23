@@ -14,7 +14,9 @@ using namespace nes;
 #include "io/controller.h"
 #include "mappers/mapper.h"
 
-Emulator::Emulator() {
+Emulator::Emulator(Keymap keymap1, Keymap keymap2) 
+    : keymap1_(keymap1), keymap2_(keymap2)
+{
     cycle_interval_ = std::chrono::nanoseconds(559);
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -57,11 +59,13 @@ void Emulator::run(std::istream& rom) {
     PpuBus ppu_bus(*mapper);
     Ppu ppu(framebuffer, ppu_bus, cpu);
 
-    Controller controller1;
+    Controller controller1(keymap1_);
+    Controller controller2(keymap2_);
     
     cpu_bus.setCpu(cpu);
     cpu_bus.setPpu(ppu);
     cpu_bus.setController1(controller1);
+    cpu_bus.setController2(controller2);
 
     SDL_Rect rect;
     if (static_cast<float>(width) / height > Ppu::kAspect) {

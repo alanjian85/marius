@@ -22,7 +22,9 @@ namespace nes {
 
         void setPpu(Ppu& ppu);
 
-        void setController1(Controller& controller);
+        void setController1(Controller& controller1);
+
+        void setController2(Controller& controller2);
     private:
         std::array<std::uint8_t, 0x800> ram_;
         Mapper& mapper_;
@@ -31,6 +33,7 @@ namespace nes {
         Ppu* ppu_;
 
         Controller* controller1_;
+        Controller* controller2_;
     };
 }
 

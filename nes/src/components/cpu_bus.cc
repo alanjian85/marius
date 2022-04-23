@@ -25,7 +25,7 @@ std::uint8_t CpuBus::read(std::uint16_t addr) const {
             case 0x4016:
                 return controller1_->read();
             case 0x4017:
-                return 0x40;
+                return controller2_->read();
         }
     } else {
         return mapper_.readPrg(addr);
@@ -64,6 +64,7 @@ void CpuBus::write(std::uint16_t addr, std::uint8_t val) {
                 break;
             case 0x4016:
                 controller1_->write(val);
+                controller2_->write(val);
                 break;
         }
     } else {
@@ -79,6 +80,10 @@ void CpuBus::setPpu(Ppu& ppu) {
     ppu_ = &ppu;
 }
 
-void CpuBus::setController1(Controller& controller) {
-    controller1_ = &controller;
+void CpuBus::setController1(Controller& controller1) {
+    controller1_ = &controller1;
+}
+
+void CpuBus::setController2(Controller& controller2) {
+    controller2_ = &controller2;
 }

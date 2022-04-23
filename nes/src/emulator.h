@@ -4,10 +4,12 @@
 #include <chrono>
 #include <iostream>
 
+#include "io/keymap.h"
+
 namespace nes {
     class Emulator final {
     public:
-        Emulator();
+        Emulator(Keymap keymap1, Keymap keymap2);
 
         Emulator(const Emulator&) = delete;
 
@@ -20,6 +22,9 @@ namespace nes {
         using Clock = std::chrono::high_resolution_clock;
 
         std::chrono::nanoseconds cycle_interval_;
+
+        Keymap keymap1_;
+        Keymap keymap2_;
     };
 }
 

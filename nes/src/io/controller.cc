@@ -3,6 +3,12 @@ using namespace nes;
 
 #include <SDL.h>
 
+Controller::Controller(Keymap& keymap) 
+    : keymap_(keymap)
+{
+
+}
+
 void Controller::write(std::uint8_t val) {
     if (strobe_ && !(val & 0x01)) {
         update();
@@ -21,14 +27,14 @@ std::uint8_t Controller::read() {
 
 void Controller::update() {
     const Uint8* state = SDL_GetKeyboardState(nullptr);
-    bool a = state[SDL_SCANCODE_J];
-    bool b = state[SDL_SCANCODE_K];
-    bool select = state[SDL_SCANCODE_RSHIFT];
-    bool start = state[SDL_SCANCODE_RETURN];
-    bool up = state[SDL_SCANCODE_W];
-    bool down = state[SDL_SCANCODE_S];
-    bool left = state[SDL_SCANCODE_A];
-    bool right = state[SDL_SCANCODE_D];
+    bool a = state[keymap_.a];
+    bool b = state[keymap_.b];
+    bool select = state[keymap_.select];
+    bool start = state[keymap_.start];
+    bool up = state[keymap_.up];
+    bool down = state[keymap_.down];
+    bool left = state[keymap_.left];
+    bool right = state[keymap_.right];
     state_ = 
         a      << 0 |
         b      << 1 |
