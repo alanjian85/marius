@@ -53,6 +53,7 @@ void Ppu::cycle() {
         sprite_overflow_ = false;
         vblank_ = false;
         framebuffer_.lock();
+        scanline_sprites_.clear();
     }
 
     if (scanline_ < 240) {

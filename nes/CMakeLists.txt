@@ -24,6 +24,7 @@ set(NES_SRCS
 )
 add_executable(nes ${NES_SRCS})
 
+find_package(nlohmann_json REQUIRED)
 find_package(SDL2 REQUIRED)
 
 target_include_directories(nes PRIVATE
@@ -32,5 +33,6 @@ target_include_directories(nes PRIVATE
 )
 
 target_link_libraries(nes
+    nlohmann_json::nlohmann_json
     ${SDL2_LIBRARIES}
 )
