@@ -14,7 +14,7 @@ using namespace nes;
 SDL_Scancode GetScancode(const std::string& name) {
     SDL_Scancode scancode = SDL_GetScancodeFromName(name.c_str());
     if (scancode == SDL_SCANCODE_UNKNOWN) {
-        throw std::runtime_error(std::string("Error: ") + SDL_GetError());
+        throw std::runtime_error(std::string("Error: Scancode name ") + name + " is invalid");
     }
     return scancode;
 }
@@ -38,23 +38,23 @@ int main(int argc, char** argv) {
             nlohmann::json json;
             keymap_file >> json;
 
-            keymap1.a = json[0]["A"];
-            keymap1.b = json[0]["B"];
-            keymap1.select = json[0]["Select"];
-            keymap1.start = json[0]["Start"];
-            keymap1.up = json[0]["Up"];
-            keymap1.down = json[0]["Down"];
-            keymap1.left = json[0]["Left"];
-            keymap1.right = json[0]["Right"];
+            keymap1.a = GetScancode(json[0]["A"]);
+            keymap1.b = GetScancode(json[0]["B"]);
+            keymap1.select = GetScancode(json[0]["Select"]);
+            keymap1.start = GetScancode(json[0]["Start"]);
+            keymap1.up = GetScancode(json[0]["Up"]);
+            keymap1.down = GetScancode(json[0]["Down"]);
+            keymap1.left = GetScancode(json[0]["Left"]);
+            keymap1.right = GetScancode(json[0]["Right"]);
 
-            keymap1.a = json[1]["A"];
-            keymap1.b = json[1]["B"];
-            keymap1.select = json[1]["Select"];
-            keymap1.start = json[1]["Start"];
-            keymap1.up = json[1]["Up"];
-            keymap1.down = json[1]["Down"];
-            keymap1.left = json[1]["Left"];
-            keymap1.right = json[1]["Right"];
+            keymap2.a = GetScancode(json[1]["A"]);
+            keymap2.b = GetScancode(json[1]["B"]);
+            keymap2.select = GetScancode(json[1]["Select"]);
+            keymap2.start = GetScancode(json[1]["Start"]);
+            keymap2.up = GetScancode(json[1]["Up"]);
+            keymap2.down = GetScancode(json[1]["Down"]);
+            keymap2.left = GetScancode(json[1]["Left"]);
+            keymap2.right = GetScancode(json[1]["Right"]);
         } else {
             keymap1.a = SDL_SCANCODE_J;
             keymap1.b = SDL_SCANCODE_K;
