@@ -54,85 +54,91 @@ void Ppu::reset() {
 }
 
 void Ppu::cycle() {
-    if (scanline_ == 261 && cycle_ == 0) {
-        curr_addr_ = temp_addr_;
-        sprite_zero_ = false;
-        sprite_overflow_ = false;
-        vblank_ = false;
-        framebuffer_.lock();
-        scanline_sprites_.clear();
+    if (scanline_ == 261) {
+        if (cycle_ == 0) {
+            sprite_zero_ = false;
+            sprite_overflow_ = false;
+            vblank_ = false;
+            framebuffer_.lock();
+            scanline_sprites_.clear();
+        }
+
+        if (cycle_ >= 284  && cycle_ <= 304 && (show_background_ || show_sprites_)) {
+            curr_addr_ &= ~0x7BE0;
+            curr_addr_ |= temp_addr_ & 0x7BE0;
+        }
     }
 
     if (scanline_ < 240) {
-        if (cycle_ == 0) {
-            for (int x = 0; x < 256; ++x) {
-                std::uint8_t background_index;
+        if (cycle_ >= 1 && cycle_ <= 256) {
+            int x = cycle_ - 1;
 
-                if (show_background_) {
-                    int fine_x = (fine_x_scroll_ + x) % 8;
+            std::uint8_t background_index;
 
-                    std::uint8_t tile = bus_.read(0x2000 | (curr_addr_ & 0x0FFF));
-                    std::uint8_t attribute = bus_.read(0x23c0 | 
-                        (curr_addr_ & 0x0C00) |
-                        ((curr_addr_ & 0x0380) >> 4) |
-                        ((curr_addr_ & 0x001C) >> 2)
-                    );
+            if (show_background_) {
+                int fine_x = (fine_x_scroll_ + x) & 0x07;
 
-                    bool bit0 = bus_.read(background_pattern_ | tile * 16 + ((curr_addr_ & 0x7000) >> 12)) & 0x80 >> fine_x;
-                    bool bit1 = bus_.read(background_pattern_ | tile * 16 + 8 + ((curr_addr_ & 0x7000) >> 12)) & 0x80 >> fine_x;
-                    background_index = bit0 | bit1 << 1;
+                std::uint8_t tile = bus_.read(0x2000 | (curr_addr_ & 0x0FFF));
+                std::uint8_t attribute = bus_.read(0x23c0 | 
+                    (curr_addr_ & 0x0C00) |
+                    ((curr_addr_ & 0x0380) >> 4) |
+                    ((curr_addr_ & 0x001C) >> 2)
+                );
 
-                    int shift = ((curr_addr_ & 0x0040) >> 4) | (curr_addr_ & 0x0002);
-                    std::uint8_t palette = attribute >> shift & 0x03;
-                    if (background_index != 0x00) {
-                        framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F00 + palette * 4 + background_index)]);
-                    } else {
-                        framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F00)]);
-                    }
+                bool bit0 = bus_.read(background_pattern_ | tile * 16 + ((curr_addr_ & 0x7000) >> 12)) & 0x80 >> fine_x;
+                bool bit1 = bus_.read(background_pattern_ | tile * 16 + 8 + ((curr_addr_ & 0x7000) >> 12)) & 0x80 >> fine_x;
+                background_index = bit0 | bit1 << 1;
 
-                    if (fine_x == 7) {
-                        if ((curr_addr_ & 0x001F) == 31) {
-                            curr_addr_ &= ~0x001F;
-                            curr_addr_ ^= 0x0400;
-                        } else {
-                            ++curr_addr_;
-                        }
-                    }
+                int shift = ((curr_addr_ & 0x0040) >> 4) | (curr_addr_ & 0x0002);
+                std::uint8_t palette = attribute >> shift & 0x03;
+                if (background_index != 0x00) {
+                    framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F00 + palette * 4 + background_index)]);
+                } else {
+                    framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F00)]);
                 }
 
-                if (show_sprites_) {
-                    for (auto sprite : scanline_sprites_) {
-                        std::uint8_t sprite_y = bus_.readOam(sprite * 4 + 0);
-                        std::uint8_t tile = bus_.readOam(sprite * 4 + 1);
-                        std::uint8_t attribute = bus_.readOam(sprite * 4 + 2);
-                        std::uint8_t sprite_x = bus_.readOam(sprite * 4 + 3);
-                    
-                        if (x - sprite_x >= 0 && x - sprite_x < 8) {
-                            std::uint8_t x_offset = (x - sprite_x) & 0x7;
-                            std::uint8_t y_offset = (scanline_ - 1 - sprite_y) & 0x7;
+                if (fine_x == 7) {
+                    if ((curr_addr_ & 0x001F) == 31) {
+                        curr_addr_ &= ~0x001F;
+                        curr_addr_ ^= 0x0400;
+                    } else {
+                        ++curr_addr_;
+                    }
+                }
+            }
 
-                            if (attribute & 0x40) {
-                                x_offset = 7 - x_offset;
+            if (show_sprites_) {
+                for (auto sprite : scanline_sprites_) {
+                    std::uint8_t sprite_y = bus_.readOam(sprite * 4 + 0);
+                    std::uint8_t tile = bus_.readOam(sprite * 4 + 1);
+                    std::uint8_t attribute = bus_.readOam(sprite * 4 + 2);
+                    std::uint8_t sprite_x = bus_.readOam(sprite * 4 + 3);
+                
+                    if (x - sprite_x >= 0 && x - sprite_x < 8) {
+                        std::uint8_t x_offset = (x - sprite_x) & 0x07;
+                        std::uint8_t y_offset = (scanline_ - 1 - sprite_y) & 0x07;
+
+                        if (attribute & 0x40) {
+                            x_offset = 7 - x_offset;
+                        }
+
+                        if (attribute & 0x80) {
+                            y_offset = 7 - y_offset;
+                        }
+
+                        std::uint8_t palette = attribute & 0x03;
+
+                        bool bit0 = bus_.read(sprite_pattern_ + tile * 16 + y_offset) & 0x80 >> x_offset % 8;
+                        bool bit1 = bus_.read(sprite_pattern_ + tile * 16 + 8 + y_offset) & 0x80 >> x_offset % 8;
+                        std::uint8_t sprite_index = bit0 | bit1 << 1;
+
+                        if (sprite_index != 0x00) {
+                            if (!(attribute & 0x20) || !show_background_ || background_index == 0x00) {
+                                framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F10 + palette * 4 + sprite_index)]);
                             }
 
-                            if (attribute & 0x80) {
-                                y_offset = 7 - y_offset;
-                            }
-
-                            std::uint8_t palette = attribute & 0x03;
-
-                            bool bit0 = bus_.read(sprite_pattern_ + tile * 16 + y_offset) & 0x80 >> x_offset % 8;
-                            bool bit1 = bus_.read(sprite_pattern_ + tile * 16 + 8 + y_offset) & 0x80 >> x_offset % 8;
-                            std::uint8_t sprite_index = bit0 | bit1 << 1;
-
-                            if (sprite_index != 0x00) {
-                                if (!(attribute & 0x20) || !show_background_ || background_index == 0x00) {
-                                    framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F10 + palette * 4 + sprite_index)]);
-                                }
-
-                                if (sprite == 0 && show_background_ && background_index != 0x00) {
-                                    sprite_zero_ = true;
-                                }
+                            if (sprite == 0 && show_background_ && background_index != 0x00) {
+                                sprite_zero_ = true;
                             }
                         }
                     }
@@ -140,7 +146,7 @@ void Ppu::cycle() {
             }
         }
 
-        if (cycle_ == 256) {
+        if (cycle_ == 256 && (show_background_ || show_sprites_)) {
             if ((curr_addr_ & 0x7000) != 0x7000) {
                 curr_addr_ += 0x1000;
             } else {
@@ -158,11 +164,6 @@ void Ppu::cycle() {
             }
         }
 
-        if (cycle_ == 257) {
-            curr_addr_ &= ~0x041F;
-            curr_addr_ |= temp_addr_ & 0x041F;
-        }
-
         if (cycle_ == 340) {
             scanline_sprites_.clear();
 
@@ -177,6 +178,11 @@ void Ppu::cycle() {
                 sprite_overflow_ = true;
             }
         }
+    }
+
+    if (cycle_ == 257 && (show_background_ || show_sprites_)) {
+        curr_addr_ &= ~0x041F;
+        curr_addr_ |= temp_addr_ & 0x041F;
     }
 
     if (scanline_ == 241 && cycle_ == 0) {
