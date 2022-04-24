@@ -1,7 +1,6 @@
 #include "emulator.h"
 using namespace nes;
 
-#include <cassert>
 #include <stdexcept>
 
 #include <SDL.h>
@@ -42,15 +41,12 @@ void Emulator::run(std::istream& rom) {
     );
     
     Cartridge cartridge;
-    try {
-        rom >> cartridge;
-    } catch (std::exception& e) {
-        std::cerr << "Error loading ROM: " << e.what() << std::endl;
-        return;
-    }
+    rom >> cartridge;
 
     auto mapper = MakeMapper(cartridge);
-    assert(mapper);
+    if (!mapper) {
+        throw std::runtime_error("Error: Unknown mapper");
+    }
     Framebuffer framebuffer(renderer, Ppu::kWidth, Ppu::kWidth);
     
     CpuBus cpu_bus(*mapper);

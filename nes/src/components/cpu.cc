@@ -1,8 +1,6 @@
 #include "cpu.h"
 using namespace nes;
 
-#include <cassert>
-
 #include "cpu_bus.h"
 
 Cpu::Cpu(CpuBus& bus) 
@@ -58,7 +56,7 @@ void Cpu::cycle() {
             return;
         if (execGroup2(opcode))
             return;
-        assert(false && "Invalid opcode");
+        throw std::runtime_error("Invalid opcode");
     }
 }
 

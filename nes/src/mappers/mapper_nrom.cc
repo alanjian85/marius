@@ -1,8 +1,6 @@
 #include "mapper_nrom.h"
 using namespace nes;
 
-#include <cassert>
-
 std::uint8_t MapperNrom::readPrg(std::uint16_t addr) {
     if (addr >= 0x8000) {
         if (cartridge_.getPrgRomBanks() == 1) {
@@ -15,7 +13,7 @@ std::uint8_t MapperNrom::readPrg(std::uint16_t addr) {
 }
 
 void MapperNrom::writePrg(std::uint16_t addr, std::uint8_t val) {
-    assert(false && "Attempted to write to PRG ROM");
+    throw std::logic_error("Error: Attempted to write to PRG ROM in NROM");
 }
 
 std::uint8_t MapperNrom::readChr(std::uint16_t addr) {
@@ -26,7 +24,7 @@ std::uint8_t MapperNrom::readChr(std::uint16_t addr) {
 }
 
 void MapperNrom::writeChr(std::uint16_t addr, std::uint8_t val) {
-    assert(false && "Attempted to write to CHR ROM");
+    throw std::logic_error("Error: Attempted to write to CHR ROM in NROM");
 }
 
 Mirroring MapperNrom::getMirroring() {

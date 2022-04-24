@@ -196,6 +196,16 @@ void Ppu::setOamData(std::uint8_t data) {
     bus_.writeOam(oam_addr_++, data);
 }
 
+void Ppu::setScroll(std::uint8_t scroll) {
+    if (write_toggle_) {
+        
+        write_toggle_ = false;
+    } else {
+
+        write_toggle_ = true;
+    }
+}
+
 void Ppu::setAddr(std::uint8_t addr) {
     if (write_toggle_) {
         temp_addr_ &= ~0xFF00;

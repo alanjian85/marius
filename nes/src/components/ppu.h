@@ -29,6 +29,8 @@ namespace nes {
 
         void setOamData(std::uint8_t data);
 
+        void setScroll(std::uint8_t scroll);
+
         void setAddr(std::uint8_t addr);
 
         void setData(std::uint8_t data);
