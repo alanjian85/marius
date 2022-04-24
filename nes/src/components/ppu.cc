@@ -70,31 +70,20 @@ void Ppu::cycle() {
 
                 if (show_background_) {
                     int fine_x = (fine_x_scroll_ + x) % 8;
-                    
-                    int tile_x = x / 8, tile_y = scanline_ / 8;
-                    int block_x = x / 32, block_y = scanline_ / 32;
 
                     std::uint8_t tile = bus_.read(0x2000 | (curr_addr_ & 0x0FFF));
                     std::uint8_t attribute = bus_.read(0x23c0 | 
                         (curr_addr_ & 0x0C00) |
-                        ((curr_addr_ & 0x38) >> 4) |
-                        ((curr_addr_ & 0x07) >> 2)
+                        ((curr_addr_ & 0x0380) >> 4) |
+                        ((curr_addr_ & 0x001C) >> 2)
                     );
-                    std::uint8_t palette;
-                    if (tile_x % 4 < 2 && tile_y % 4 < 2) {
-                        palette = attribute >> 0 & 0x03;
-                    } else if (tile_x % 4 >= 2 && tile_y % 4 < 2) {
-                        palette = attribute >> 2 & 0x03;
-                    } else if (tile_x % 4 < 2 && tile_y % 4 >= 2) {
-                        palette = attribute >> 4 & 0x03;
-                    } else {
-                        palette = attribute >> 6 & 0x03;
-                    }
 
-                    bool bit0 = bus_.read(background_pattern_ + tile * 16 + scanline_ % 8) & 0x80 >> fine_x;
-                    bool bit1 = bus_.read(background_pattern_ + tile * 16 + 8 + scanline_ % 8) & 0x80 >> fine_x;
+                    bool bit0 = bus_.read(background_pattern_ | tile * 16 + ((curr_addr_ & 0x7000) >> 12)) & 0x80 >> fine_x;
+                    bool bit1 = bus_.read(background_pattern_ | tile * 16 + 8 + ((curr_addr_ & 0x7000) >> 12)) & 0x80 >> fine_x;
                     background_index = bit0 | bit1 << 1;
 
+                    int shift = ((curr_addr_ & 0x0040) >> 4) | (curr_addr_ & 0x0002);
+                    std::uint8_t palette = attribute >> shift & 0x03;
                     if (background_index != 0x00) {
                         framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F00 + palette * 4 + background_index)]);
                     } else {
