@@ -1,6 +1,8 @@
 #include "cpu.h"
 using namespace nes;
 
+#include <fmt/format.h>
+
 #include "cpu_bus.h"
 
 Cpu::Cpu(CpuBus& bus) 
@@ -56,7 +58,7 @@ void Cpu::cycle() {
             return;
         if (execGroup2(opcode))
             return;
-        throw std::runtime_error("Invalid opcode");
+        throw std::runtime_error(fmt::format("Invalid opcode {:#04x}", opcode));
     }
 }
 
