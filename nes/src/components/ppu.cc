@@ -108,8 +108,8 @@ void Ppu::cycle() {
                         std::uint8_t sprite_x = bus_.readOam(sprite * 4 + 3);
                     
                         if (x - sprite_x >= 0 && x - sprite_x < 8) {
-                            std::uint8_t x_offset = (x - sprite_x) % 8;
-                            std::uint8_t y_offset = (scanline_ - 1 - sprite_y) % 8;
+                            std::uint8_t x_offset = (x - sprite_x) & 0x7;
+                            std::uint8_t y_offset = (scanline_ - 1 - sprite_y) & 0x7;
 
                             if (attribute & 0x40) {
                                 x_offset = 7 - x_offset;
@@ -126,9 +126,11 @@ void Ppu::cycle() {
                             std::uint8_t sprite_index = bit0 | bit1 << 1;
 
                             if (sprite_index != 0x00) {
-                                framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F10 + palette * 4 + sprite_index)]);
-                                
-                                if (sprite == 0 && show_background_ && background_index != 0) {
+                                if (!(attribute & 0x20) || !show_background_ || background_index == 0x00) {
+                                    framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F10 + palette * 4 + sprite_index)]);
+                                }
+
+                                if (sprite == 0 && show_background_ && background_index != 0x00) {
                                     sprite_zero_ = true;
                                 }
                             }
