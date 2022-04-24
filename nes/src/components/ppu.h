@@ -56,6 +56,8 @@ namespace nes {
         std::uint16_t background_pattern_;
         std::uint16_t sprite_pattern_;
 
+        std::uint8_t fine_x_;
+
         bool write_toggle_;
         std::uint16_t curr_addr_;
         std::uint16_t temp_addr_;

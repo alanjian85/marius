@@ -21,6 +21,8 @@ Ppu::Ppu(Framebuffer& framebuffer, PpuBus& bus, Cpu& cpu)
     background_pattern_ = 0x0000;
     sprite_pattern_ = 0x0000;
 
+    fine_x_ = 0x00;
+
     write_toggle_ = true;
     curr_addr_ = 0x00;
     temp_addr_ = 0x00;
@@ -43,6 +45,8 @@ void Ppu::reset() {
     nametable_ = 0x2000;
     background_pattern_ = 0x0000;
     sprite_pattern_ = 0x0000;
+
+    fine_x_ = 0x00;
 
     write_toggle_ = true;
     temp_addr_ = 0x00;
@@ -69,8 +73,12 @@ void Ppu::cycle() {
                     int tile_x = x / 8, tile_y = scanline_ / 8;
                     int block_x = x / 32, block_y = scanline_ / 32;
 
-                    std::uint8_t tile = bus_.read(nametable_ + tile_y * 32 + tile_x);
-                    std::uint8_t attribute = bus_.read(nametable_ + 0x03C0 + block_y * 8 + block_x);
+                    std::uint8_t tile = bus_.read(0x2000 | (curr_addr_ & 0x0FFF));
+                    std::uint8_t attribute = bus_.read(0x23c0 | 
+                        (curr_addr_ & 0x0C00) |
+                        ((curr_addr_ & 0x38) >> 4) |
+                        ((curr_addr_ & 0x07) >> 2)
+                    );
                     std::uint8_t palette;
                     if (tile_x % 4 < 2 && tile_y % 4 < 2) {
                         palette = attribute >> 0 & 0x03;
@@ -198,10 +206,14 @@ void Ppu::setOamData(std::uint8_t data) {
 
 void Ppu::setScroll(std::uint8_t scroll) {
     if (write_toggle_) {
-        
+        temp_addr_ &= ~0x001F;
+        temp_addr_ |= (scroll >> 3) & 0x1F;
+        fine_x_ = scroll & 0x07;
         write_toggle_ = false;
     } else {
-
+        temp_addr_ &= ~0x73E0;
+        temp_addr_ |= (scroll & 0x07) << 12;
+        temp_addr_ |= (scroll & 0xF8) << 2;
         write_toggle_ = true;
     }
 }
@@ -210,7 +222,6 @@ void Ppu::setAddr(std::uint8_t addr) {
     if (write_toggle_) {
         temp_addr_ &= ~0xFF00;
         temp_addr_ |= (addr & 0x3F) << 8;
-        temp_addr_ &= ~0x8000;
         write_toggle_ = false;
     } else {
         temp_addr_ &= ~0x00FF;
@@ -231,6 +242,7 @@ std::uint8_t Ppu::getStatus() {
         sprite_zero_ << 6 | 
         sprite_overflow_ << 5;
     vblank_ = false;
+    write_toggle_ = true;
     return status;
 }
 
