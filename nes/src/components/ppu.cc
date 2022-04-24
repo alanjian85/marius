@@ -138,12 +138,13 @@ void Ppu::cycle() {
                         std::uint8_t sprite_index = bit0 | bit1 << 1;
 
                         if (sprite_index != 0x00) {
-                            if (!(attribute & 0x20) || !show_background_ || background_index == 0x00) {
-                                framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F10 + palette * 4 + sprite_index)]);
-                            }
-
                             if (sprite == 0 && show_background_ && background_index != 0x00) {
                                 sprite_zero_ = true;
+                            }
+                            
+                            if (!(attribute & 0x20) || !show_background_ || background_index == 0x00) {
+                                framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F10 + palette * 4 + sprite_index)]);
+                                break;
                             }
                         }
                     }
