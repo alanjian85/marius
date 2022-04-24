@@ -21,7 +21,9 @@ Ppu::Ppu(Framebuffer& framebuffer, PpuBus& bus, Cpu& cpu)
     background_pattern_ = 0x0000;
     sprite_pattern_ = 0x0000;
 
-    addr_ = 0x00;
+    write_toggle_ = true;
+    curr_addr_ = 0x00;
+    temp_addr_ = 0x00;
     addr_inc_ = 1;
     read_buffer_ = 0x00;
 
@@ -42,6 +44,8 @@ void Ppu::reset() {
     background_pattern_ = 0x0000;
     sprite_pattern_ = 0x0000;
 
+    write_toggle_ = true;
+    temp_addr_ = 0x00;
     addr_inc_ = 1;
 
     vblank_nmi_ = false;
@@ -193,13 +197,22 @@ void Ppu::setOamData(std::uint8_t data) {
 }
 
 void Ppu::setAddr(std::uint8_t addr) {
-    addr_ = addr_ << 8 | addr;
-    addr_ &= 0x3FFF;
+    if (write_toggle_) {
+        temp_addr_ &= ~0xFF00;
+        temp_addr_ |= (addr & 0x3F) << 8;
+        temp_addr_ &= ~0x8000;
+        write_toggle_ = false;
+    } else {
+        temp_addr_ &= ~0x00FF;
+        temp_addr_ |= addr;
+        curr_addr_ = temp_addr_;
+        write_toggle_ = true;
+    }
 }
 
 void Ppu::setData(std::uint8_t data) {
-    bus_.write(addr_, data);
-    addr_ += addr_inc_;
+    bus_.write(curr_addr_ & 0x3FFF, data);
+    curr_addr_ += addr_inc_;
 }
 
 std::uint8_t Ppu::getStatus() {
@@ -212,9 +225,9 @@ std::uint8_t Ppu::getStatus() {
 }
 
 std::uint8_t Ppu::getData() {
-    std::uint8_t result = bus_.read(addr_);
-    addr_ += addr_inc_;
-    if (addr_ < 0x3F00) {
+    std::uint8_t result = bus_.read(curr_addr_ & 0x3FFF);
+    curr_addr_ += addr_inc_;
+    if (curr_addr_ < 0x3F00) {
         std::swap(result, read_buffer_);
     }
     return result;
