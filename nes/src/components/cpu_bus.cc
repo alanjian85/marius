@@ -50,6 +50,9 @@ void CpuBus::write(std::uint16_t addr, std::uint8_t val) {
             case 0x4:
                 ppu_->setOamData(val);
                 break;
+            case 0x5:
+                ppu_->setScroll(val);
+                break;
             case 0x6:
                 ppu_->setAddr(val);
                 break;

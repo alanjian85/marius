@@ -24,7 +24,7 @@ std::uint8_t MapperNrom::readChr(std::uint16_t addr) {
 }
 
 void MapperNrom::writeChr(std::uint16_t addr, std::uint8_t val) {
-    throw std::logic_error("Error: Attempted to write to CHR ROM in NROM");
+    //throw std::logic_error("Error: Attempted to write to CHR ROM in NROM");
 }
 
 Mirroring MapperNrom::getMirroring() {

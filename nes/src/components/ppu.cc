@@ -17,13 +17,12 @@ Ppu::Ppu(Framebuffer& framebuffer, PpuBus& bus, Cpu& cpu)
     show_background_ = false;
     show_sprites_ = false;
 
-    nametable_ = 0x2000;
     background_pattern_ = 0x0000;
     sprite_pattern_ = 0x0000;
 
-    fine_x_ = 0x00;
+    fine_x_scroll_ = 0x00;
 
-    write_toggle_ = true;
+    write_toggle_ = false;
     curr_addr_ = 0x00;
     temp_addr_ = 0x00;
     addr_inc_ = 1;
@@ -42,13 +41,12 @@ void Ppu::reset() {
     show_background_ = false;
     show_sprites_ = false;
     
-    nametable_ = 0x2000;
     background_pattern_ = 0x0000;
     sprite_pattern_ = 0x0000;
 
-    fine_x_ = 0x00;
+    fine_x_scroll_ = 0x00;
 
-    write_toggle_ = true;
+    write_toggle_ = false;
     temp_addr_ = 0x00;
     addr_inc_ = 1;
 
@@ -57,6 +55,7 @@ void Ppu::reset() {
 
 void Ppu::cycle() {
     if (scanline_ == 261 && cycle_ == 0) {
+        curr_addr_ = temp_addr_;
         sprite_zero_ = false;
         sprite_overflow_ = false;
         vblank_ = false;
@@ -65,11 +64,13 @@ void Ppu::cycle() {
     }
 
     if (scanline_ < 240) {
-        for (int x = 0; x < 256; ++x) {
-            if (cycle_ == 0) {
+        if (cycle_ == 0) {
+            for (int x = 0; x < 256; ++x) {
                 std::uint8_t background_index;
 
                 if (show_background_) {
+                    int fine_x = (fine_x_scroll_ + x) % 8;
+                    
                     int tile_x = x / 8, tile_y = scanline_ / 8;
                     int block_x = x / 32, block_y = scanline_ / 32;
 
@@ -90,14 +91,23 @@ void Ppu::cycle() {
                         palette = attribute >> 6 & 0x03;
                     }
 
-                    bool bit0 = bus_.read(background_pattern_ + tile * 16 + scanline_ % 8) & 0x80 >> x % 8;
-                    bool bit1 = bus_.read(background_pattern_ + tile * 16 + 8 + scanline_ % 8) & 0x80 >> x % 8;
+                    bool bit0 = bus_.read(background_pattern_ + tile * 16 + scanline_ % 8) & 0x80 >> fine_x;
+                    bool bit1 = bus_.read(background_pattern_ + tile * 16 + 8 + scanline_ % 8) & 0x80 >> fine_x;
                     background_index = bit0 | bit1 << 1;
 
                     if (background_index != 0x00) {
                         framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F00 + palette * 4 + background_index)]);
                     } else {
                         framebuffer_.setPixel(x, scanline_, kPalette[bus_.read(0x3F00)]);
+                    }
+
+                    if (fine_x == 7) {
+                        if ((curr_addr_ & 0x001F) == 31) {
+                            curr_addr_ &= ~0x001F;
+                            curr_addr_ ^= 0x0400;
+                        } else {
+                            ++curr_addr_;
+                        }
                     }
                 }
 
@@ -139,6 +149,29 @@ void Ppu::cycle() {
             }
         }
 
+        if (cycle_ == 256) {
+            if ((curr_addr_ & 0x7000) != 0x7000) {
+                curr_addr_ += 0x1000;
+            } else {
+                curr_addr_ &= ~0x7000;
+                int y = (curr_addr_ & 0x03E0) >> 5;
+                if (y == 29) {
+                    y = 0;
+                    curr_addr_ ^= 0x0800;
+                } else if (y == 31) {
+                    y = 0;
+                } else {
+                    ++y;
+                }
+                curr_addr_ = (curr_addr_ & ~0x03E0) | (y << 5);
+            }
+        }
+
+        if (cycle_ == 257) {
+            curr_addr_ &= ~0x041F;
+            curr_addr_ |= temp_addr_ & 0x041F;
+        }
+
         if (cycle_ == 340) {
             scanline_sprites_.clear();
 
@@ -171,20 +204,8 @@ void Ppu::cycle() {
 }
 
 void Ppu::setCtrl(std::uint8_t ctrl) {
-    switch (ctrl & 0x03) {
-        case 0x00:
-            nametable_ = 0x2000;
-            break;
-        case 0x01:
-            nametable_ = 0x2400;
-            break;
-        case 0x02:
-            nametable_ = 0x2800;
-            break;
-        case 0x03:
-            nametable_ = 0x2C00;
-            break;
-    }
+    temp_addr_ &= ~0x0C00;
+    temp_addr_ |= (ctrl & 0x03) << 10;
     background_pattern_ = (ctrl & 0x10) ? 0x1000 : 0x0000;
     sprite_pattern_ = (ctrl & 0x08) ? 0x1000 : 0x0000;
     addr_inc_ = (ctrl & 0x04) ? 32 : 1;
@@ -205,34 +226,34 @@ void Ppu::setOamData(std::uint8_t data) {
 }
 
 void Ppu::setScroll(std::uint8_t scroll) {
-    if (write_toggle_) {
+    if (!write_toggle_) {
         temp_addr_ &= ~0x001F;
         temp_addr_ |= (scroll >> 3) & 0x1F;
-        fine_x_ = scroll & 0x07;
-        write_toggle_ = false;
+        fine_x_scroll_ = scroll & 0x07;
+        write_toggle_ = true;
     } else {
         temp_addr_ &= ~0x73E0;
         temp_addr_ |= (scroll & 0x07) << 12;
         temp_addr_ |= (scroll & 0xF8) << 2;
-        write_toggle_ = true;
+        write_toggle_ = false;
     }
 }
 
 void Ppu::setAddr(std::uint8_t addr) {
-    if (write_toggle_) {
+    if (!write_toggle_) {
         temp_addr_ &= ~0xFF00;
         temp_addr_ |= (addr & 0x3F) << 8;
-        write_toggle_ = false;
+        write_toggle_ = true;
     } else {
         temp_addr_ &= ~0x00FF;
         temp_addr_ |= addr;
         curr_addr_ = temp_addr_;
-        write_toggle_ = true;
+        write_toggle_ = false;
     }
 }
 
 void Ppu::setData(std::uint8_t data) {
-    bus_.write(curr_addr_ & 0x3FFF, data);
+    bus_.write(curr_addr_, data);
     curr_addr_ += addr_inc_;
 }
 
@@ -242,12 +263,12 @@ std::uint8_t Ppu::getStatus() {
         sprite_zero_ << 6 | 
         sprite_overflow_ << 5;
     vblank_ = false;
-    write_toggle_ = true;
+    write_toggle_ = false;
     return status;
 }
 
 std::uint8_t Ppu::getData() {
-    std::uint8_t result = bus_.read(curr_addr_ & 0x3FFF);
+    std::uint8_t result = bus_.read(curr_addr_);
     curr_addr_ += addr_inc_;
     if (curr_addr_ < 0x3F00) {
         std::swap(result, read_buffer_);
