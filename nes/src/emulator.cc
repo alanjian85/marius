@@ -47,7 +47,7 @@ void Emulator::run(std::istream& rom) {
     if (!mapper) {
         throw std::runtime_error("Error: Unknown mapper");
     }
-    Framebuffer framebuffer(renderer, Ppu::kWidth, Ppu::kWidth);
+    Framebuffer framebuffer(renderer, Ppu::kWidth, Ppu::kHeight);
     
     CpuBus cpu_bus(*mapper);
     Cpu cpu(cpu_bus);

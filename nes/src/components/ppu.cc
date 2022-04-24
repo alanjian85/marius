@@ -63,7 +63,12 @@ void Ppu::cycle() {
             scanline_sprites_.clear();
         }
 
-        if (cycle_ >= 284  && cycle_ <= 304 && (show_background_ || show_sprites_)) {
+        if (cycle_ == 257 && (show_background_ || show_sprites_)) {
+            curr_addr_ &= ~0x041F;
+            curr_addr_ |= temp_addr_ & 0x041F;
+        }
+
+        if (cycle_ >= 284  && cycle_ <= 304 && (show_background_ && show_sprites_)) {
             curr_addr_ &= ~0x7BE0;
             curr_addr_ |= temp_addr_ & 0x7BE0;
         }
@@ -164,6 +169,11 @@ void Ppu::cycle() {
             }
         }
 
+        if (cycle_ == 257 && (show_background_ || show_sprites_)) {
+            curr_addr_ &= ~0x041F;
+            curr_addr_ |= temp_addr_ & 0x041F;
+        }
+
         if (cycle_ == 340) {
             scanline_sprites_.clear();
 
@@ -178,11 +188,6 @@ void Ppu::cycle() {
                 sprite_overflow_ = true;
             }
         }
-    }
-
-    if (cycle_ == 257 && (show_background_ || show_sprites_)) {
-        curr_addr_ &= ~0x041F;
-        curr_addr_ |= temp_addr_ & 0x041F;
     }
 
     if (scanline_ == 241 && cycle_ == 0) {
