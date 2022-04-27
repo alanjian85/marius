@@ -11,9 +11,9 @@ NES Emulation Software
 * PPU Scrolling
 
 ## Dependencies
-* [{fmt}](https://fmt.dev/latest/index.html)
 * [JSON for Modern C++](https://json.nlohmann.me/)
 * [SDL2](https://www.libsdl.org/)
+* [spdlog](https://github.com/gabime/spdlog)
 
 ## References
 * [NESdev Wiki](https://www.nesdev.org/wiki/Nesdev_Wiki)

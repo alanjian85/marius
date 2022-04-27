@@ -24,9 +24,9 @@ set(NES_SRCS
 )
 add_executable(nes ${NES_SRCS})
 
-find_package(fmt REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(SDL2 REQUIRED)
+find_package(spdlog REQUIRED)
 
 target_include_directories(nes PRIVATE
     src
@@ -34,7 +34,7 @@ target_include_directories(nes PRIVATE
 )
 
 target_link_libraries(nes
-    fmt::fmt
     nlohmann_json::nlohmann_json
     ${SDL2_LIBRARIES}
+    spdlog::spdlog
 )

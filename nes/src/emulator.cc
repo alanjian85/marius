@@ -1,9 +1,8 @@
 #include "emulator.h"
 using namespace nes;
 
-#include <stdexcept>
-
 #include <SDL.h>
+#include <spdlog/spdlog.h>
 
 #include "components/cpu_bus.h"
 #include "components/cpu.h"
@@ -18,7 +17,9 @@ Emulator::Emulator(Keymap keymap1, Keymap keymap2)
 {
     cycle_interval_ = std::chrono::nanoseconds(559);
 
-    SDL_Init(SDL_INIT_VIDEO);
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        spdlog::error("Failed to initialize SDL");
+    }
 }
 
 Emulator::~Emulator() {
@@ -34,18 +35,29 @@ void Emulator::run(std::istream& rom) {
         0
     );
 
+    if (!window) {
+        spdlog::error("Failed to create window");
+        return;
+    }
+
     auto renderer = SDL_CreateRenderer(
         window, 
         -1, 
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
     );
+
+    if (!renderer) {
+        spdlog::error("Failed to create renderer");
+        return;
+    }
     
     Cartridge cartridge;
     rom >> cartridge;
 
     auto mapper = MakeMapper(cartridge);
     if (!mapper) {
-        throw std::runtime_error("Error: Unknown mapper");
+        spdlog::error("Unknown mapper number: {:03}", cartridge.getMapperNum());
+        return;
     }
     Framebuffer framebuffer(renderer, Ppu::kWidth, Ppu::kHeight);
     
