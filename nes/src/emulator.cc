@@ -15,51 +15,49 @@ using namespace nes;
 Emulator::Emulator(Keymap keymap1, Keymap keymap2) 
     : keymap1_(keymap1), keymap2_(keymap2)
 {
+    width_ = 1024;
+    height_ = 960;
     cycle_interval_ = std::chrono::nanoseconds(559);
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        spdlog::error("Failed to initialize SDL");
+        spdlog::error("Failed to initialize SDL: {}", SDL_GetError());
+    }
+
+    window_ = SDL_CreateWindow(
+        "NES",
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+        width_, height_,
+        0
+    );
+    if (!window_) {
+        spdlog::error("Failed to create window: {}", SDL_GetError());
+    }
+
+    renderer_ = SDL_CreateRenderer(
+        window_, 
+        -1, 
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+    );
+    if (!renderer_) {
+        spdlog::error("Failed to create renderer: {}", SDL_GetError());
     }
 }
 
 Emulator::~Emulator() {
+    SDL_DestroyRenderer(renderer_);
+    SDL_DestroyWindow(window_);
     SDL_Quit();
 }
 
 void Emulator::run(std::istream& rom) {
-    const int width = 1024, height = 960;
-    auto window = SDL_CreateWindow(
-        "NES",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        width, height,
-        0
-    );
-
-    if (!window) {
-        spdlog::error("Failed to create window");
-        return;
-    }
-
-    auto renderer = SDL_CreateRenderer(
-        window, 
-        -1, 
-        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
-    );
-
-    if (!renderer) {
-        spdlog::error("Failed to create renderer");
-        return;
-    }
-    
     Cartridge cartridge;
     rom >> cartridge;
 
     auto mapper = MakeMapper(cartridge);
     if (!mapper) {
         spdlog::error("Unknown mapper number: {:03}", cartridge.getMapperNum());
-        return;
     }
-    Framebuffer framebuffer(renderer, Ppu::kWidth, Ppu::kHeight);
+    Framebuffer framebuffer(renderer_, Ppu::kWidth, Ppu::kHeight);
     
     CpuBus cpu_bus(*mapper);
     Cpu cpu(cpu_bus);
@@ -76,17 +74,17 @@ void Emulator::run(std::istream& rom) {
     cpu_bus.setController2(controller2);
 
     SDL_Rect rect;
-    if (static_cast<float>(width) / height > Ppu::kAspect) {
-        int screen_width = height * Ppu::kAspect;
-        rect.x = (width - screen_width) / 2;
+    if (static_cast<float>(width_) / height_ > Ppu::kAspect) {
+        int screen_width = height_ * Ppu::kAspect;
+        rect.x = (width_ - screen_width) / 2;
         rect.y = 0;
         rect.w = screen_width;
-        rect.h = height;
+        rect.h = height_;
     } else {
-        int screen_height = width / Ppu::kAspect;
+        int screen_height = width_ / Ppu::kAspect;
         rect.x = 0;
-        rect.y = (height - screen_height) / 2;
-        rect.w = width;
+        rect.y = (height_ - screen_height) / 2;
+        rect.w = width_;
         rect.h = screen_height;
     }
 
@@ -117,16 +115,12 @@ void Emulator::run(std::istream& rom) {
         prev_time = Clock::now();
 
         if (!framebuffer.isLocked()) {
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            SDL_RenderClear(renderer);
+            SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
+            SDL_RenderClear(renderer_);
 
-            SDL_RenderCopy(renderer, framebuffer.getTexture(), nullptr, &rect);
+            SDL_RenderCopy(renderer_, framebuffer.getTexture(), nullptr, &rect);
 
-            SDL_RenderPresent(renderer);
+            SDL_RenderPresent(renderer_);
         }      
     }
-
-    framebuffer.destroy();
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
 }

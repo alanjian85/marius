@@ -16,8 +16,6 @@ namespace nes {
 
         ~Framebuffer();
 
-        void destroy();
-
         [[nodiscard]] SDL_Texture* getTexture() const;
 
         void lock();

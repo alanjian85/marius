@@ -21,7 +21,11 @@ namespace nes {
     private:
         using Clock = std::chrono::high_resolution_clock;
 
+        int width_, height_;
         std::chrono::nanoseconds cycle_interval_;
+
+        SDL_Window* window_;
+        SDL_Renderer* renderer_;
 
         Keymap keymap1_;
         Keymap keymap2_;

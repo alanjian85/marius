@@ -1,6 +1,8 @@
 #include "framebuffer.h"
 using namespace nes;
 
+#include <spdlog/spdlog.h>
+
 Framebuffer::Framebuffer(SDL_Renderer* renderer, int width, int height) {
     texture_ = SDL_CreateTexture(
         renderer, 
@@ -9,17 +11,14 @@ Framebuffer::Framebuffer(SDL_Renderer* renderer, int width, int height) {
         width, height
     );
     pixels_ = nullptr;
-}
 
-Framebuffer::~Framebuffer() {
-    if (texture_) {
-        SDL_DestroyTexture(texture_);
+    if (!texture_) {
+        spdlog::error("Failed to create framebuffer texture: {}", SDL_GetError());
     }
 }
 
-void Framebuffer::destroy() {
+Framebuffer::~Framebuffer() {
     SDL_DestroyTexture(texture_);
-    texture_ = nullptr;
 }
 
 SDL_Texture* Framebuffer::getTexture() const {
