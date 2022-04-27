@@ -8,6 +8,8 @@ namespace nes {
     public:
         using Mapper::Mapper;
 
+        virtual std::string getName() const override;
+
         virtual std::uint8_t readPrg(std::uint16_t addr) override;
 
         virtual void writePrg(std::uint16_t addr, std::uint8_t val) override;

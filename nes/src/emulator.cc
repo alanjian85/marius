@@ -51,8 +51,11 @@ Emulator::Emulator(const std::filesystem::path& path, Keymap keymap1, Keymap key
 
 Emulator::~Emulator() {
     SDL_DestroyRenderer(renderer_);
+    spdlog::debug("Renderer destroyed");
     SDL_DestroyWindow(window_);
+    spdlog::debug("Window destroyed");
     SDL_Quit();
+    spdlog::debug("SDL quit");
 }
 
 void Emulator::run() {
@@ -61,8 +64,11 @@ void Emulator::run() {
 
     auto mapper = MakeMapper(cartridge);
     if (!mapper) {
-        spdlog::error("Unknown mapper number: {:03}", cartridge.getMapperNum());
+        spdlog::error("Unknown mapper");
+        return;
     }
+    spdlog::info("Mapper: {}", mapper->getName());
+
     Framebuffer framebuffer(renderer_, Ppu::kWidth, Ppu::kHeight);
     
     CpuBus cpu_bus(*mapper);

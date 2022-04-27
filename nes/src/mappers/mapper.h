@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
 
 #include "io/cartridge.h"
 
@@ -12,6 +13,8 @@ namespace nes {
         Mapper(Cartridge& cartridge);
 
         virtual ~Mapper() noexcept = default;
+
+        [[nodiscard]] virtual std::string getName() const = 0;
 
         [[nodiscard]] virtual std::uint8_t readPrg(std::uint16_t addr) = 0;
 

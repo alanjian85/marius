@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 
 #include "emulator.h"
 #include "io/keymap.h"
