@@ -2,14 +2,15 @@
 #define NES_EMULATOR_H_
 
 #include <chrono>
-#include <iostream>
+#include <filesystem>
+#include <fstream>
 
 #include "io/keymap.h"
 
 namespace nes {
     class Emulator final {
     public:
-        Emulator(Keymap keymap1, Keymap keymap2);
+        Emulator(const std::filesystem::path& path, Keymap keymap1, Keymap keymap2);
 
         Emulator(const Emulator&) = delete;
 
@@ -17,12 +18,14 @@ namespace nes {
 
         ~Emulator();
 
-        void run(std::istream& rom);
+        void run();
     private:
         using Clock = std::chrono::high_resolution_clock;
 
         int width_, height_;
         std::chrono::nanoseconds cycle_interval_;
+
+        std::ifstream rom_;
 
         SDL_Window* window_;
         SDL_Renderer* renderer_;

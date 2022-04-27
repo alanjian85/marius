@@ -3,6 +3,7 @@ using namespace nes;
 
 #include <SDL.h>
 #include <spdlog/spdlog.h>
+#include <spdlog/fmt/fmt.h>
 
 #include "components/cpu_bus.h"
 #include "components/cpu.h"
@@ -12,19 +13,24 @@ using namespace nes;
 #include "io/controller.h"
 #include "mappers/mapper.h"
 
-Emulator::Emulator(Keymap keymap1, Keymap keymap2) 
+Emulator::Emulator(const std::filesystem::path& path, Keymap keymap1, Keymap keymap2) 
     : keymap1_(keymap1), keymap2_(keymap2)
 {
     width_ = 1024;
     height_ = 960;
     cycle_interval_ = std::chrono::nanoseconds(559);
 
+    rom_.open(path);
+    if (!rom_.is_open()) {
+        spdlog::error("Couldn't open ROM file: {}", path.string());
+    }
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         spdlog::error("Failed to initialize SDL: {}", SDL_GetError());
     }
 
     window_ = SDL_CreateWindow(
-        "NES",
+        fmt::format("NES {}", path.filename().string()).c_str(),
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         width_, height_,
         0
@@ -49,9 +55,9 @@ Emulator::~Emulator() {
     SDL_Quit();
 }
 
-void Emulator::run(std::istream& rom) {
+void Emulator::run() {
     Cartridge cartridge;
-    rom >> cartridge;
+    rom_ >> cartridge;
 
     auto mapper = MakeMapper(cartridge);
     if (!mapper) {
