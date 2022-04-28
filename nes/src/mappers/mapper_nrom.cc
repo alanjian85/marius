@@ -19,7 +19,7 @@ std::uint8_t MapperNrom::readPrg(std::uint16_t addr) {
 }
 
 void MapperNrom::writePrg(std::uint16_t addr, std::uint8_t val) {
-    spdlog::error("Attempted to write PRG ROM");
+    spdlog::warn("Attempted to write PRG ROM");
 }
 
 std::uint8_t MapperNrom::readChr(std::uint16_t addr) {

@@ -6,9 +6,9 @@ NES Emulation Software
 * Configurable key mapping
 * Basic 6502 Emulation
 * iNES ROM loading
+* PPU Scrolling
 
 ## TODO
-* PPU Scrolling
 
 ## Dependencies
 * [JSON for Modern C++](https://json.nlohmann.me/)
