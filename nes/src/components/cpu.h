@@ -67,8 +67,9 @@ namespace nes {
         void setN(bool val);
         void setZN(std::uint8_t val);
 
-        [[nodiscard]] bool execBranch(std::uint8_t opcode);
+        [[nodiscard]] bool execOpcode(std::uint8_t opcode);
         [[nodiscard]] bool execImplied(std::uint8_t opcode);
+        [[nodiscard]] bool execBranch(std::uint8_t opcode);
         [[nodiscard]] bool execGroup0(std::uint8_t opcode);
         [[nodiscard]] bool execGroup1(std::uint8_t opcode);
         [[nodiscard]] bool execGroup2(std::uint8_t opcode);

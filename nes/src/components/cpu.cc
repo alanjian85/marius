@@ -48,6 +48,8 @@ void Cpu::reset() {
 void Cpu::cycle() {
     if (cycle_-- == 0) {
         auto opcode = readByte(pc_++);
+        if (execOpcode(opcode))
+            return;
         if (execImplied(opcode))
             return;
         if (execBranch(opcode))
@@ -217,119 +219,149 @@ void Cpu::setZN(std::uint8_t val) {
     setN(val & 0x80);
 }
 
+bool Cpu::execOpcode(std::uint8_t opcode) {
+    switch (opcode) {
+        case 0x20:
+            push((pc_ + 1) >> 8);
+            push(pc_ + 1);
+            pc_ = readAddress(pc_);
+            spdlog::trace("JSR");
+            break;
+        default:
+            return false;
+    }
+    return true;
+}
+
 bool Cpu::execImplied(std::uint8_t opcode) {
     switch (opcode) {
-        case 0x00: // BRK
+        case 0x00:
             ++pc_;
             push(pc_ >> 8);
             push(pc_);
             push(p_ | 1 << 5 | kB);
             setI(true);
             pc_ = readAddress(kBrkVector);
+            spdlog::trace("BRK");
             break;
-        case 0x20: // JSR
-            {
-                push((pc_ + 1) >> 8);
-                push(pc_ + 1);
-                pc_ = readAddress(pc_);
-            }
-            break;
-        case 0x40: // RTI
+        case 0x40:
             p_ = pull() & 0xCF;
             pc_ = pull();
             pc_ |= pull() << 8;
             ++cycle_;
+            spdlog::trace("RTI");
             break;
-        case 0x60: // RTS
+        case 0x60:
             pc_ = pull();
             pc_ |= pull() << 8;
             ++cycle_;
             ++pc_;
             ++cycle_;
+            spdlog::trace("RTS");
             break;
-        case 0x08: // PHP
+        case 0x08:
             push(p_ | 1 << 5 | kB);
+            spdlog::trace("PHP");
             break;
-        case 0x18: // CLC
+        case 0x18:
             setC(false);
+            spdlog::trace("CLC");
             break;
-        case 0x28: // PLP
+        case 0x28:
             p_ = pull() & 0xCF;
             ++cycle_;
+            spdlog::trace("PLP");
             break;
-        case 0x38: // SEC
+        case 0x38:
             setC(true);
+            spdlog::trace("SEC");
             break;
-        case 0x48: // PHA
+        case 0x48:
             push(a_);
+            spdlog::trace("PHA");
             break;
-        case 0x58: // CLI
+        case 0x58:
             setI(false);
+            spdlog::trace("CLI");
             break;
-        case 0x68: // PLA
+        case 0x68:
             a_ = pull();
             ++cycle_;
             setZN(a_);
+            spdlog::trace("PLA");
             break;
-        case 0x78: // SEI
+        case 0x78:
             setI(true);
+            spdlog::trace("SEI");
             break;
-        case 0x88: // DEY
+        case 0x88:
             --y_;
             setZN(y_);
+            spdlog::trace("DEY");
             break;
-        case 0x98: // TYA
+        case 0x98:
             a_ = y_;
             setZN(a_);
+            spdlog::trace("TYA");
             break;
-        case 0xA8: // TAY
+        case 0xA8:
             y_ = a_;
             setZN(y_);
+            spdlog::trace("TAY");
             break;
-        case 0xB8: // CLV
+        case 0xB8:
             setV(false);
+            spdlog::trace("CLV");
             break;
-        case 0xC8: // INY
+        case 0xC8:
             ++y_;
             setZN(y_);
+            spdlog::trace("INY");
             break;
-        case 0xD8: // CLD
+        case 0xD8:
             setD(false);
+            spdlog::trace("CLD");
             break;
-        case 0xE8: // INX
+        case 0xE8:
             ++x_;
             setZN(x_);
+            spdlog::trace("INX");
             break;
-        case 0xF8: // SED
+        case 0xF8:
             setD(true);
+            spdlog::trace("SED");
             break;
-        case 0x8A: // TXA
+        case 0x8A:
             a_ = x_;
             setZN(a_);
+            spdlog::trace("TXA");
             break;
-        case 0x9A: // TXS
+        case 0x9A:
             s_ = x_;
+            spdlog::trace("TXS");
             break;
-        case 0xAA: // TAX
+        case 0xAA:
             x_ = a_;
             setZN(x_);
+            spdlog::trace("TAX");
             break;
-        case 0xBA: // TSX
+        case 0xBA:
             x_ = s_;
             setZN(x_);
+            spdlog::trace("TSX");
             break;
-        case 0xCA: // DEX
+        case 0xCA:
             --x_;
             setZN(x_);
+            spdlog::trace("DEX");
             break;
-        case 0xEA: // NOP
+        case 0xEA:
+            spdlog::trace("NOP");
             break;
         default:
             return false;
     }
-    if (opcode != 0x20) { // JSR
-        ++cycle_;
-    }
+    ++cycle_;
     return true;
 }
 
