@@ -225,7 +225,7 @@ bool Cpu::execOpcode(std::uint8_t opcode) {
             push((pc_ + 1) >> 8);
             push(pc_ + 1);
             pc_ = readAddress(pc_);
-            spdlog::trace("JSR");
+            spdlog::debug("JSR");
             break;
         default:
             return false;
@@ -242,14 +242,14 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             push(p_ | 1 << 5 | kB);
             setI(true);
             pc_ = readAddress(kBrkVector);
-            spdlog::trace("BRK");
+            spdlog::debug("BRK");
             break;
         case 0x40:
             p_ = pull() & 0xCF;
             pc_ = pull();
             pc_ |= pull() << 8;
             ++cycle_;
-            spdlog::trace("RTI");
+            spdlog::debug("RTI");
             break;
         case 0x60:
             pc_ = pull();
@@ -257,106 +257,106 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             ++cycle_;
             ++pc_;
             ++cycle_;
-            spdlog::trace("RTS");
+            spdlog::debug("RTS");
             break;
         case 0x08:
             push(p_ | 1 << 5 | kB);
-            spdlog::trace("PHP");
+            spdlog::debug("PHP");
             break;
         case 0x18:
             setC(false);
-            spdlog::trace("CLC");
+            spdlog::debug("CLC");
             break;
         case 0x28:
             p_ = pull() & 0xCF;
             ++cycle_;
-            spdlog::trace("PLP");
+            spdlog::debug("PLP");
             break;
         case 0x38:
             setC(true);
-            spdlog::trace("SEC");
+            spdlog::debug("SEC");
             break;
         case 0x48:
             push(a_);
-            spdlog::trace("PHA");
+            spdlog::debug("PHA");
             break;
         case 0x58:
             setI(false);
-            spdlog::trace("CLI");
+            spdlog::debug("CLI");
             break;
         case 0x68:
             a_ = pull();
             ++cycle_;
             setZN(a_);
-            spdlog::trace("PLA");
+            spdlog::debug("PLA");
             break;
         case 0x78:
             setI(true);
-            spdlog::trace("SEI");
+            spdlog::debug("SEI");
             break;
         case 0x88:
             --y_;
             setZN(y_);
-            spdlog::trace("DEY");
+            spdlog::debug("DEY");
             break;
         case 0x98:
             a_ = y_;
             setZN(a_);
-            spdlog::trace("TYA");
+            spdlog::debug("TYA");
             break;
         case 0xA8:
             y_ = a_;
             setZN(y_);
-            spdlog::trace("TAY");
+            spdlog::debug("TAY");
             break;
         case 0xB8:
             setV(false);
-            spdlog::trace("CLV");
+            spdlog::debug("CLV");
             break;
         case 0xC8:
             ++y_;
             setZN(y_);
-            spdlog::trace("INY");
+            spdlog::debug("INY");
             break;
         case 0xD8:
             setD(false);
-            spdlog::trace("CLD");
+            spdlog::debug("CLD");
             break;
         case 0xE8:
             ++x_;
             setZN(x_);
-            spdlog::trace("INX");
+            spdlog::debug("INX");
             break;
         case 0xF8:
             setD(true);
-            spdlog::trace("SED");
+            spdlog::debug("SED");
             break;
         case 0x8A:
             a_ = x_;
             setZN(a_);
-            spdlog::trace("TXA");
+            spdlog::debug("TXA");
             break;
         case 0x9A:
             s_ = x_;
-            spdlog::trace("TXS");
+            spdlog::debug("TXS");
             break;
         case 0xAA:
             x_ = a_;
             setZN(x_);
-            spdlog::trace("TAX");
+            spdlog::debug("TAX");
             break;
         case 0xBA:
             x_ = s_;
             setZN(x_);
-            spdlog::trace("TSX");
+            spdlog::debug("TSX");
             break;
         case 0xCA:
             --x_;
             setZN(x_);
-            spdlog::trace("DEX");
+            spdlog::debug("DEX");
             break;
         case 0xEA:
-            spdlog::trace("NOP");
+            spdlog::debug("NOP");
             break;
         default:
             return false;
@@ -372,37 +372,37 @@ bool Cpu::execBranch(std::uint8_t opcode) {
             case 0b00:
                 if (condition) {
                     condition = p_ & kN;
-                    spdlog::trace("BMI rel");
+                    spdlog::debug("BMI rel");
                 } else {
                     condition = !(p_ & kN);
-                    spdlog::trace("BPL rel");
+                    spdlog::debug("BPL rel");
                 }
                 break;
             case 0b01:
                 if (condition) {
                     condition = p_ & kV;
-                    spdlog::trace("BVS rel");
+                    spdlog::debug("BVS rel");
                 } else {
                     condition = !(p_ & kV);
-                    spdlog::trace("BVC rel");
+                    spdlog::debug("BVC rel");
                 }
                 break;
             case 0b10:
                 if (condition) {
                     condition = p_ & kC;
-                    spdlog::trace("BCS rel");
+                    spdlog::debug("BCS rel");
                 } else {
                     condition = !(p_ & kC);
-                    spdlog::trace("BCC rel");
+                    spdlog::debug("BCC rel");
                 }
                 break;
             case 0b11:
                 if (condition) {
                     condition = p_ & kZ;
-                    spdlog::trace("BEQ rel");
+                    spdlog::debug("BEQ rel");
                 } else {
                     condition = !(p_ & kZ);
-                    spdlog::trace("BNE rel");
+                    spdlog::debug("BNE rel");
                 }
                 break;
         }

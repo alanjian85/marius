@@ -51,11 +51,11 @@ Emulator::Emulator(const std::filesystem::path& path, Keymap keymap1, Keymap key
 
 Emulator::~Emulator() {
     SDL_DestroyRenderer(renderer_);
-    spdlog::debug("Renderer destroyed");
+    spdlog::info("Renderer destroyed");
     SDL_DestroyWindow(window_);
-    spdlog::debug("Window destroyed");
+    spdlog::info("Window destroyed");
     SDL_Quit();
-    spdlog::debug("SDL quit");
+    spdlog::info("SDL quit");
 }
 
 void Emulator::run() {
