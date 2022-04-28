@@ -370,16 +370,40 @@ bool Cpu::execBranch(std::uint8_t opcode) {
         bool condition = opcode & 0x20;
         switch ((opcode & 0xC0) >> 6) {
             case 0b00:
-                condition = condition == static_cast<bool>(p_ & kN);
+                if (condition) {
+                    condition = p_ & kN;
+                    spdlog::trace("BMI rel");
+                } else {
+                    condition = !(p_ & kN);
+                    spdlog::trace("BPL rel");
+                }
                 break;
             case 0b01:
-                condition = condition == static_cast<bool>(p_ & kV);
+                if (condition) {
+                    condition = p_ & kV;
+                    spdlog::trace("BVS rel");
+                } else {
+                    condition = !(p_ & kV);
+                    spdlog::trace("BVC rel");
+                }
                 break;
             case 0b10:
-                condition = condition == static_cast<bool>(p_ & kC);
+                if (condition) {
+                    condition = p_ & kC;
+                    spdlog::trace("BCS rel");
+                } else {
+                    condition = !(p_ & kC);
+                    spdlog::trace("BCC rel");
+                }
                 break;
             case 0b11:
-                condition = condition == static_cast<bool>(p_ & kZ);
+                if (condition) {
+                    condition = p_ & kZ;
+                    spdlog::trace("BEQ rel");
+                } else {
+                    condition = !(p_ & kZ);
+                    spdlog::trace("BNE rel");
+                }
                 break;
         }
 
