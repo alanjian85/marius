@@ -110,6 +110,11 @@ void Emulator::run() {
                 case SDL_QUIT:
                     quit = true;
                     break;
+                case SDL_KEYDOWN:
+                    if (event.key.keysym.sym == SDLK_F1) {
+                        spdlog::dump_backtrace();
+                    }
+                    break;
             }
         }
 

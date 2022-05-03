@@ -71,6 +71,8 @@ int main(int argc, char** argv) {
         keymap2.right = SDL_SCANCODE_RIGHT;
     }
 
+    spdlog::enable_backtrace(32);
+
     Emulator emulator(argv[1], keymap1, keymap2);
     emulator.run();
 

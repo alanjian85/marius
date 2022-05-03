@@ -225,7 +225,7 @@ bool Cpu::execOpcode(std::uint8_t opcode) {
             push((pc_ + 1) >> 8);
             push(pc_ + 1);
             pc_ = readAddress(pc_);
-            spdlog::debug("JSR");
+            spdlog::debug("JSR abs");
             break;
         default:
             return false;
@@ -242,14 +242,14 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             push(p_ | 1 << 5 | kB);
             setI(true);
             pc_ = readAddress(kBrkVector);
-            spdlog::debug("BRK");
+            spdlog::debug("BRK impl");
             break;
         case 0x40:
             p_ = pull() & 0xCF;
             pc_ = pull();
             pc_ |= pull() << 8;
             ++cycle_;
-            spdlog::debug("RTI");
+            spdlog::debug("RTI impl");
             break;
         case 0x60:
             pc_ = pull();
@@ -257,106 +257,106 @@ bool Cpu::execImplied(std::uint8_t opcode) {
             ++cycle_;
             ++pc_;
             ++cycle_;
-            spdlog::debug("RTS");
+            spdlog::debug("RTS impl");
             break;
         case 0x08:
             push(p_ | 1 << 5 | kB);
-            spdlog::debug("PHP");
+            spdlog::debug("PHP impl");
             break;
         case 0x18:
             setC(false);
-            spdlog::debug("CLC");
+            spdlog::debug("CLC impl");
             break;
         case 0x28:
             p_ = pull() & 0xCF;
             ++cycle_;
-            spdlog::debug("PLP");
+            spdlog::debug("PLP impl");
             break;
         case 0x38:
             setC(true);
-            spdlog::debug("SEC");
+            spdlog::debug("SEC impl");
             break;
         case 0x48:
             push(a_);
-            spdlog::debug("PHA");
+            spdlog::debug("PHA impl");
             break;
         case 0x58:
             setI(false);
-            spdlog::debug("CLI");
+            spdlog::debug("CLI impl");
             break;
         case 0x68:
             a_ = pull();
             ++cycle_;
             setZN(a_);
-            spdlog::debug("PLA");
+            spdlog::debug("PLA impl");
             break;
         case 0x78:
             setI(true);
-            spdlog::debug("SEI");
+            spdlog::debug("SEI impl");
             break;
         case 0x88:
             --y_;
             setZN(y_);
-            spdlog::debug("DEY");
+            spdlog::debug("DEY impl");
             break;
         case 0x98:
             a_ = y_;
             setZN(a_);
-            spdlog::debug("TYA");
+            spdlog::debug("TYA impl");
             break;
         case 0xA8:
             y_ = a_;
             setZN(y_);
-            spdlog::debug("TAY");
+            spdlog::debug("TAY impl");
             break;
         case 0xB8:
             setV(false);
-            spdlog::debug("CLV");
+            spdlog::debug("CLV impl");
             break;
         case 0xC8:
             ++y_;
             setZN(y_);
-            spdlog::debug("INY");
+            spdlog::debug("INY impl");
             break;
         case 0xD8:
             setD(false);
-            spdlog::debug("CLD");
+            spdlog::debug("CLD impl");
             break;
         case 0xE8:
             ++x_;
             setZN(x_);
-            spdlog::debug("INX");
+            spdlog::debug("INX impl");
             break;
         case 0xF8:
             setD(true);
-            spdlog::debug("SED");
+            spdlog::debug("SED impl");
             break;
         case 0x8A:
             a_ = x_;
             setZN(a_);
-            spdlog::debug("TXA");
+            spdlog::debug("TXA impl");
             break;
         case 0x9A:
             s_ = x_;
-            spdlog::debug("TXS");
+            spdlog::debug("TXS impl");
             break;
         case 0xAA:
             x_ = a_;
             setZN(x_);
-            spdlog::debug("TAX");
+            spdlog::debug("TAX impl");
             break;
         case 0xBA:
             x_ = s_;
             setZN(x_);
-            spdlog::debug("TSX");
+            spdlog::debug("TSX impl");
             break;
         case 0xCA:
             --x_;
             setZN(x_);
-            spdlog::debug("DEX");
+            spdlog::debug("DEX impl");
             break;
         case 0xEA:
-            spdlog::debug("NOP");
+            spdlog::debug("NOP impl");
             break;
         default:
             return false;
@@ -420,56 +420,68 @@ bool Cpu::execBranch(std::uint8_t opcode) {
 }
 
 bool Cpu::execGroup0(std::uint8_t opcode) {
+    std::string_view instr, mode;
     if ((opcode & 0x03) == 0x00) {
         switch ((opcode & 0x1C) >> 2) {
             case 0b000:
                 addrImmediate();
+                mode = "#";
                 break;
             case 0b001:
                 addrZeroPage();
+                mode = "zpg";
                 break;
             case 0b011:
                 if (opcode == 0x6C) { // JMP (abs)
                     addrIndirect();
+                    mode = "ind";
                 } else {
                     addrAbsolute();
+                    mode = "abs";
                 }
                 break;
             case 0b101:
                 addrZeroPageX();
+                mode = "zpg, X";
                 break;
             case 0b111:
                 addrAbsoluteX();
+                mode = "abs, X";
                 break;
             default:
                 return false;
         }
         switch ((opcode & 0xE0) >> 5) {
-            case 0b001: // BIT
+            case 0b001:
                 {
-                    auto operand = readByte(addr_);
+                    std::uint8_t operand = readByte(addr_);
                     setZ(!(operand & a_));
                     setV(operand & 0x40);
                     setN(operand & 0x80);
                 }
+                instr = "BIT";
                 break;
-            case 0b010: // JMP
-            case 0b011: // JMP (abs)
+            case 0b010:
+            case 0b011:
                 pc_ = addr_;
+                instr = "JMP";
                 break;
-            case 0b100: // STY
+            case 0b100:
                 writeByte(addr_, y_);
+                instr = "STY";
                 break;
-            case 0b101: // LDY
+            case 0b101:
                 y_ = readByte(addr_);
                 setZN(y_);
+                instr = "LDY";
                 break;
-            case 0b110: // CPY
+            case 0b110:
                 {
                     std::uint16_t diff = y_ - readByte(addr_);
                     setC(!(diff & 0x100));
                     setZN(diff);
                 }
+                instr = "CPY";
                 break;
             case 0b111: // CPX
                 {
@@ -477,154 +489,187 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
                     setC(!(diff & 0x100));
                     setZN(diff);
                 }
+                instr = "CPX";
                 break;
         }
+        spdlog::debug("{} {}", instr, mode);
         return true;
     }
     return false;
 }
 
 bool Cpu::execGroup1(std::uint8_t opcode) {
+    std::string_view instr, mode;
     if ((opcode & 0x03) == 0x01) {
         std::uint16_t addr;
         switch ((opcode & 0x1C) >> 2) {
             case 0b000:
                 addrIndexedIndirect();
+                mode = "X, ind";
                 break;
             case 0b001:
                 addrZeroPage();
+                mode = "zpg";
                 break;
             case 0b010:
                 addrImmediate();
+                mode = "#";
                 break;
             case 0b011:
                 addrAbsolute();
+                mode = "abs";
                 break;
             case 0b100:
                 addrIndirectIndexed();
+                mode = "ind, Y";
                 break;
             case 0b101:
                 addrZeroPageX();
+                mode = "zpg, X";
                 break;
             case 0b110:
                 addrAbsoluteY();
+                mode = "abs, Y";
                 break;
             case 0b111:
                 addrAbsoluteX();
+                mode = "abs, X";
                 break;
         }
         switch ((opcode & 0xE0) >> 5) {
-            case 0b000: // ORA
+            case 0b000:
                 a_ |= readByte(addr_);
                 setZN(a_);
+                instr = "ORA";
                 break;
-            case 0b001: // AND
+            case 0b001:
                 a_ &= readByte(addr_);
                 setZN(a_);
+                instr = "AND";
                 break;
-            case 0b010: // EOR
+            case 0b010:
                 a_ ^= readByte(addr_);
                 setZN(a_);
+                instr = "EOR";
                 break;
-            case 0b011: // ADC
+            case 0b011:
                 {
-                    auto operand = readByte(addr_);
+                    std::uint8_t operand = readByte(addr_);
                     std::uint16_t sum = a_ + operand + (p_ & kC);
                     setC(sum & 0x100);
                     setV(~(a_ ^ operand) & (a_ ^ sum) & 0x80);
                     a_ = static_cast<std::uint8_t>(sum);
-                    setZN(a_);
                 }
+                setZN(a_);
+                instr = "ADC";
                 break;
-            case 0b100: // STA
+            case 0b100:
                 writeByte(addr_, a_);
+                instr = "STA";
                 break;
-            case 0b101: // LDA
+            case 0b101:
                 a_ = readByte(addr_);
                 setZN(a_);
+                instr = "LDA";
                 break;
-            case 0b110: // CMP
+            case 0b110:
                 {
                     std::uint16_t diff = a_ - readByte(addr_);
                     setC(!(diff & 0x100));
                     setZN(diff);
                 }
+                instr = "CMP";
                 break;
-            case 0b111: // SBC
+            case 0b111:
                 {
-                    auto operand = readByte(addr_);
+                    std::uint8_t operand = readByte(addr_);
                     std::uint16_t diff = a_ - operand - !(p_ & kC);
                     setC(!(diff & 0x100));
                     setV((a_ ^ operand) & (a_ ^ diff) & 0x80);
                     a_ = static_cast<std::uint8_t>(diff);
-                    setZN(a_);
                 }
+                setZN(a_);
+                instr = "SBC";
                 break;
         }
+        spdlog::debug("{} {}", instr, mode);
         return true;
     }
     return false;
 }
 
 bool Cpu::execGroup2(std::uint8_t opcode) {
+    std::string_view instr, mode;
     if ((opcode & 0x03) == 0x02) {
-        auto mode = (opcode & 0x1C) >> 2;
-        if (mode == 0b010) { // Accumulator
+        auto mode_flag = (opcode & 0x1C) >> 2;
+        if (mode_flag == 0b010) {
+            mode = "A";
             switch ((opcode & 0xE0) >> 5) {
-                case 0b000: // ASL
+                case 0b000:
                     setC(a_ & 0x80);
                     a_ <<= 1;
                     setZN(a_);
+                    instr = "ASL";
                     break;
-                case 0b001: // ROL
+                case 0b001:
                     {
                         bool old_c = p_ & kC;
                         setC(a_ & 0x80);
                         a_ <<= 1;
                         a_ |= old_c;
-                        setZN(a_);
                     }
+                    setZN(a_);
+                    instr = "ROL";
                     break;
-                case 0b010: // LSR
+                case 0b010:
                     setC(a_ & 0x01);
                     a_ >>= 1;
                     setZN(a_);
+                    instr = "LSR";
                     break;
-                case 0b011: // ROR
+                case 0b011:
                     {
                         bool old_c = p_ & kC;
                         setC(a_ & 0x01);
                         a_ >>= 1;
                         a_ |= old_c << 7;
-                        setZN(a_);
                     }
+                    setZN(a_);
+                    instr = "ROR";
                     break;
                 default:
                     return false;
             }
         } else {
-            switch (mode) {
+            switch (mode_flag) {
                 case 0b000:
                     addrImmediate();
+                    mode = "#";
                     break;
                 case 0b001:
                     addrZeroPage();
+                    mode = "zpg";
                     break;
                 case 0b011:
                     addrAbsolute();
+                    mode = "abs";                    
                     break;
                 case 0b101:
                     if (opcode == 0x96 || opcode == 0xB6) {
                         addrZeroPageY();
+                        mode = "zpg, Y";
                     } else {
                         addrZeroPageX();
+                        mode = "zpg, X";
                     }
                     break;
                 case 0b111:
                     if (opcode == 0xBE) { // LDX
                         addrAbsoluteY();
+                        mode = "abs, Y";
                     } else {
                         addrAbsoluteX();
+                        mode = "abs, X";
                     }
                     break;
                 default:
@@ -632,17 +677,18 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
             }
 
             switch ((opcode & 0xE0) >> 5) {
-                case 0b000: // ASL
+                case 0b000:
                     {
-                        auto operand = readByte(addr_);
+                        std::uint8_t operand = readByte(addr_);
                         setC(operand & 0x80);
                         operand <<= 1;
                         ++cycle_;
                         writeByte(addr_, operand);
                         setZN(operand);
                     }
+                    instr = "ASL";
                     break;
-                case 0b001: // ROL
+                case 0b001:
                     {
                         std::uint8_t operand = readByte(addr_);
                         bool old_c = p_ & kC;
@@ -653,8 +699,9 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         writeByte(addr_, operand);
                         setZN(operand);
                     }
+                    instr = "ROL";
                     break;
-                case 0b010: // LSR
+                case 0b010:
                     {
                         auto operand = readByte(addr_);
                         setC(operand & 0x01);
@@ -663,8 +710,9 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         writeByte(addr_, operand);
                         setZN(operand);
                     }
+                    instr = "LSR";
                     break;
-                case 0b011: // ROR
+                case 0b011:
                     {
                         std::uint8_t operand = readByte(addr_);
                         bool old_c = p_ & kC;
@@ -675,34 +723,40 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                         writeByte(addr_, operand);
                         setZN(operand);
                     }
+                    instr = "ROR";
                     break;
-                case 0b100: // STX
+                case 0b100:
                     writeByte(addr_, x_);
+                    instr = "STX";
                     break;
-                case 0b101: // LDX
+                case 0b101:
                     x_ = readByte(addr_);
                     setZN(x_);
+                    instr = "LDX";
                     break;
-                case 0b110: // DEC
+                case 0b110:
                     {
-                        auto operand = readByte(addr_);
+                        std::uint8_t operand = readByte(addr_);
                         --operand;
                         ++cycle_;
                         writeByte(addr_, operand);
                         setZN(operand);
                     }
+                    instr = "DEC";
                     break;
-                case 0b111: // INC
+                case 0b111:
                     {
-                        auto operand = readByte(addr_);
+                        std::uint8_t operand = readByte(addr_);
                         ++operand;
                         ++cycle_;
                         writeByte(addr_, operand);
                         setZN(operand);
                     }
+                    instr = "INC";
                     break;
             }
         }
+        spdlog::debug("{} {}", instr, mode);
         return true;
     }
     return false;
