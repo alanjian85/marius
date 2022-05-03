@@ -13,12 +13,14 @@ using namespace nes;
 #include "io/controller.h"
 #include "mappers/mapper.h"
 
-Emulator::Emulator(const std::filesystem::path& path, Keymap keymap1, Keymap keymap2) 
-    : keymap1_(keymap1), keymap2_(keymap2)
-{
+Emulator::Emulator(const std::filesystem::path& path, Settings settings) {
     width_ = 1024;
     height_ = 960;
     cycle_interval_ = std::chrono::nanoseconds(559);
+
+    spdlog::enable_backtrace(settings.backtrace_size);
+    keymap1_ = settings.keymap1;
+    keymap2_ = settings.keymap2;
 
     rom_.open(path);
     if (!rom_.is_open()) {

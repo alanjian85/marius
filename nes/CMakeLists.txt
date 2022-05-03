@@ -20,6 +20,8 @@ set(NES_SRCS
     src/mappers/mapper.h
     src/emulator.cc
     src/emulator.h
+    src/settings.cc
+    src/settings.h
     src/main.cc
 )
 add_executable(nes ${NES_SRCS})

@@ -5,12 +5,12 @@
 #include <filesystem>
 #include <fstream>
 
-#include "io/keymap.h"
+#include "settings.h"
 
 namespace nes {
     class Emulator final {
     public:
-        Emulator(const std::filesystem::path& path, Keymap keymap1, Keymap keymap2);
+        Emulator(const std::filesystem::path& path, Settings settings);
 
         Emulator(const Emulator&) = delete;
 
