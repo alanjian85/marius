@@ -10,6 +10,7 @@ set(NES_SRCS
     src/components/ppu.h
     src/io/cartridge.cc
     src/io/cartridge.h
+    src/io/controller_keymap.h
     src/io/controller.cc
     src/io/controller.h
     src/io/framebuffer.cc

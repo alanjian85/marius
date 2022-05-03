@@ -3,7 +3,7 @@ using namespace nes;
 
 #include <SDL.h>
 
-Controller::Controller(Keymap& keymap) 
+Controller::Controller(ControllerKeymap& keymap) 
     : keymap_(keymap)
 {
 

@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "io/keymap.h"
+#include "io/controller_keymap.h"
 
 namespace nes {
     struct Settings {
@@ -13,8 +13,9 @@ namespace nes {
 
         SDL_Scancode getScancode(const std::string& name);
 
-        int backtrace_size;
-        Keymap keymap1, keymap2;
+        int dump_size;
+        SDL_Scancode dump;
+        ControllerKeymap keymap1, keymap2;
     };
 }
 

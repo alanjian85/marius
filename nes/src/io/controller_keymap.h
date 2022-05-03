@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 
 namespace nes {
-    struct Keymap {
+    struct ControllerKeymap {
         SDL_Scancode a;
         SDL_Scancode b;
         SDL_Scancode select;

@@ -26,12 +26,10 @@ namespace nes {
         std::chrono::nanoseconds cycle_interval_;
 
         std::ifstream rom_;
+        Settings settings_;
 
         SDL_Window* window_;
         SDL_Renderer* renderer_;
-
-        Keymap keymap1_;
-        Keymap keymap2_;
     };
 }
 

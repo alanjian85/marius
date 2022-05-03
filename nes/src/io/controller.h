@@ -3,12 +3,12 @@
 
 #include <cstdint>
 
-#include "keymap.h"
+#include "controller_keymap.h"
 
 namespace nes {
     class Controller final {
     public:
-        Controller(Keymap& keymap);
+        Controller(ControllerKeymap& keymap);
 
         void write(std::uint8_t val);
 
@@ -16,7 +16,7 @@ namespace nes {
     private:
         void update();
 
-        Keymap& keymap_;
+        ControllerKeymap& keymap_;
 
         bool strobe_;
         std::uint8_t state_;

@@ -13,14 +13,14 @@ using namespace nes;
 #include "io/controller.h"
 #include "mappers/mapper.h"
 
-Emulator::Emulator(const std::filesystem::path& path, Settings settings) {
+Emulator::Emulator(const std::filesystem::path& path, Settings settings)
+    : settings_(settings)
+{
     width_ = 1024;
     height_ = 960;
     cycle_interval_ = std::chrono::nanoseconds(559);
 
-    spdlog::enable_backtrace(settings.backtrace_size);
-    keymap1_ = settings.keymap1;
-    keymap2_ = settings.keymap2;
+    spdlog::enable_backtrace(settings.dump_size);
 
     rom_.open(path);
     if (!rom_.is_open()) {
@@ -79,8 +79,8 @@ void Emulator::run() {
     PpuBus ppu_bus(*mapper);
     Ppu ppu(framebuffer, ppu_bus, cpu);
 
-    Controller controller1(keymap1_);
-    Controller controller2(keymap2_);
+    Controller controller1(settings_.keymap1);
+    Controller controller2(settings_.keymap2);
     
     cpu_bus.setCpu(cpu);
     cpu_bus.setPpu(ppu);
@@ -113,7 +113,7 @@ void Emulator::run() {
                     quit = true;
                     break;
                 case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_F1) {
+                    if (event.key.keysym.scancode == settings_.dump) {
                         spdlog::dump_backtrace();
                     }
                     break;

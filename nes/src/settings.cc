@@ -17,10 +17,12 @@ Settings::Settings(const char* path) {
             return;
         }
 
-        if (auto it = json.find("backtrace_size"); it != json.cend()) backtrace_size = *it;
+        if (auto it = json.find("dump_size"); it != json.cend()) dump_size = *it;
 
         if (auto it = json.find("keymaps"); it != json.cend()) {
             auto& keymaps = *it;
+
+            if (auto it = keymaps.find("dump"); it != keymaps.cend()) dump = getScancode(*it);
 
             if (auto it = keymaps.find("controller1"); it != keymaps.cend()) {
                 auto& map1 = *it;
@@ -52,7 +54,9 @@ Settings::Settings(const char* path) {
 }
 
 void Settings::loadDefaults() {
-    backtrace_size = 32;
+    dump_size = 32;
+
+    dump = SDL_SCANCODE_F1;
 
     keymap1.a = SDL_SCANCODE_J;
     keymap1.b = SDL_SCANCODE_K;
