@@ -15,6 +15,7 @@ namespace nes {
 
         int dump_size;
         SDL_Scancode dump;
+        SDL_Scancode reset;
         ControllerKeymap keymap1, keymap2;
     };
 }

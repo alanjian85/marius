@@ -116,6 +116,10 @@ void Emulator::run() {
                     if (event.key.keysym.scancode == settings_.dump) {
                         spdlog::dump_backtrace();
                     }
+                    if (event.key.keysym.scancode == settings_.reset) {
+                        cpu.reset();
+                        ppu.reset();
+                    }
                     break;
             }
         }

@@ -23,6 +23,7 @@ Settings::Settings(const char* path) {
             auto& keymaps = *it;
 
             if (auto it = keymaps.find("dump"); it != keymaps.cend()) dump = getScancode(*it);
+            if (auto it = keymaps.find("reset"); it != keymaps.cend()) reset = getScancode(*it);
 
             if (auto it = keymaps.find("controller1"); it != keymaps.cend()) {
                 auto& map1 = *it;
@@ -57,6 +58,7 @@ void Settings::loadDefaults() {
     dump_size = 32;
 
     dump = SDL_SCANCODE_F1;
+    reset = SDL_SCANCODE_F2;
 
     keymap1.a = SDL_SCANCODE_J;
     keymap1.b = SDL_SCANCODE_K;
