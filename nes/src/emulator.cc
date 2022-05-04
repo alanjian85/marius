@@ -40,7 +40,7 @@ Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
     height_ = 960;
     resize();
     window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(), width_, height_, SDL_WINDOW_RESIZABLE);
-    renderer_ = Renderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer_ = Renderer(window_, -1, SDL_RENDERER_ACCELERATED);
     framebuffer_ = Framebuffer(renderer_, Ppu::kWidth, Ppu::kHeight);
 }
 
@@ -91,6 +91,7 @@ void Emulator::run() {
         }
 
         elapsed_time += Clock::now() - prev_time;
+        prev_time = Clock::now();
         while (elapsed_time > cycle_interval_) {
             cpu_.cycle();
 
@@ -101,7 +102,6 @@ void Emulator::run() {
 
             elapsed_time -= cycle_interval_;
         }
-        prev_time = Clock::now();
 
         renderer_.setDrawColor(0, 0, 0, 255);
         renderer_.clear();
