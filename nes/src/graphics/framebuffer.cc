@@ -67,14 +67,9 @@ void Framebuffer::lock() {
 
 void Framebuffer::unlock() {
     SDL_UnlockTexture(texture_);
-    pixels_ = nullptr;
 }
 
 void Framebuffer::setPixel(int x, int y, std::uint32_t color) {
     auto pixel = reinterpret_cast<std::uint32_t*>(static_cast<std::uint8_t*>(pixels_) + y * pitch_) + x;
     *pixel = color;
-}
-
-bool Framebuffer::isLocked() const {
-    return pixels_;
 }

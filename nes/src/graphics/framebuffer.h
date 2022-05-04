@@ -27,8 +27,6 @@ namespace nes {
         void unlock();
 
         void setPixel(int x, int y, std::uint32_t color);
-
-        [[nodiscard]] bool isLocked() const;
     private:
         SDL_Texture* texture_;
         void* pixels_;

@@ -103,14 +103,12 @@ void Emulator::run() {
         }
         prev_time = Clock::now();
 
-        if (!framebuffer_.isLocked()) {
-            renderer_.setDrawColor(0, 0, 0, 255);
-            renderer_.clear();
+        renderer_.setDrawColor(0, 0, 0, 255);
+        renderer_.clear();
 
-            renderer_.copy(framebuffer_.getTexture(), nullptr, &rect_);
+        renderer_.copy(framebuffer_.getTexture(), nullptr, &rect_);
 
-            renderer_.present();
-        }
+        renderer_.present();
 #ifndef __EMSCRIPTEN__
     }
 #else
