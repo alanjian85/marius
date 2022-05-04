@@ -22,7 +22,7 @@ Emulator::Emulator(const std::filesystem::path& path, Settings settings)
 
     spdlog::enable_backtrace(settings.dump_size);
 
-    rom_.open(path);
+    rom_.open(path, std::ios::binary);
     if (!rom_.is_open()) {
         spdlog::error("Couldn't open ROM file: {}", path.string());
     }
@@ -89,13 +89,13 @@ void Emulator::run() {
 
     SDL_Rect rect;
     if (static_cast<float>(width_) / height_ > Ppu::kAspect) {
-        int screen_width = height_ * Ppu::kAspect;
+        auto screen_width = static_cast<int>(height_ * Ppu::kAspect);
         rect.x = (width_ - screen_width) / 2;
         rect.y = 0;
         rect.w = screen_width;
         rect.h = height_;
     } else {
-        int screen_height = width_ / Ppu::kAspect;
+        auto screen_height = static_cast<int>(width_ / Ppu::kAspect);
         rect.x = 0;
         rect.y = (height_ - screen_height) / 2;
         rect.w = width_;

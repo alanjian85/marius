@@ -21,8 +21,8 @@ Cpu::Cpu(CpuBus& bus)
 void Cpu::irq() {
     if (!(p_ & kI)) {
         cycle_ += 2;
-        push(pc_ >> 8);
-        push(pc_);
+        push(static_cast<std::uint8_t>(pc_ >> 8));
+        push(static_cast<std::uint8_t>(pc_));
         push((p_ | 1 << 5) & ~kB);
         setI(true);
         pc_ = readAddress(kIrqVector);
@@ -31,8 +31,8 @@ void Cpu::irq() {
 
 void Cpu::nmi() {
     cycle_ += 2;
-    push(pc_ >> 8);
-    push(pc_);
+    push(static_cast<std::uint8_t>(pc_ >> 8));
+    push(static_cast<std::uint8_t>(pc_));
     push((p_ | 1 << 5) & ~kB);
     setI(true);
     pc_ = readAddress(kNmiVector);
@@ -237,8 +237,8 @@ bool Cpu::execImplied(std::uint8_t opcode) {
     switch (opcode) {
         case 0x00:
             ++pc_;
-            push(pc_ >> 8);
-            push(pc_);
+            push(static_cast<std::uint8_t>(pc_ >> 8));
+            push(static_cast<std::uint8_t>(pc_));
             push(p_ | 1 << 5 | kB);
             setI(true);
             pc_ = readAddress(kBrkVector);
@@ -479,7 +479,7 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
                 {
                     std::uint16_t diff = y_ - readByte(addr_);
                     setC(!(diff & 0x100));
-                    setZN(diff);
+                    setZN(static_cast<std::uint8_t>(diff));
                 }
                 instr = "CPY";
                 break;
@@ -487,7 +487,7 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
                 {
                     std::uint16_t diff = x_ - readByte(addr_);
                     setC(!(diff & 0x100));
-                    setZN(diff);
+                    setZN(static_cast<std::uint8_t>(diff));
                 }
                 instr = "CPX";
                 break;
@@ -501,7 +501,6 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
 bool Cpu::execGroup1(std::uint8_t opcode) {
     std::string_view instr, mode;
     if ((opcode & 0x03) == 0x01) {
-        std::uint16_t addr;
         switch ((opcode & 0x1C) >> 2) {
             case 0b000:
                 addrIndexedIndirect();
@@ -576,7 +575,7 @@ bool Cpu::execGroup1(std::uint8_t opcode) {
                 {
                     std::uint16_t diff = a_ - readByte(addr_);
                     setC(!(diff & 0x100));
-                    setZN(diff);
+                    setZN(static_cast<std::uint8_t>(diff));
                 }
                 instr = "CMP";
                 break;
@@ -613,7 +612,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                     break;
                 case 0b001:
                     {
-                        bool old_c = p_ & kC;
+                        std::uint8_t old_c = p_ & kC;
                         setC(a_ & 0x80);
                         a_ <<= 1;
                         a_ |= old_c;
@@ -691,7 +690,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                 case 0b001:
                     {
                         std::uint8_t operand = readByte(addr_);
-                        bool old_c = p_ & kC;
+                        std::uint8_t old_c = p_ & kC;
                         setC(operand & 0x80);
                         operand <<= 1;
                         ++cycle_;
