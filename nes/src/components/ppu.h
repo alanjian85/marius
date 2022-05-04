@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "cpu.h"
-#include "io/framebuffer.h"
 #include "ppu_bus.h"
+#include "graphics/framebuffer.h"
 
 namespace nes {
     class Ppu final {

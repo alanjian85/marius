@@ -3,9 +3,9 @@ using namespace nes;
 
 #include <spdlog/spdlog.h>
 
-Framebuffer::Framebuffer(SDL_Renderer* renderer, int width, int height) {
+Framebuffer::Framebuffer(const Renderer& renderer, int width, int height) {
     texture_ = SDL_CreateTexture(
-        renderer, 
+        renderer.getHandle(),
         SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_STREAMING,
         width, height

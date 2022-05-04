@@ -8,13 +8,15 @@ set(NES_SRCS
     src/components/ppu_bus.h
     src/components/ppu.cc
     src/components/ppu.h
+    src/graphics/framebuffer.cc
+    src/graphics/framebuffer.h
+    src/graphics/renderer.h
+    src/graphics/window.h
     src/io/cartridge.cc
     src/io/cartridge.h
     src/io/controller_keymap.h
     src/io/controller.cc
     src/io/controller.h
-    src/io/framebuffer.cc
-    src/io/framebuffer.h
     src/mappers/mapper_nrom.cc
     src/mappers/mapper_nrom.h
     src/mappers/mapper.cc

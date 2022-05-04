@@ -5,6 +5,9 @@
 #include <filesystem>
 #include <fstream>
 
+#include "graphics/renderer.h"
+#include "graphics/window.h"
+#include "io/cartridge.h"
 #include "settings.h"
 
 namespace nes {
@@ -12,24 +15,17 @@ namespace nes {
     public:
         Emulator(const std::filesystem::path& path, Settings settings);
 
-        Emulator(const Emulator&) = delete;
-
-        Emulator& operator=(const Emulator&) = delete;
-
-        ~Emulator();
-
         void run();
     private:
         using Clock = std::chrono::high_resolution_clock;
 
-        int width_, height_;
         std::chrono::nanoseconds cycle_interval_;
 
-        std::ifstream rom_;
         Settings settings_;
+        Cartridge cartridge_;
 
-        SDL_Window* window_;
-        SDL_Renderer* renderer_;
+        Window window_;
+        Renderer renderer_;
     };
 }
 

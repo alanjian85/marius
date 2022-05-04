@@ -5,10 +5,12 @@
 
 #include <SDL2/SDL.h>
 
+#include "renderer.h"
+
 namespace nes {
     class Framebuffer final {
     public:
-        Framebuffer(SDL_Renderer* renderer, int width, int height);
+        Framebuffer(const Renderer& renderer, int width, int height);
 
         Framebuffer(const Framebuffer&) = delete;
 

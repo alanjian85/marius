@@ -26,9 +26,18 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    Settings settings("settings.json");
-    Emulator emulator(argv[1], settings);
-    emulator.run();
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        spdlog::error("Failed to initialize SDL: {}", SDL_GetError());
+        return EXIT_FAILURE;
+    }
 
+    {
+        Settings settings("settings.json");
+        Emulator emulator(argv[1], settings);
+        emulator.run();
+    }
+
+    SDL_Quit();
+    spdlog::info("SDL quit");
     return EXIT_SUCCESS;
 }
