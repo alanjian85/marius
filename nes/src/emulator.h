@@ -21,6 +21,8 @@ namespace nes {
 
         void run();
     private:
+        void resize();
+
         using Clock = std::chrono::high_resolution_clock;
 
         std::chrono::nanoseconds cycle_interval_;
@@ -31,6 +33,9 @@ namespace nes {
         Controller controller2_;
         std::unique_ptr<Mapper> mapper_;
 
+        SDL_Rect rect_;
+        int width_;
+        int height_;
         Window window_;
         Renderer renderer_;
         Framebuffer framebuffer_;

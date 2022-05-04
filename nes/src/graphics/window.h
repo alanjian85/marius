@@ -11,7 +11,7 @@ namespace nes {
     public:
         Window();
 
-        Window(const char* title, int width, int height);
+        Window(const char* title, int width, int height, Uint32 flags);
 
         Window(Window&& rhs) noexcept;
 
@@ -21,13 +21,9 @@ namespace nes {
 
         [[nodiscard]] SDL_Window* getHandle() const;
 
-        [[nodiscard]] int getWidth() const;
-
-        [[nodiscard]] int getHeight() const;
+        void getSize(int& width, int& height) const;
     private:
         SDL_Window* handle_;
-        int width_;
-        int height_;
     };
 }
 

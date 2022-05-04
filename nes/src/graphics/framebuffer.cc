@@ -24,7 +24,7 @@ Framebuffer::Framebuffer(const Renderer& renderer, int width, int height) {
     if (!texture_) {
         throw std::runtime_error("Failed to create framebuffer texture: " + std::string(SDL_GetError()));
     } else {
-        spdlog::info("Texture created");
+        spdlog::info("Framebuffer texture created");
     }
 }
 

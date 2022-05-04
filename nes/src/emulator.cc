@@ -28,7 +28,10 @@ Emulator::Emulator(const std::filesystem::path& path, Settings settings)
     mapper_ = MakeMapper(cartridge_);
     spdlog::info("Mapper: {}", mapper_->getName());
 
-    window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(), 1024, 960);
+    width_ = 1024;
+    height_ = 960;
+    resize();
+    window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(), width_, height_, SDL_WINDOW_RESIZABLE);
     renderer_ = Renderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     framebuffer_ = Framebuffer(renderer_, Ppu::kWidth, Ppu::kHeight);
 }
@@ -44,21 +47,6 @@ void Emulator::run() {
     cpu_bus.setPpu(ppu);
     cpu_bus.setController1(controller1_);
     cpu_bus.setController2(controller2_);
-
-    SDL_Rect rect;
-    if (static_cast<float>(window_.getWidth()) / window_.getHeight() > Ppu::kAspect) {
-        auto screen_width = static_cast<int>(window_.getHeight() * Ppu::kAspect);
-        rect.x = (window_.getWidth() - screen_width) / 2;
-        rect.y = 0;
-        rect.w = screen_width;
-        rect.h = window_.getHeight();
-    } else {
-        auto screen_height = static_cast<int>(window_.getWidth() / Ppu::kAspect);
-        rect.x = 0;
-        rect.y = (window_.getHeight() - screen_height) / 2;
-        rect.w = window_.getWidth();
-        rect.h = screen_height;
-    }
 
     bool quit = false;
     auto prev_time = Clock::now();
@@ -82,6 +70,15 @@ void Emulator::run() {
                         ppu.reset();
                     }
                     break;
+                case SDL_WINDOWEVENT:
+                    switch (event.window.event) {
+                        case SDL_WINDOWEVENT_RESIZED:
+                            width_ = event.window.data1;
+                            height_ = event.window.data2;
+                            resize();
+                            break;
+                    }
+                    break;
             }
         }
 
@@ -102,9 +99,25 @@ void Emulator::run() {
             renderer_.setDrawColor(0, 0, 0, 255);
             renderer_.clear();
 
-            renderer_.copy(framebuffer_.getTexture(), nullptr, &rect);
+            renderer_.copy(framebuffer_.getTexture(), nullptr, &rect_);
 
             renderer_.present();
         }      
+    }
+}
+
+void Emulator::resize() {
+    if (static_cast<float>(width_) / height_ > Ppu::kAspect) {
+        auto screen_width = static_cast<int>(height_ * Ppu::kAspect);
+        rect_.x = (width_ - screen_width) / 2;
+        rect_.y = 0;
+        rect_.w = screen_width;
+        rect_.h = height_;
+    } else {
+        auto screen_height = static_cast<int>(width_ / Ppu::kAspect);
+        rect_.x = 0;
+        rect_.y = (height_ - screen_height) / 2;
+        rect_.w = width_;
+        rect_.h = screen_height;
     }
 }

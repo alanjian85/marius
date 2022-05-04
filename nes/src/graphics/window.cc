@@ -10,15 +10,13 @@ Window::Window()
 
 }
 
-Window::Window(const char* title, int width, int height) {
+Window::Window(const char* title, int width, int height, Uint32 flags) {
     handle_ = SDL_CreateWindow(
         title,
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
         width, height,
-        0
+        flags
     );
-    width_ = width;
-    height_ = height;
 
     if (!handle_) {
         throw std::runtime_error("Failed to create window: " + std::string(SDL_GetError()));
@@ -29,8 +27,6 @@ Window::Window(const char* title, int width, int height) {
 
 Window::Window(Window&& rhs) noexcept {
     handle_ = std::exchange(rhs.handle_, nullptr);
-    width_ = rhs.width_;
-    height_ = rhs.height_;
 }
 
 Window& Window::operator=(Window&& rhs) noexcept {
@@ -39,8 +35,6 @@ Window& Window::operator=(Window&& rhs) noexcept {
         spdlog::info("Window destroyed");
     }
     handle_ = std::exchange(rhs.handle_, nullptr);
-    width_ = rhs.width_;
-    height_ = rhs.height_;
     return *this;
 }
 
@@ -55,10 +49,6 @@ SDL_Window* Window::getHandle() const {
     return handle_;
 }
 
-int Window::getWidth() const {
-    return width_;
-}
-
-int Window::getHeight() const {
-    return height_;
+void Window::getSize(int& width, int& height) const {
+    SDL_GetWindowSize(handle_, &width, &height);
 }
