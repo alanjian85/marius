@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 
+#include "graphics/framebuffer.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "io/cartridge.h"
@@ -26,6 +27,7 @@ namespace nes {
 
         Window window_;
         Renderer renderer_;
+        Framebuffer framebuffer_;
     };
 }
 

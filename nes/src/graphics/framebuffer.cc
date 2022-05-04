@@ -3,6 +3,12 @@ using namespace nes;
 
 #include <spdlog/spdlog.h>
 
+Framebuffer::Framebuffer()
+    : texture_(nullptr)
+{
+
+}
+
 Framebuffer::Framebuffer(const Renderer& renderer, int width, int height) {
     texture_ = SDL_CreateTexture(
         renderer.getHandle(),
@@ -14,11 +20,33 @@ Framebuffer::Framebuffer(const Renderer& renderer, int width, int height) {
 
     if (!texture_) {
         spdlog::error("Failed to create framebuffer texture: {}", SDL_GetError());
+    } else {
+        spdlog::info("Texture created");
     }
 }
 
+Framebuffer::Framebuffer(Framebuffer&& rhs) noexcept {
+    texture_ = std::exchange(rhs.texture_, nullptr);
+    pixels_ = rhs.pixels_;
+    pitch_ = rhs.pitch_;
+}
+
+Framebuffer& Framebuffer::operator=(Framebuffer&& rhs) noexcept {
+    if (texture_) {
+        SDL_DestroyTexture(texture_);
+        spdlog::info("Framebuffer texture destroyed");
+    }
+    texture_ = std::exchange(rhs.texture_, nullptr);
+    pixels_ = rhs.pixels_;
+    pitch_ = rhs.pitch_;
+    return *this;
+}
+
 Framebuffer::~Framebuffer() {
-    SDL_DestroyTexture(texture_);
+    if (texture_) {
+        SDL_DestroyTexture(texture_);
+        spdlog::info("Framebuffer texture destroyed");
+    }
 }
 
 SDL_Texture* Framebuffer::getTexture() const {

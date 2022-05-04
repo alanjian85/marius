@@ -7,60 +7,23 @@
 #include <spdlog/spdlog.h>
 
 namespace nes {
-    class Window {
+    class Window final {
     public:
-        Window() : handle_(nullptr) {}
+        Window();
 
-        Window(const char* title, int width, int height) {
-            handle_ = SDL_CreateWindow(
-                title,
-                SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                width, height,
-                0
-            );
-            width_ = width;
-            height_ = height;
+        Window(const char* title, int width, int height);
 
-            if (!handle_) {
-                spdlog::error("Failed to create window: {}", SDL_GetError());
-            }
-        }
+        Window(Window&& rhs) noexcept;
 
-        Window(Window&& rhs) noexcept {
-            handle_ = std::exchange(rhs.handle_, nullptr);
-            width_ = rhs.width_;
-            height_ = rhs.height_;
-        }
+        Window& operator=(Window&& rhs) noexcept;
 
-        Window& operator=(Window&& rhs) noexcept {
-            if (handle_) {
-                SDL_DestroyWindow(handle_);
-                spdlog::info("Window destroyed");
-            }
-            handle_ = std::exchange(rhs.handle_, nullptr);
-            width_ = rhs.width_;
-            height_ = rhs.height_;
-            return *this;
-        }
+        ~Window();
 
-        ~Window() {
-            if (handle_) {
-                SDL_DestroyWindow(handle_);
-                spdlog::info("Window destroyed");
-            }
-        }
+        [[nodiscard]] SDL_Window* getHandle() const;
 
-        [[nodiscard]] SDL_Window* getHandle() const {
-            return handle_;
-        }
+        [[nodiscard]] int getWidth() const;
 
-        [[nodiscard]] int getWidth() const {
-            return width_;
-        }
-
-        [[nodiscard]] int getHeight() const {
-            return height_;
-        }
+        [[nodiscard]] int getHeight() const;
     private:
         SDL_Window* handle_;
         int width_;

@@ -27,6 +27,7 @@ Emulator::Emulator(const std::filesystem::path& path, Settings settings)
 
     window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(), 1024, 960);
     renderer_ = Renderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    framebuffer_ = Framebuffer(renderer_, Ppu::kWidth, Ppu::kHeight);
 }
 
 void Emulator::run() {
@@ -37,13 +38,12 @@ void Emulator::run() {
     }
     spdlog::info("Mapper: {}", mapper->getName());
 
-    Framebuffer framebuffer(renderer_, Ppu::kWidth, Ppu::kHeight);
     
     CpuBus cpu_bus(*mapper);
     Cpu cpu(cpu_bus);
     
     PpuBus ppu_bus(*mapper);
-    Ppu ppu(framebuffer, ppu_bus, cpu);
+    Ppu ppu(framebuffer_, ppu_bus, cpu);
 
     Controller controller1(settings_.keymap1);
     Controller controller2(settings_.keymap2);
@@ -106,11 +106,11 @@ void Emulator::run() {
         }
         prev_time = Clock::now();
 
-        if (!framebuffer.isLocked()) {
+        if (!framebuffer_.isLocked()) {
             renderer_.setDrawColor(0, 0, 0, 255);
             renderer_.clear();
 
-            renderer_.copy(framebuffer.getTexture(), nullptr, &rect);
+            renderer_.copy(framebuffer_.getTexture(), nullptr, &rect);
 
             renderer_.present();
         }      

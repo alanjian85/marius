@@ -26,9 +26,13 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
+    spdlog::info("ROM Path: {}", argv[1]);
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         spdlog::error("Failed to initialize SDL: {}", SDL_GetError());
         return EXIT_FAILURE;
+    } else {
+        spdlog::info("SDL initialized");
     }
 
     {

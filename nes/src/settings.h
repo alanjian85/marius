@@ -6,7 +6,7 @@
 #include "io/controller_keymap.h"
 
 namespace nes {
-    struct Settings {
+    struct Settings final {
         Settings(const char* path);
 
         void loadDefaults();

@@ -10,11 +10,13 @@
 namespace nes {
     class Framebuffer final {
     public:
+        Framebuffer();
+
         Framebuffer(const Renderer& renderer, int width, int height);
 
-        Framebuffer(const Framebuffer&) = delete;
+        Framebuffer(Framebuffer&& rhs) noexcept;
 
-        Framebuffer& operator=(const Framebuffer&) = delete;
+        Framebuffer& operator=(Framebuffer&& rhs) noexcept;
 
         ~Framebuffer();
 

@@ -10,7 +10,9 @@ set(NES_SRCS
     src/components/ppu.h
     src/graphics/framebuffer.cc
     src/graphics/framebuffer.h
+    src/graphics/renderer.cc
     src/graphics/renderer.h
+    src/graphics/window.cc
     src/graphics/window.h
     src/io/cartridge.cc
     src/io/cartridge.h
