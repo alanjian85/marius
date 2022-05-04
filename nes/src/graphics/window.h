@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <spdlog/spdlog.h>
 
 namespace nes {

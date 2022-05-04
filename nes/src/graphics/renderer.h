@@ -1,7 +1,7 @@
 #ifndef NES_GRAPHICS_RENDERER_H_
 #define NES_GRAPHICS_RENDERER_H_
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "window.h"
 

@@ -1,7 +1,7 @@
 #ifndef NES_KEYMAP_H_
 #define NES_KEYMAP_H_
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 namespace nes {
     struct ControllerKeymap final {

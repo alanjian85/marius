@@ -5,6 +5,7 @@ using namespace nes;
 #include <stdexcept>
 
 #include <nlohmann/json.hpp>
+#include <SDL_keyboard.h>
 
 Settings::Settings(const char* path) {
     loadDefaults();

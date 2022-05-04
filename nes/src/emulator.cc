@@ -1,9 +1,15 @@
 #include "emulator.h"
 using namespace nes;
 
+#include <functional>
+
 #include <SDL.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/fmt.h>
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
     : settings_(settings),
@@ -39,20 +45,31 @@ Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
 }
 
 void Emulator::run() {
+
+
+#ifndef __EMSCRIPTEN__
     bool quit = false;
-    auto prev_time = Clock::now();
-    auto elapsed_time = prev_time - prev_time;
     while (!quit) {
+#else
+    std::function<void()> callback = [this]() {
+#endif
+        static auto prev_time = Clock::now();
+        static auto elapsed_time = prev_time - prev_time;
+
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
+#ifndef __EMSCRIPTEN__
                 case SDL_QUIT:
                     quit = true;
                     break;
+#endif
                 case SDL_KEYDOWN:
+#ifndef __EMSCRIPTEN__
                     if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                         quit = true;
                     }
+#endif
                     if (event.key.keysym.scancode == settings_.dump) {
                         spdlog::dump_backtrace();
                     }
@@ -93,8 +110,19 @@ void Emulator::run() {
             renderer_.copy(framebuffer_.getTexture(), nullptr, &rect_);
 
             renderer_.present();
-        }      
+        }
+#ifndef __EMSCRIPTEN__
     }
+#else
+    };
+    emscripten_set_main_loop_arg(
+        [](void* callback) {
+            (*static_cast<std::function<void()>*>(callback))();
+        },
+        &callback,
+        0, true
+    );
+#endif
 }
 
 void Emulator::resize() {

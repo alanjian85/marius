@@ -1,3 +1,8 @@
+if (EMSCRIPTEN)
+    set(CMAKE_CXX_FLAGS "-s USE_SDL=2")
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+endif()
+
 set(NES_SRCS
     src/components/cpu_bus.cc
     src/components/cpu_bus.h
@@ -40,8 +45,14 @@ target_include_directories(nes PRIVATE
     ${SDL2_INCLUDE_DIRS}
 )
 
-target_link_libraries(nes
-    nlohmann_json::nlohmann_json
-    ${SDL2_LIBRARIES}
-    spdlog::spdlog
-)
+if (EMSCRIPTEN)
+    target_link_libraries(nes
+        ${SDL2_LIBRARIES}
+    )
+else()
+    target_link_libraries(nes
+        nlohmann_json::nlohmann_json
+        ${SDL2_LIBRARIES}
+        spdlog::spdlog
+    )
+endif()
