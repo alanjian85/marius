@@ -22,9 +22,12 @@ SDL_Scancode GetScancode(const std::string& name) {
 
 int main(int argc, char** argv) {
     try {
-        const char* path = "mario.nes";
+        if (argc != 2) {
+            std::cerr << "Usage: nes <ROM>";
+            return EXIT_FAILURE;
+        }
 
-        spdlog::info("ROM Path: {}", path);
+        spdlog::info("ROM Path: {}", argv[1]);
 
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
             throw std::runtime_error("Failed to initialize SDL: " + std::string(SDL_GetError()));
@@ -34,7 +37,7 @@ int main(int argc, char** argv) {
 
         {
             Settings settings("settings.json");
-            Emulator emulator(path, settings);
+            Emulator emulator(argv[1], settings);
             emulator.run();
         }
 
