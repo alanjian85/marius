@@ -1,6 +1,9 @@
 #include "renderer.h"
 using namespace nes;
 
+#include <stdexcept>
+#include <string>
+
 #include <spdlog/spdlog.h>
 
 Renderer::Renderer()
@@ -12,7 +15,7 @@ Renderer::Renderer()
 Renderer::Renderer(const Window& window, int index, Uint32 flags) {
     handle_ = SDL_CreateRenderer(window.getHandle(), index, flags);
     if (!handle_) {
-        spdlog::error("Failed to create renderer: {}", SDL_GetError());
+        throw std::runtime_error("Failed to create renderer: " + std::string(SDL_GetError()));
     } else {
         spdlog::info("Renderer created");
     }

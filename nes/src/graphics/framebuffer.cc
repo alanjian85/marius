@@ -1,6 +1,9 @@
 #include "framebuffer.h"
 using namespace nes;
 
+#include <stdexcept>
+#include <string>
+
 #include <spdlog/spdlog.h>
 
 Framebuffer::Framebuffer()
@@ -19,7 +22,7 @@ Framebuffer::Framebuffer(const Renderer& renderer, int width, int height) {
     pixels_ = nullptr;
 
     if (!texture_) {
-        spdlog::error("Failed to create framebuffer texture: {}", SDL_GetError());
+        throw std::runtime_error("Failed to create framebuffer texture: " + std::string(SDL_GetError()));
     } else {
         spdlog::info("Texture created");
     }

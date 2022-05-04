@@ -1,6 +1,9 @@
 #include "window.h"
 using namespace nes;
 
+#include <stdexcept>
+#include <string>
+
 Window::Window()
     : handle_(nullptr)
 {
@@ -18,7 +21,7 @@ Window::Window(const char* title, int width, int height) {
     height_ = height;
 
     if (!handle_) {
-        spdlog::error("Failed to create window: {}", SDL_GetError());
+        throw std::runtime_error("Failed to create window: " + std::string(SDL_GetError()));
     } else {
         spdlog::info("Window created");
     }

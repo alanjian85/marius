@@ -2,9 +2,9 @@
 using namespace nes;
 
 #include <fstream>
+#include <stdexcept>
 
 #include <nlohmann/json.hpp>
-#include <spdlog/spdlog.h>
 
 Settings::Settings(const char* path) {
     loadDefaults();
@@ -13,7 +13,7 @@ Settings::Settings(const char* path) {
     if (file.is_open()) {
         nlohmann::json json;
         if (!(file >> json)) {
-            spdlog::error("Failed to load settings file");
+            throw std::runtime_error("Failed to load settings file");
             return;
         }
 
@@ -82,7 +82,7 @@ void Settings::loadDefaults() {
 SDL_Scancode Settings::getScancode(const std::string& name) {
     SDL_Scancode scancode = SDL_GetScancodeFromName(name.c_str());
     if (scancode == SDL_SCANCODE_UNKNOWN) {
-        spdlog::error("Scancode name {} is invalid", name);
+        throw std::invalid_argument("Scancode name " + name + " is invalid");
     }
     return scancode;
 }

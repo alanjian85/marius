@@ -1,8 +1,6 @@
 #include "ppu.h"
 using namespace nes;
 
-#include <cassert>
-
 #include "cpu.h"
 #include "palette.h"
 

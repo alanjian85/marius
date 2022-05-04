@@ -21,27 +21,31 @@ SDL_Scancode GetScancode(const std::string& name) {
 }
 
 int main(int argc, char** argv) {
-    if (argc != 2) {
-        std::cerr << "Usage: nes <ROM>";
+    try {
+        if (argc != 2) {
+            std::cerr << "Usage: nes <ROM>";
+            return EXIT_FAILURE;
+        }
+
+        spdlog::info("ROM Path: {}", argv[1]);
+
+        if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+            throw std::runtime_error("Failed to initialize SDL: " + std::string(SDL_GetError()));
+        } else {
+            spdlog::info("SDL initialized");
+        }
+
+        {
+            Settings settings("settings.json");
+            Emulator emulator(argv[1], settings);
+            emulator.run();
+        }
+
+        SDL_Quit();
+        spdlog::info("SDL quit");
+    } catch (std::exception& e) {
+        spdlog::error(e.what());
         return EXIT_FAILURE;
     }
-
-    spdlog::info("ROM Path: {}", argv[1]);
-
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        spdlog::error("Failed to initialize SDL: {}", SDL_GetError());
-        return EXIT_FAILURE;
-    } else {
-        spdlog::info("SDL initialized");
-    }
-
-    {
-        Settings settings("settings.json");
-        Emulator emulator(argv[1], settings);
-        emulator.run();
-    }
-
-    SDL_Quit();
-    spdlog::info("SDL quit");
     return EXIT_SUCCESS;
 }

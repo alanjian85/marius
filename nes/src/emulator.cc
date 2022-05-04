@@ -9,8 +9,6 @@ using namespace nes;
 #include "components/cpu.h"
 #include "components/ppu_bus.h"
 #include "components/ppu.h"
-#include "io/controller.h"
-#include "mappers/mapper.h"
 
 Emulator::Emulator(const std::filesystem::path& path, Settings settings)
     : settings_(settings)
@@ -21,9 +19,14 @@ Emulator::Emulator(const std::filesystem::path& path, Settings settings)
 
     std::ifstream rom(path, std::ios::binary);
     if (!rom.is_open()) {
-        spdlog::error("Couldn't open ROM file: {}", path.string());
+        throw std::runtime_error("Couldn't open ROM file: " + path.string());
     }
     rom >> cartridge_;
+    controller1_.setKeymap(settings.keymap1);
+    controller2_.setKeymap(settings.keymap2);
+
+    mapper_ = MakeMapper(cartridge_);
+    spdlog::info("Mapper: {}", mapper_->getName());
 
     window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(), 1024, 960);
     renderer_ = Renderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -31,27 +34,16 @@ Emulator::Emulator(const std::filesystem::path& path, Settings settings)
 }
 
 void Emulator::run() {
-    auto mapper = MakeMapper(cartridge_);
-    if (!mapper) {
-        spdlog::error("Unknown mapper");
-        return;
-    }
-    spdlog::info("Mapper: {}", mapper->getName());
-
-    
-    CpuBus cpu_bus(*mapper);
+    CpuBus cpu_bus(*mapper_);
     Cpu cpu(cpu_bus);
     
-    PpuBus ppu_bus(*mapper);
+    PpuBus ppu_bus(*mapper_);
     Ppu ppu(framebuffer_, ppu_bus, cpu);
-
-    Controller controller1(settings_.keymap1);
-    Controller controller2(settings_.keymap2);
     
     cpu_bus.setCpu(cpu);
     cpu_bus.setPpu(ppu);
-    cpu_bus.setController1(controller1);
-    cpu_bus.setController2(controller2);
+    cpu_bus.setController1(controller1_);
+    cpu_bus.setController2(controller2_);
 
     SDL_Rect rect;
     if (static_cast<float>(window_.getWidth()) / window_.getHeight() > Ppu::kAspect) {

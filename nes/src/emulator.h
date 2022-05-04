@@ -4,11 +4,14 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 
 #include "graphics/framebuffer.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "io/cartridge.h"
+#include "io/controller.h"
+#include "mappers/mapper.h"
 #include "settings.h"
 
 namespace nes {
@@ -24,6 +27,9 @@ namespace nes {
 
         Settings settings_;
         Cartridge cartridge_;
+        Controller controller1_;
+        Controller controller2_;
+        std::unique_ptr<Mapper> mapper_;
 
         Window window_;
         Renderer renderer_;
