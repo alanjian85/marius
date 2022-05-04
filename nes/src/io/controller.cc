@@ -3,8 +3,10 @@ using namespace nes;
 
 #include <SDL.h>
 
-void Controller::setKeymap(ControllerKeymap keymap) {
-    keymap_ = keymap;
+Controller::Controller(const ControllerKeymap& keymap)
+    : keymap_(keymap)
+{
+
 }
 
 void Controller::write(std::uint8_t val) {

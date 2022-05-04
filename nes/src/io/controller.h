@@ -8,7 +8,7 @@
 namespace nes {
     class Controller final {
     public:
-        void setKeymap(ControllerKeymap keymap);
+        Controller(const ControllerKeymap& keymap);
 
         void write(std::uint8_t val);
 
@@ -16,7 +16,7 @@ namespace nes {
     private:
         void update();
 
-        ControllerKeymap keymap_;
+        const ControllerKeymap& keymap_;
 
         bool strobe_;
         std::uint8_t state_;

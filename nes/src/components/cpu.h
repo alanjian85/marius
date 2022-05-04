@@ -10,7 +10,7 @@ namespace nes {
 
     class Cpu final {
     public:
-        Cpu(CpuBus& bus);
+        explicit Cpu(CpuBus& bus);
 
         void irq();
 

@@ -1,18 +1,16 @@
 #include "ppu_bus.h"
 using namespace nes;
 
-PpuBus::PpuBus(Mapper& mapper)
-    : mapper_(mapper)
-{
-
+void PpuBus::setMapper(Mapper& mapper) {
+    mapper_ = &mapper;
 }
 
 std::uint8_t PpuBus::read(std::uint16_t addr) const {
     if (addr < 0x2000) {
-        return mapper_.readChr(addr);
+        return mapper_->readChr(addr);
     } else if (addr < 0x3F00) {
         std::uint16_t nametable = addr & 0x2C00;
-        switch (mapper_.getMirroring()) {
+        switch (mapper_->getMirroring()) {
             case Mirroring::kHorizontal:
                 if (nametable == 0x2000 || nametable == 0x2400) {
                     return ram_[addr & 0x3FF];
@@ -34,10 +32,10 @@ std::uint8_t PpuBus::read(std::uint16_t addr) const {
 
 void PpuBus::write(std::uint16_t addr, std::uint8_t val) {
     if (addr < 0x2000) {
-        mapper_.writeChr(addr, val);
+        mapper_->writeChr(addr, val);
     } else if (addr < 0x3F00) {
         std::uint16_t nametable = addr & 0x2C00;
-        switch (mapper_.getMirroring()) {
+        switch (mapper_->getMirroring()) {
             case Mirroring::kHorizontal:
                 if (nametable == 0x2000 || nametable == 0x2400) {
                     ram_[addr & 0x3FF] = val;

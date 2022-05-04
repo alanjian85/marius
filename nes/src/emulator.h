@@ -6,6 +6,10 @@
 #include <fstream>
 #include <memory>
 
+#include "components/cpu_bus.h"
+#include "components/cpu.h"
+#include "components/ppu_bus.h"
+#include "components/ppu.h"
 #include "graphics/framebuffer.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
@@ -17,7 +21,7 @@
 namespace nes {
     class Emulator final {
     public:
-        Emulator(const std::filesystem::path& path, Settings settings);
+        Emulator(const std::filesystem::path& path, const Settings& settings);
 
         void run();
     private:
@@ -29,9 +33,13 @@ namespace nes {
 
         Settings settings_;
         Cartridge cartridge_;
+        std::unique_ptr<Mapper> mapper_;
         Controller controller1_;
         Controller controller2_;
-        std::unique_ptr<Mapper> mapper_;
+        CpuBus cpu_bus_;
+        Cpu cpu_;
+        PpuBus ppu_bus_;
+        Ppu ppu_;
 
         SDL_Rect rect_;
         int width_;

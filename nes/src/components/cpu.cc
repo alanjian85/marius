@@ -11,10 +11,8 @@ Cpu::Cpu(CpuBus& bus)
     a_ = 0x00;
     x_ = 0x00;
     y_ = 0x00;
-    pc_ = readAddress(kResetVector);
-    s_ = 0xFD;
+    s_ = 0xFF;
     p_ = 0x00;
-    setI(true);
     cycle_ = 0;
 }
 

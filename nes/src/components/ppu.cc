@@ -10,30 +10,18 @@ Ppu::Ppu(Framebuffer& framebuffer, PpuBus& bus, Cpu& cpu)
       cpu_(cpu)
 {
     cycle_ = 0;
-    scanline_ = 261;
 
-    show_background_ = false;
-    show_sprites_ = false;
-
-    background_pattern_ = 0x0000;
-    sprite_pattern_ = 0x0000;
-
-    fine_x_scroll_ = 0x00;
-
-    write_toggle_ = false;
     curr_addr_ = 0x00;
-    temp_addr_ = 0x00;
-    addr_inc_ = 1;
     read_buffer_ = 0x00;
+
+    oam_addr_ = 0x00;
 
     sprite_zero_ = false;
     sprite_overflow_ = false;
     vblank_ = true;
-    vblank_nmi_ = false;
 }
 
 void Ppu::reset() {
-    cycle_ = 0;
     scanline_ = 261;
 
     show_background_ = false;

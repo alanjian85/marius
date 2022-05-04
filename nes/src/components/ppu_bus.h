@@ -9,7 +9,7 @@
 namespace nes {
     class PpuBus final {
     public:
-        explicit PpuBus(Mapper& mapper);
+        void setMapper(Mapper& mapper);
 
         [[nodiscard]] std::uint8_t read(std::uint16_t addr) const;
 
@@ -19,10 +19,11 @@ namespace nes {
 
         void writeOam(std::uint8_t addr, std::uint8_t val);
     private:
-        Mapper& mapper_;
         std::array<std::uint8_t, 0x800> ram_;
         std::array<std::uint8_t, 0x20> palette_;
         std::array<std::uint32_t, 0x100> oam_;
+
+        Mapper* mapper_;
     };
 }
 

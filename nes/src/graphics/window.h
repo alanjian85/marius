@@ -20,8 +20,6 @@ namespace nes {
         ~Window();
 
         [[nodiscard]] SDL_Window* getHandle() const;
-
-        void getSize(int& width, int& height) const;
     private:
         SDL_Window* handle_;
     };

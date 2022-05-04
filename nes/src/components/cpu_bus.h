@@ -12,28 +12,23 @@
 namespace nes {
     class CpuBus final {
     public:
-        CpuBus(Mapper& mapper);
+        CpuBus(Cpu& cpu, Ppu& ppu, Controller& controller1, Controller& controller2);
+
+        void setMapper(Mapper& mapper);
 
         [[nodiscard]] std::uint8_t read(std::uint16_t addr) const;
 
         void write(std::uint16_t addr, std::uint8_t val);
-
-        void setCpu(Cpu& cpu);
-
-        void setPpu(Ppu& ppu);
-
-        void setController1(Controller& controller1);
-
-        void setController2(Controller& controller2);
     private:
         std::array<std::uint8_t, 0x800> ram_;
-        Mapper& mapper_;
 
-        Cpu* cpu_;
-        Ppu* ppu_;
+        Cpu& cpu_;
+        Ppu& ppu_;
 
-        Controller* controller1_;
-        Controller* controller2_;
+        Controller& controller1_;
+        Controller& controller2_;
+
+        Mapper* mapper_;
     };
 }
 

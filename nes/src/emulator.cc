@@ -5,13 +5,13 @@ using namespace nes;
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/fmt.h>
 
-#include "components/cpu_bus.h"
-#include "components/cpu.h"
-#include "components/ppu_bus.h"
-#include "components/ppu.h"
-
-Emulator::Emulator(const std::filesystem::path& path, Settings settings)
-    : settings_(settings)
+Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
+    : settings_(settings),
+      controller1_(settings.keymap1),
+      controller2_(settings.keymap2),
+      cpu_bus_(cpu_, ppu_, controller1_, controller2_),
+      cpu_(cpu_bus_),
+      ppu_(framebuffer_, ppu_bus_, cpu_)
 {
     cycle_interval_ = std::chrono::nanoseconds(559);
 
@@ -22,11 +22,13 @@ Emulator::Emulator(const std::filesystem::path& path, Settings settings)
         throw std::runtime_error("Couldn't open ROM file: " + path.string());
     }
     rom >> cartridge_;
-    controller1_.setKeymap(settings.keymap1);
-    controller2_.setKeymap(settings.keymap2);
 
     mapper_ = MakeMapper(cartridge_);
     spdlog::info("Mapper: {}", mapper_->getName());
+    cpu_bus_.setMapper(*mapper_);
+    ppu_bus_.setMapper(*mapper_);
+    cpu_.reset();
+    ppu_.reset();
 
     width_ = 1024;
     height_ = 960;
@@ -37,17 +39,6 @@ Emulator::Emulator(const std::filesystem::path& path, Settings settings)
 }
 
 void Emulator::run() {
-    CpuBus cpu_bus(*mapper_);
-    Cpu cpu(cpu_bus);
-    
-    PpuBus ppu_bus(*mapper_);
-    Ppu ppu(framebuffer_, ppu_bus, cpu);
-    
-    cpu_bus.setCpu(cpu);
-    cpu_bus.setPpu(ppu);
-    cpu_bus.setController1(controller1_);
-    cpu_bus.setController2(controller2_);
-
     bool quit = false;
     auto prev_time = Clock::now();
     auto elapsed_time = prev_time - prev_time;
@@ -66,8 +57,8 @@ void Emulator::run() {
                         spdlog::dump_backtrace();
                     }
                     if (event.key.keysym.scancode == settings_.reset) {
-                        cpu.reset();
-                        ppu.reset();
+                        cpu_.reset();
+                        ppu_.reset();
                     }
                     break;
                 case SDL_WINDOWEVENT:
@@ -84,12 +75,12 @@ void Emulator::run() {
 
         elapsed_time += Clock::now() - prev_time;
         while (elapsed_time > cycle_interval_) {
-            cpu.cycle();
+            cpu_.cycle();
 
             // PPU clock is three times faster than CPU
-            ppu.cycle();
-            ppu.cycle();
-            ppu.cycle();
+            ppu_.cycle();
+            ppu_.cycle();
+            ppu_.cycle();
 
             elapsed_time -= cycle_interval_;
         }

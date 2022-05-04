@@ -48,7 +48,3 @@ Window::~Window() {
 SDL_Window* Window::getHandle() const {
     return handle_;
 }
-
-void Window::getSize(int& width, int& height) const {
-    SDL_GetWindowSize(handle_, &width, &height);
-}
