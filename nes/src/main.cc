@@ -12,6 +12,10 @@
 #include "settings.h"
 using namespace nes;
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 SDL_Scancode GetScancode(const std::string& name) {
     SDL_Scancode scancode = SDL_GetScancodeFromName(name.c_str());
     if (scancode == SDL_SCANCODE_UNKNOWN) {
@@ -38,7 +42,15 @@ int main(int argc, char** argv) {
         {
             Settings settings("settings.json");
             Emulator emulator(argv[1], settings);
+#ifndef __EMSCRIPTEN__
             emulator.run();
+#else
+            emscripten_set_main_loop_arg(
+                [](void* arg) {
+                    static_cast<Emulator*>(arg)->loop();
+                },
+            &emulator, 0, true);
+#endif
         }
 
         SDL_Quit();

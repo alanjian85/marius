@@ -24,12 +24,16 @@ namespace nes {
         Emulator(const std::filesystem::path& path, const Settings& settings);
 
         void run();
+
+        void loop();
     private:
         void resize();
 
         using Clock = std::chrono::high_resolution_clock;
 
         std::chrono::nanoseconds cycle_interval_;
+        Clock::time_point prev_time_;
+        std::chrono::nanoseconds elapsed_time_;
 
         Settings settings_;
         Cartridge cartridge_;

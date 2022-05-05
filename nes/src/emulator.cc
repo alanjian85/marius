@@ -7,10 +7,6 @@ using namespace nes;
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/fmt.h>
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#endif
-
 Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
     : settings_(settings),
       controller1_(settings.keymap1),
@@ -20,6 +16,8 @@ Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
       ppu_(framebuffer_, ppu_bus_, cpu_)
 {
     cycle_interval_ = std::chrono::nanoseconds(559);
+    prev_time_ = Clock::now();
+    elapsed_time_ = prev_time_ - prev_time_;
 
     spdlog::enable_backtrace(settings.dump_size);
 
@@ -45,31 +43,18 @@ Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
 }
 
 void Emulator::run() {
-
-
-#ifndef __EMSCRIPTEN__
     bool quit = false;
     while (!quit) {
-#else
-    std::function<void()> callback = [this]() {
-#endif
-        static auto prev_time = Clock::now();
-        static auto elapsed_time = prev_time - prev_time;
-
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
-#ifndef __EMSCRIPTEN__
                 case SDL_QUIT:
                     quit = true;
                     break;
-#endif
                 case SDL_KEYDOWN:
-#ifndef __EMSCRIPTEN__
                     if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                         quit = true;
                     }
-#endif
                     if (event.key.keysym.scancode == settings_.dump) {
                         spdlog::dump_backtrace();
                     }
@@ -90,37 +75,30 @@ void Emulator::run() {
             }
         }
 
-        elapsed_time += Clock::now() - prev_time;
-        prev_time = Clock::now();
-        while (elapsed_time > cycle_interval_) {
-            cpu_.cycle();
-
-            // PPU clock is three times faster than CPU
-            ppu_.cycle();
-            ppu_.cycle();
-            ppu_.cycle();
-
-            elapsed_time -= cycle_interval_;
-        }
-
-        renderer_.setDrawColor(0, 0, 0, 255);
-        renderer_.clear();
-
-        renderer_.copy(framebuffer_.getTexture(), nullptr, &rect_);
-
-        renderer_.present();
-#ifndef __EMSCRIPTEN__
+        loop();
     }
-#else
-    };
-    emscripten_set_main_loop_arg(
-        [](void* callback) {
-            (*static_cast<std::function<void()>*>(callback))();
-        },
-        &callback,
-        0, true
-    );
-#endif
+}
+
+void Emulator::loop() {
+    elapsed_time_ += Clock::now() - prev_time_;
+    prev_time_ = Clock::now();
+    while (elapsed_time_ > cycle_interval_) {
+        cpu_.cycle();
+
+        // PPU clock is three times faster than CPU
+        ppu_.cycle();
+        ppu_.cycle();
+        ppu_.cycle();
+
+        elapsed_time_ -= cycle_interval_;
+    }
+
+    renderer_.setDrawColor(0, 0, 0, 255);
+    renderer_.clear();
+
+    renderer_.copy(framebuffer_.getTexture(), nullptr, &rect_);
+
+    renderer_.present();
 }
 
 void Emulator::resize() {
