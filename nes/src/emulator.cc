@@ -38,7 +38,7 @@ Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
     height_ = 960;
     resize();
     window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(), width_, height_, SDL_WINDOW_RESIZABLE);
-    renderer_ = Renderer(window_, -1, SDL_RENDERER_ACCELERATED);
+    renderer_ = Renderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     framebuffer_ = Framebuffer(renderer_, Ppu::kWidth, Ppu::kHeight);
 }
 

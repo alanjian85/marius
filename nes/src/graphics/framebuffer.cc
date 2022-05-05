@@ -57,12 +57,15 @@ SDL_Texture* Framebuffer::getTexture() const {
 }
 
 void Framebuffer::lock() {
-    SDL_LockTexture(
+    int status = SDL_LockTexture(
         texture_, 
         nullptr,
         &pixels_,
         &pitch_
     );
+    if (status < 0) {
+        spdlog::critical("Unable to lock framebuffer texture");
+    }
 }
 
 void Framebuffer::unlock() {
