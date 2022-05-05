@@ -45,7 +45,6 @@ void Ppu::cycle() {
             sprite_zero_ = false;
             sprite_overflow_ = false;
             vblank_ = false;
-            framebuffer_.lock();
             scanline_sprites_.clear();
         }
 
@@ -183,7 +182,7 @@ void Ppu::cycle() {
         if (vblank_nmi_) {
             cpu_.nmi();
         }
-        framebuffer_.unlock();
+        framebuffer_.update();
     }
 
     ++cycle_;

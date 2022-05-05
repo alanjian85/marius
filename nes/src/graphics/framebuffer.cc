@@ -1,6 +1,7 @@
 #include "framebuffer.h"
 using namespace nes;
 
+#include <cassert>
 #include <stdexcept>
 #include <string>
 
@@ -12,14 +13,17 @@ Framebuffer::Framebuffer()
 
 }
 
-Framebuffer::Framebuffer(const Renderer& renderer, int width, int height) {
+Framebuffer::Framebuffer(const Renderer& renderer, int width, int height)
+    : pixels_(width * height)
+{
+    width_ = width;
+    height_ = height;
     texture_ = SDL_CreateTexture(
         renderer.getHandle(),
         SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_STREAMING,
         width, height
     );
-    pixels_ = nullptr;
 
     if (!texture_) {
         throw std::runtime_error("Failed to create framebuffer texture: " + std::string(SDL_GetError()));
@@ -28,10 +32,12 @@ Framebuffer::Framebuffer(const Renderer& renderer, int width, int height) {
     }
 }
 
-Framebuffer::Framebuffer(Framebuffer&& rhs) noexcept {
+Framebuffer::Framebuffer(Framebuffer&& rhs) noexcept
+    : pixels_(std::move(rhs.pixels_))
+{
+    width_ = rhs.width_;
+    height_ = rhs.height_;
     texture_ = std::exchange(rhs.texture_, nullptr);
-    pixels_ = rhs.pixels_;
-    pitch_ = rhs.pitch_;
 }
 
 Framebuffer& Framebuffer::operator=(Framebuffer&& rhs) noexcept {
@@ -39,9 +45,10 @@ Framebuffer& Framebuffer::operator=(Framebuffer&& rhs) noexcept {
         SDL_DestroyTexture(texture_);
         spdlog::info("Framebuffer texture destroyed");
     }
+    width_ = rhs.width_;
+    height_ = rhs.height_;
     texture_ = std::exchange(rhs.texture_, nullptr);
-    pixels_ = rhs.pixels_;
-    pitch_ = rhs.pitch_;
+    pixels_ = std::move(rhs.pixels_);
     return *this;
 }
 
@@ -56,23 +63,14 @@ SDL_Texture* Framebuffer::getTexture() const {
     return texture_;
 }
 
-void Framebuffer::lock() {
-    int status = SDL_LockTexture(
-        texture_, 
-        nullptr,
-        &pixels_,
-        &pitch_
-    );
-    if (status < 0) {
-        spdlog::critical("Unable to lock framebuffer texture");
-    }
-}
-
-void Framebuffer::unlock() {
-    SDL_UnlockTexture(texture_);
-}
-
 void Framebuffer::setPixel(int x, int y, std::uint32_t color) {
-    auto pixel = reinterpret_cast<std::uint32_t*>(static_cast<std::uint8_t*>(pixels_) + y * pitch_) + x;
-    *pixel = color;
+    assert(x >= 0 && x < width_);
+    assert(y >= 0 && y < height_);
+    pixels_[y * width_ + x] = color;
+}
+
+void Framebuffer::update() {
+    if (SDL_UpdateTexture(texture_, nullptr, pixels_.data(), sizeof(std::uint32_t) * width_) < 0) {
+        spdlog::critical("Failed to update framebuffer texture: {}", SDL_GetError());
+    }
 }

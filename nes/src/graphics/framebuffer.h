@@ -2,6 +2,7 @@
 #define NES_IO_FRAMEBUFFER_H_
 
 #include <cstdint>
+#include <vector>
 
 #include <SDL.h>
 
@@ -22,15 +23,14 @@ namespace nes {
 
         [[nodiscard]] SDL_Texture* getTexture() const;
 
-        void lock();
-
-        void unlock();
-
         void setPixel(int x, int y, std::uint32_t color);
+
+        void update();
     private:
+        int width_;
+        int height_;
         SDL_Texture* texture_;
-        void* pixels_;
-        int pitch_;
+        std::vector<std::uint32_t> pixels_;
     };
 }
 
