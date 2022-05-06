@@ -1,6 +1,7 @@
 #include "emulator.h"
 using namespace nes;
 
+#include <cmath>
 #include <functional>
 
 #include <SDL.h>
@@ -18,7 +19,6 @@ Emulator::Emulator(int width, int height, const std::filesystem::path& path, con
     cycle_interval_ = std::chrono::nanoseconds(559);
     prev_time_ = Clock::now();
     elapsed_time_ = prev_time_ - prev_time_;
-    quit_ = false;
 
     spdlog::enable_backtrace(settings.dump_size);
 
@@ -35,31 +35,31 @@ Emulator::Emulator(int width, int height, const std::filesystem::path& path, con
     cpu_.reset();
     ppu_.reset();
 
-    width_ = width;
-    height_ = height;
-    resize();
-    window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(), width_, height_, SDL_WINDOW_RESIZABLE);
+    window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(), width, height, SDL_WINDOW_RESIZABLE);
     renderer_ = Renderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     framebuffer_ = Framebuffer(renderer_, Ppu::kWidth, Ppu::kHeight);
-}
 
-void Emulator::run() {
-    while (!quit_) {
-        loop();
-    }
+#ifndef __EMSCRIPTEN__
+    quit_ = false;
+    resize(width, height);
+#endif
 }
 
 void Emulator::loop() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
+#ifndef __EMSCRIPTEN__
             case SDL_QUIT:
                 quit_ = true;
                 break;
+#endif
             case SDL_KEYDOWN:
+#ifndef __EMSCRIPTEN__
                 if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                     quit_ = true;
                 }
+#endif
                 if (event.key.keysym.scancode == settings_.dump) {
                     spdlog::dump_backtrace();
                 }
@@ -70,11 +70,11 @@ void Emulator::loop() {
                 break;
             case SDL_WINDOWEVENT:
                 switch (event.window.event) {
+#ifndef __EMSCRIPTEN__
                     case SDL_WINDOWEVENT_RESIZED:
-                        width_ = event.window.data1;
-                        height_ = event.window.data2;
-                        resize();
+                        resize(event.window.data1, event.window.data2);
                         break;
+#endif
                 }
                 break;
         }
@@ -96,23 +96,30 @@ void Emulator::loop() {
     renderer_.setDrawColor(0, 0, 0, 255);
     renderer_.clear();
 
+#ifndef __EMSCRIPTEN__
     renderer_.copy(framebuffer_.getTexture(), nullptr, &rect_);
+#else
+    renderer_.copy(framebuffer_.getTexture(), nullptr, nullptr);
+#endif
 
     renderer_.present();
 }
 
-void Emulator::resize() {
-    if (static_cast<float>(width_) / height_ > Ppu::kAspect) {
-        auto screen_width = static_cast<int>(height_ * Ppu::kAspect);
-        rect_.x = (width_ - screen_width) / 2;
-        rect_.y = 0;
-        rect_.w = screen_width;
-        rect_.h = height_;
-    } else {
-        auto screen_height = static_cast<int>(width_ / Ppu::kAspect);
-        rect_.x = 0;
-        rect_.y = (height_ - screen_height) / 2;
-        rect_.w = width_;
-        rect_.h = screen_height;
+#ifndef __EMSCRIPTEN__
+void Emulator::run() {
+    while (!quit_) {
+        loop();
     }
 }
+
+void Emulator::resize(int width, int height) {
+    auto scale = std::min(
+        static_cast<float>(width) / Ppu::kWidth,
+        static_cast<float>(height) / Ppu::kHeight
+    );
+    rect_.w = static_cast<int>(Ppu::kWidth * scale);
+    rect_.h = static_cast<int>(Ppu::kHeight * scale);
+    rect_.x = (width - rect_.w) / 2;
+    rect_.y = (height - rect_.h) / 2;
+}
+#endif

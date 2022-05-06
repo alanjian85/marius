@@ -6,15 +6,19 @@
 
         <style>
             body {
+                width: 100%;
+                height: 100%;
                 margin: 0;
                 padding: 0; 
                 overflow: hidden;
+                background-color: darkred;
             }
 
             canvas {
                 position: absolute;
-                width: 100%;
-                height: 100%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%)
             }
         </style>
     </head>
@@ -22,8 +26,30 @@
         <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
         <script type="text/javascript">
             var Module = {
-                canvas: (function() { return document.getElementById('canvas') })()
+                canvas: document.getElementById('canvas')
             }
+
+            var resize = function() {
+                var canvas = Module.canvas
+                const ppu = {
+                    width: 256,
+                    height: 240
+                }
+                const size = {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                }
+
+                const scale = Math.min(
+                    size.width / ppu.width,
+                    size.height / ppu.height
+                )
+                canvas.style.width = Math.trunc(ppu.width * scale) + 'px'
+                canvas.style.height = Math.trunc(ppu.height * scale) + 'px'
+            }
+            resize()
+
+            window.addEventListener('resize', resize)
         </script>
         <script src="nes.js"></script>
     </body>

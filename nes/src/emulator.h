@@ -23,18 +23,19 @@ namespace nes {
     public:
         Emulator(int width, int height, const std::filesystem::path& path, const Settings& settings);
 
+        void loop();
+        
+#ifndef __EMSCRIPTEN__
         void run();
 
-        void loop();
-    private:
-        void resize();
+        void resize(int width, int height);
+#endif
 
         using Clock = std::chrono::high_resolution_clock;
 
         std::chrono::nanoseconds cycle_interval_;
         Clock::time_point prev_time_;
         std::chrono::nanoseconds elapsed_time_;
-        bool quit_;
 
         Settings settings_;
         Cartridge cartridge_;
@@ -46,12 +47,14 @@ namespace nes {
         PpuBus ppu_bus_;
         Ppu ppu_;
 
-        SDL_Rect rect_;
-        int width_;
-        int height_;
         Window window_;
         Renderer renderer_;
         Framebuffer framebuffer_;
+
+#ifndef __EMSCRIPTEN__
+        bool quit_;
+        SDL_Rect rect_;
+#endif
     };
 }
 
