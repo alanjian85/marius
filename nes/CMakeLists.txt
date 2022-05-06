@@ -1,6 +1,5 @@
 if (EMSCRIPTEN)
     set(CMAKE_CXX_FLAGS "-s USE_SDL=2")
-    set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
 
 set(NES_SRCS
@@ -49,6 +48,8 @@ if (EMSCRIPTEN)
     target_link_libraries(nes
         ${SDL2_LIBRARIES}
     )
+
+    configure_file(index.html index.html COPYONLY)    
 else()
     target_link_libraries(nes
         nlohmann_json::nlohmann_json

@@ -21,7 +21,7 @@
 namespace nes {
     class Emulator final {
     public:
-        Emulator(const std::filesystem::path& path, const Settings& settings);
+        Emulator(int width, int height, const std::filesystem::path& path, const Settings& settings);
 
         void run();
 
@@ -34,6 +34,7 @@ namespace nes {
         std::chrono::nanoseconds cycle_interval_;
         Clock::time_point prev_time_;
         std::chrono::nanoseconds elapsed_time_;
+        bool quit_;
 
         Settings settings_;
         Cartridge cartridge_;

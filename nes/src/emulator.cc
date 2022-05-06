@@ -7,7 +7,7 @@ using namespace nes;
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/fmt.h>
 
-Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
+Emulator::Emulator(int width, int height, const std::filesystem::path& path, const Settings& settings)
     : settings_(settings),
       controller1_(settings.keymap1),
       controller2_(settings.keymap2),
@@ -18,6 +18,7 @@ Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
     cycle_interval_ = std::chrono::nanoseconds(559);
     prev_time_ = Clock::now();
     elapsed_time_ = prev_time_ - prev_time_;
+    quit_ = false;
 
     spdlog::enable_backtrace(settings.dump_size);
 
@@ -34,8 +35,8 @@ Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
     cpu_.reset();
     ppu_.reset();
 
-    width_ = 1024;
-    height_ = 960;
+    width_ = width;
+    height_ = height;
     resize();
     window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(), width_, height_, SDL_WINDOW_RESIZABLE);
     renderer_ = Renderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -43,43 +44,42 @@ Emulator::Emulator(const std::filesystem::path& path, const Settings& settings)
 }
 
 void Emulator::run() {
-    bool quit = false;
-    while (!quit) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_QUIT:
-                    quit = true;
-                    break;
-                case SDL_KEYDOWN:
-                    if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-                        quit = true;
-                    }
-                    if (event.key.keysym.scancode == settings_.dump) {
-                        spdlog::dump_backtrace();
-                    }
-                    if (event.key.keysym.scancode == settings_.reset) {
-                        cpu_.reset();
-                        ppu_.reset();
-                    }
-                    break;
-                case SDL_WINDOWEVENT:
-                    switch (event.window.event) {
-                        case SDL_WINDOWEVENT_RESIZED:
-                            width_ = event.window.data1;
-                            height_ = event.window.data2;
-                            resize();
-                            break;
-                    }
-                    break;
-            }
-        }
-
+    while (!quit_) {
         loop();
     }
 }
 
 void Emulator::loop() {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_QUIT:
+                quit_ = true;
+                break;
+            case SDL_KEYDOWN:
+                if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+                    quit_ = true;
+                }
+                if (event.key.keysym.scancode == settings_.dump) {
+                    spdlog::dump_backtrace();
+                }
+                if (event.key.keysym.scancode == settings_.reset) {
+                    cpu_.reset();
+                    ppu_.reset();
+                }
+                break;
+            case SDL_WINDOWEVENT:
+                switch (event.window.event) {
+                    case SDL_WINDOWEVENT_RESIZED:
+                        width_ = event.window.data1;
+                        height_ = event.window.data2;
+                        resize();
+                        break;
+                }
+                break;
+        }
+    }
+
     elapsed_time_ += Clock::now() - prev_time_;
     prev_time_ = Clock::now();
     while (elapsed_time_ > cycle_interval_) {

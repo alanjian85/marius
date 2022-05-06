@@ -14,15 +14,16 @@ using namespace nes;
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
-#endif
 
-SDL_Scancode GetScancode(const std::string& name) {
-    SDL_Scancode scancode = SDL_GetScancodeFromName(name.c_str());
-    if (scancode == SDL_SCANCODE_UNKNOWN) {
-        throw std::runtime_error(std::string("Error: Scancode name ") + name + " is invalid");
-    }
-    return scancode;
-}
+EM_JS(int, GetCanvasWidth, (), {
+    return Module.canvas.width
+});
+
+EM_JS(int, GetCanvasHeight, (), {
+    return Module.canvas.height
+});
+
+#endif
 
 int main(int argc, char** argv) {
     try {
@@ -41,10 +42,11 @@ int main(int argc, char** argv) {
 
         {
             Settings settings("settings.json");
-            Emulator emulator(argv[1], settings);
 #ifndef __EMSCRIPTEN__
+            Emulator emulator(1024, 960, argv[1], settings);
             emulator.run();
 #else
+            Emulator emulator(GetCanvasWidth(), GetCanvasHeight(), path, settings);
             emscripten_set_main_loop_arg(
                 [](void* arg) {
                     static_cast<Emulator*>(arg)->loop();
