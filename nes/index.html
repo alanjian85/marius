@@ -11,20 +11,45 @@
                 margin: 0;
                 padding: 0; 
                 overflow: hidden;
-                background-color: darkred;
+                background-color: rgb(170, 60, 61);
             }
 
             canvas {
                 position: absolute;
+                outline: 125px solid rgb(229, 226, 217);
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%)
+            }
+
+            div {
+                font-family: Arial, sans-serif;
+                outline: 5px solid rgb(113, 5, 29);
+                background: rgb(159, 2, 31);
+                color: ivory;
+                position: absolute;
+                top: 1%;
+                left: 1%;
             }
         </style>
 
         <title>NES Emulation Software</title>
     </head>
     <body>
+        <div>
+            LEFT - A
+            <br>
+            RIGHT - D
+            <br>
+            JUMP - J
+            <br>
+            BOOST - K
+            <br>
+            SELECT - RIGHT SHIFT
+            <br>
+            START - ENTER
+        </div>
+
         <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
         <script type="text/javascript">
             var Module = {
