@@ -27,12 +27,14 @@ EM_JS(int, GetCanvasHeight, (), {
 
 int main(int argc, char** argv) {
     try {
+#ifndef __EMSCRIPTEN__
         if (argc != 2) {
             std::cerr << "Usage: nes <ROM>";
             return EXIT_FAILURE;
         }
 
         spdlog::info("ROM Path: {}", argv[1]);
+#endif
 
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
             throw std::runtime_error("Failed to initialize SDL: " + std::string(SDL_GetError()));

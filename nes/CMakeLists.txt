@@ -1,5 +1,5 @@
 if (EMSCRIPTEN)
-    set(CMAKE_CXX_FLAGS "-s USE_SDL=2")
+    set(CMAKE_CXX_FLAGS "-s USE_SDL=2 -O3")
 endif()
 
 set(NES_SRCS
