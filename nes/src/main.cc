@@ -46,6 +46,7 @@ int main(int argc, char** argv) {
             Emulator emulator(1024, 960, argv[1], settings);
             emulator.run();
 #else
+            const char* path = "mario.nes";
             Emulator emulator(GetCanvasWidth(), GetCanvasHeight(), path, settings);
             emscripten_set_main_loop_arg(
                 [](void* arg) {

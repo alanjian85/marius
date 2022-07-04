@@ -2,13 +2,14 @@
 NES Emulation Software
 
 ## Features
-* NROM Mapper
-* Configurable key mapping
-* Basic 6502 Emulation
-* iNES ROM loading
-* PPU Scrolling
+* 6502 CPU Emulation
+* PPU Rendering
+* Keyboard Input
+* Configurable JSON Key Mapping
+* iNES ROM Format Support
 
-## TODO
+## Supported Mappers
+* NROM
 
 ## Dependencies
 * [JSON for Modern C++](https://json.nlohmann.me/)
