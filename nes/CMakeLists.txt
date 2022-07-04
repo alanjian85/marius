@@ -49,7 +49,8 @@ if (EMSCRIPTEN)
         ${SDL2_LIBRARIES}
     )
 
-    configure_file(index.html index.html COPYONLY)
+    configure_file(res/index.html index.html COPYONLY)
+    configure_file(res/icon.png icon.png COPYONLY)
 
     set_target_properties(nes PROPERTIES LINK_FLAGS "--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/mario.nes@mario.nes")
 else()
