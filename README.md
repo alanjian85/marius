@@ -1,6 +1,8 @@
 # NES
 NES Emulation Software
 
+![Mario GIF](media/mario.gif) ![Pacman GIF](media/pacman.gif) ![Donkey Kong GIF](media/donkeykong.gif)
+
 ## Features
 * 6502 CPU Emulation
 * PPU Rendering
