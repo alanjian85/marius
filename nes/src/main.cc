@@ -1,12 +1,12 @@
+#include <spdlog/spdlog.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
+#include <iostream>
+#include <nlohmann/json.hpp>
 #include <stdexcept>
 #include <string>
-#include <iostream>
-
-#include <nlohmann/json.hpp>
-#include <spdlog/spdlog.h>
 
 #include "emulator.h"
 #include "settings.h"
@@ -15,13 +15,9 @@ using namespace nes;
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 
-EM_JS(int, GetCanvasWidth, (), {
-    return Module.canvas.width
-});
+EM_JS(int, GetCanvasWidth, (), {return Module.canvas.width});
 
-EM_JS(int, GetCanvasHeight, (), {
-    return Module.canvas.height
-});
+EM_JS(int, GetCanvasHeight, (), {return Module.canvas.height});
 
 #endif
 
@@ -37,7 +33,8 @@ int main(int argc, char** argv) {
 #endif
 
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-            throw std::runtime_error("Failed to initialize SDL: " + std::string(SDL_GetError()));
+            throw std::runtime_error("Failed to initialize SDL: " +
+                                     std::string(SDL_GetError()));
         } else {
             spdlog::info("SDL initialized");
         }
@@ -49,12 +46,11 @@ int main(int argc, char** argv) {
             emulator.run();
 #else
             const char* path = "mario.nes";
-            Emulator emulator(GetCanvasWidth(), GetCanvasHeight(), path, settings);
+            Emulator emulator(GetCanvasWidth(), GetCanvasHeight(), path,
+                              settings);
             emscripten_set_main_loop_arg(
-                [](void* arg) {
-                    static_cast<Emulator*>(arg)->loop();
-                },
-            &emulator, 0, true);
+                [](void* arg) { static_cast<Emulator*>(arg)->loop(); },
+                &emulator, 0, true);
 #endif
         }
 

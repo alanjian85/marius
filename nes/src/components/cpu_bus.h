@@ -10,26 +10,28 @@
 #include "ppu.h"
 
 namespace nes {
-    class CpuBus final {
-    public:
-        CpuBus(Cpu& cpu, Ppu& ppu, Controller& controller1, Controller& controller2);
+class CpuBus final {
+   public:
+    CpuBus(Cpu& cpu, Ppu& ppu, Controller& controller1,
+           Controller& controller2);
 
-        void setMapper(Mapper& mapper);
+    void setMapper(Mapper& mapper);
 
-        [[nodiscard]] std::uint8_t read(std::uint16_t addr) const;
+    [[nodiscard]] std::uint8_t read(std::uint16_t addr) const;
 
-        void write(std::uint16_t addr, std::uint8_t val);
-    private:
-        std::array<std::uint8_t, 0x800> ram_;
+    void write(std::uint16_t addr, std::uint8_t val);
 
-        Cpu& cpu_;
-        Ppu& ppu_;
+   private:
+    std::array<std::uint8_t, 0x800> ram_;
 
-        Controller& controller1_;
-        Controller& controller2_;
+    Cpu& cpu_;
+    Ppu& ppu_;
 
-        Mapper* mapper_;
-    };
-}
+    Controller& controller1_;
+    Controller& controller2_;
 
-#endif // NES_COMPONENTS_CPU_BUS_H_
+    Mapper* mapper_;
+};
+}  // namespace nes
+
+#endif  // NES_COMPONENTS_CPU_BUS_H_

@@ -3,11 +3,7 @@ using namespace nes;
 
 #include <SDL.h>
 
-Controller::Controller(const ControllerKeymap& keymap)
-    : keymap_(keymap)
-{
-
-}
+Controller::Controller(const ControllerKeymap& keymap) : keymap_(keymap) {}
 
 void Controller::write(std::uint8_t val) {
     if (strobe_ && !(val & 0x01)) {
@@ -35,21 +31,13 @@ void Controller::update() {
     bool down = state[keymap_.down];
     bool left = state[keymap_.left];
     bool right = state[keymap_.right];
-    state_ = 
-        a      << 0 |
-        b      << 1 |
-        select << 2 |
-        start  << 3;
-    
+    state_ = a << 0 | b << 1 | select << 2 | start << 3;
+
     if (up != down) {
-        state_ |= 
-            up   << 4 |
-            down << 5;
+        state_ |= up << 4 | down << 5;
     }
 
     if (right != left) {
-        state_ |= 
-            left  << 6 |
-            right << 7;
+        state_ |= left << 6 | right << 7;
     }
 }

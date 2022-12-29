@@ -1,9 +1,7 @@
 #include "ppu_bus.h"
 using namespace nes;
 
-void PpuBus::setMapper(Mapper& mapper) {
-    mapper_ = &mapper;
-}
+void PpuBus::setMapper(Mapper& mapper) { mapper_ = &mapper; }
 
 std::uint8_t PpuBus::read(std::uint16_t addr) const {
     if (addr < 0x2000) {
@@ -64,10 +62,6 @@ void PpuBus::write(std::uint16_t addr, std::uint8_t val) {
     }
 }
 
-std::uint8_t PpuBus::readOam(std::uint8_t addr) const {
-    return oam_[addr];
-}
+std::uint8_t PpuBus::readOam(std::uint8_t addr) const { return oam_[addr]; }
 
-void PpuBus::writeOam(std::uint8_t addr, std::uint8_t val) {
-    oam_[addr] = val;
-}
+void PpuBus::writeOam(std::uint8_t addr, std::uint8_t val) { oam_[addr] = val; }

@@ -4,22 +4,15 @@ using namespace nes;
 #include <stdexcept>
 #include <string>
 
-Window::Window()
-    : handle_(nullptr)
-{
-
-}
+Window::Window() : handle_(nullptr) {}
 
 Window::Window(const char* title, int width, int height, Uint32 flags) {
-    handle_ = SDL_CreateWindow(
-        title,
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        width, height,
-        flags
-    );
+    handle_ = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
+                               SDL_WINDOWPOS_UNDEFINED, width, height, flags);
 
     if (!handle_) {
-        throw std::runtime_error("Failed to create window: " + std::string(SDL_GetError()));
+        throw std::runtime_error("Failed to create window: " +
+                                 std::string(SDL_GetError()));
     } else {
         spdlog::info("Window created");
     }
@@ -45,6 +38,4 @@ Window::~Window() {
     }
 }
 
-SDL_Window* Window::getHandle() const {
-    return handle_;
-}
+SDL_Window* Window::getHandle() const { return handle_; }

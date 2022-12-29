@@ -4,22 +4,22 @@
 #include "mapper.h"
 
 namespace nes {
-    class MapperNrom final : public Mapper {
-    public:
-        using Mapper::Mapper;
+class MapperNrom final : public Mapper {
+   public:
+    using Mapper::Mapper;
 
-        virtual std::string getName() const override;
+    virtual std::string getName() const override;
 
-        virtual std::uint8_t readPrg(std::uint16_t addr) override;
+    virtual std::uint8_t readPrg(std::uint16_t addr) override;
 
-        virtual void writePrg(std::uint16_t addr, std::uint8_t val) override;
-    
-        virtual std::uint8_t readChr(std::uint16_t addr) override;
+    virtual void writePrg(std::uint16_t addr, std::uint8_t val) override;
 
-        virtual void writeChr(std::uint16_t addr, std::uint8_t val) override;
+    virtual std::uint8_t readChr(std::uint16_t addr) override;
 
-        virtual Mirroring getMirroring() override;
-    };
-}
+    virtual void writeChr(std::uint16_t addr, std::uint8_t val) override;
 
-#endif // NES_MAPPERS_MAPPER_NROM_H_
+    virtual Mirroring getMirroring() override;
+};
+}  // namespace nes
+
+#endif  // NES_MAPPERS_MAPPER_NROM_H_

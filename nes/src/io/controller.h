@@ -6,21 +6,22 @@
 #include "controller_keymap.h"
 
 namespace nes {
-    class Controller final {
-    public:
-        Controller(const ControllerKeymap& keymap);
+class Controller final {
+   public:
+    Controller(const ControllerKeymap& keymap);
 
-        void write(std::uint8_t val);
+    void write(std::uint8_t val);
 
-        [[nodiscard]] std::uint8_t read();
-    private:
-        void update();
+    [[nodiscard]] std::uint8_t read();
 
-        const ControllerKeymap& keymap_;
+   private:
+    void update();
 
-        bool strobe_;
-        std::uint8_t state_;
-    };
-}
+    const ControllerKeymap& keymap_;
 
-#endif // NES_IO_CONTROLLER_H_
+    bool strobe_;
+    std::uint8_t state_;
+};
+}  // namespace nes
+
+#endif  // NES_IO_CONTROLLER_H_

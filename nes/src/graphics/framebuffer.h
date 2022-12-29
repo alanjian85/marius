@@ -1,37 +1,38 @@
 #ifndef NES_IO_FRAMEBUFFER_H_
 #define NES_IO_FRAMEBUFFER_H_
 
+#include <SDL.h>
+
 #include <cstdint>
 #include <vector>
-
-#include <SDL.h>
 
 #include "renderer.h"
 
 namespace nes {
-    class Framebuffer final {
-    public:
-        Framebuffer();
+class Framebuffer final {
+   public:
+    Framebuffer();
 
-        Framebuffer(const Renderer& renderer, int width, int height);
+    Framebuffer(const Renderer& renderer, int width, int height);
 
-        Framebuffer(Framebuffer&& rhs) noexcept;
+    Framebuffer(Framebuffer&& rhs) noexcept;
 
-        Framebuffer& operator=(Framebuffer&& rhs) noexcept;
+    Framebuffer& operator=(Framebuffer&& rhs) noexcept;
 
-        ~Framebuffer();
+    ~Framebuffer();
 
-        [[nodiscard]] SDL_Texture* getTexture() const;
+    [[nodiscard]] SDL_Texture* getTexture() const;
 
-        void setPixel(int x, int y, std::uint32_t color);
+    void setPixel(int x, int y, std::uint32_t color);
 
-        void update();
-    private:
-        int width_;
-        int height_;
-        SDL_Texture* texture_;
-        std::vector<std::uint32_t> pixels_;
-    };
-}
+    void update();
 
-#endif // NES_IO_FRAMEBUFFER_H_
+   private:
+    int width_;
+    int height_;
+    SDL_Texture* texture_;
+    std::vector<std::uint32_t> pixels_;
+};
+}  // namespace nes
+
+#endif  // NES_IO_FRAMEBUFFER_H_

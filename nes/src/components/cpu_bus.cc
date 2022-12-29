@@ -1,15 +1,14 @@
 #include "cpu_bus.h"
 using namespace nes;
 
-CpuBus::CpuBus(Cpu& cpu, Ppu& ppu, Controller& controller1, Controller& controller2)
-    : cpu_(cpu), ppu_(ppu), controller1_(controller1), controller2_(controller2)
-{
-    
-}
+CpuBus::CpuBus(Cpu& cpu, Ppu& ppu, Controller& controller1,
+               Controller& controller2)
+    : cpu_(cpu),
+      ppu_(ppu),
+      controller1_(controller1),
+      controller2_(controller2) {}
 
-void CpuBus::setMapper(Mapper& mapper) {
-    mapper_ = &mapper;
-}
+void CpuBus::setMapper(Mapper& mapper) { mapper_ = &mapper; }
 
 std::uint8_t CpuBus::read(std::uint16_t addr) const {
     if (addr < 0x2000) {

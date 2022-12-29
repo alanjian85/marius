@@ -1,21 +1,21 @@
 #include "emulator.h"
 using namespace nes;
 
+#include <SDL.h>
+#include <spdlog/fmt/fmt.h>
+#include <spdlog/spdlog.h>
+
 #include <cmath>
 #include <functional>
 
-#include <SDL.h>
-#include <spdlog/spdlog.h>
-#include <spdlog/fmt/fmt.h>
-
-Emulator::Emulator(int width, int height, const std::filesystem::path& path, const Settings& settings)
+Emulator::Emulator(int width, int height, const std::filesystem::path& path,
+                   const Settings& settings)
     : settings_(settings),
       controller1_(settings.keymap1),
       controller2_(settings.keymap2),
       cpu_bus_(cpu_, ppu_, controller1_, controller2_),
       cpu_(cpu_bus_),
-      ppu_(framebuffer_, ppu_bus_, cpu_)
-{
+      ppu_(framebuffer_, ppu_bus_, cpu_) {
     cycle_interval_ = std::chrono::nanoseconds(559);
     prev_time_ = Clock::now();
     elapsed_time_ = prev_time_ - prev_time_;
@@ -35,8 +35,10 @@ Emulator::Emulator(int width, int height, const std::filesystem::path& path, con
     cpu_.reset();
     ppu_.reset();
 
-    window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(), width, height, SDL_WINDOW_RESIZABLE);
-    renderer_ = Renderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(),
+                     width, height, SDL_WINDOW_RESIZABLE);
+    renderer_ = Renderer(window_, -1,
+                         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     framebuffer_ = Framebuffer(renderer_, Ppu::kWidth, Ppu::kHeight);
 
 #ifndef __EMSCRIPTEN__
@@ -113,10 +115,8 @@ void Emulator::run() {
 }
 
 void Emulator::resize(int width, int height) {
-    auto scale = std::min(
-        static_cast<float>(width) / Ppu::kWidth,
-        static_cast<float>(height) / Ppu::kHeight
-    );
+    auto scale = std::min(static_cast<float>(width) / Ppu::kWidth,
+                          static_cast<float>(height) / Ppu::kHeight);
     rect_.w = static_cast<int>(Ppu::kWidth * scale);
     rect_.h = static_cast<int>(Ppu::kHeight * scale);
     rect_.x = (width - rect_.w) / 2;

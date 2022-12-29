@@ -1,28 +1,29 @@
 #ifndef NES_GRAPHICS_WINDOW_H_
 #define NES_GRAPHICS_WINDOW_H_
 
-#include <algorithm>
-
 #include <SDL.h>
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
+
 namespace nes {
-    class Window final {
-    public:
-        Window();
+class Window final {
+   public:
+    Window();
 
-        Window(const char* title, int width, int height, Uint32 flags);
+    Window(const char* title, int width, int height, Uint32 flags);
 
-        Window(Window&& rhs) noexcept;
+    Window(Window&& rhs) noexcept;
 
-        Window& operator=(Window&& rhs) noexcept;
+    Window& operator=(Window&& rhs) noexcept;
 
-        ~Window();
+    ~Window();
 
-        [[nodiscard]] SDL_Window* getHandle() const;
-    private:
-        SDL_Window* handle_;
-    };
-}
+    [[nodiscard]] SDL_Window* getHandle() const;
 
-#endif // NES_GRAPHICS_WINDOW_H_
+   private:
+    SDL_Window* handle_;
+};
+}  // namespace nes
+
+#endif  // NES_GRAPHICS_WINDOW_H_

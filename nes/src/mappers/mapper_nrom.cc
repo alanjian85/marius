@@ -3,9 +3,7 @@ using namespace nes;
 
 #include <spdlog/spdlog.h>
 
-std::string MapperNrom::getName() const {
-    return "NROM";
-}
+std::string MapperNrom::getName() const { return "NROM"; }
 
 std::uint8_t MapperNrom::readPrg(std::uint16_t addr) {
     if (addr >= 0x8000) {
@@ -33,6 +31,4 @@ void MapperNrom::writeChr(std::uint16_t addr, std::uint8_t val) {
     spdlog::warn("Attempted to write CHR ROM");
 }
 
-Mirroring MapperNrom::getMirroring() {
-    return cartridge_.getMirroring();
-}
+Mirroring MapperNrom::getMirroring() { return cartridge_.getMirroring(); }

@@ -5,9 +5,7 @@ using namespace nes;
 
 #include "cpu_bus.h"
 
-Cpu::Cpu(CpuBus& bus) 
-    : bus_(bus)
-{
+Cpu::Cpu(CpuBus& bus) : bus_(bus) {
     a_ = 0x00;
     x_ = 0x00;
     y_ = 0x00;
@@ -46,18 +44,12 @@ void Cpu::reset() {
 void Cpu::cycle() {
     if (cycle_-- == 0) {
         auto opcode = readByte(pc_++);
-        if (execOpcode(opcode))
-            return;
-        if (execImplied(opcode))
-            return;
-        if (execBranch(opcode))
-            return;
-        if (execGroup0(opcode))
-            return;
-        if (execGroup1(opcode))
-            return;
-        if (execGroup2(opcode))
-            return;
+        if (execOpcode(opcode)) return;
+        if (execImplied(opcode)) return;
+        if (execBranch(opcode)) return;
+        if (execGroup0(opcode)) return;
+        if (execGroup1(opcode)) return;
+        if (execGroup2(opcode)) return;
         spdlog::critical("Invalid opcode {:#04x}", opcode);
     }
 }
@@ -89,17 +81,11 @@ void Cpu::writeByte(std::uint16_t addr, std::uint8_t val) {
     bus_.write(addr, val);
 }
 
-std::uint8_t Cpu::pull() {
-    return readByte(kStackBase | ++s_);
-}
+std::uint8_t Cpu::pull() { return readByte(kStackBase | ++s_); }
 
-void Cpu::push(std::uint8_t val) {
-    writeByte(kStackBase | s_--, val);
-}
+void Cpu::push(std::uint8_t val) { writeByte(kStackBase | s_--, val); }
 
-void Cpu::addrImmediate() {
-    addr_ = pc_++;
-}
+void Cpu::addrImmediate() { addr_ = pc_++; }
 
 void Cpu::addrRelative() {
     std::int8_t offset = readByte(pc_++);
@@ -111,14 +97,13 @@ void Cpu::addrAbsolute() {
     pc_ += 2;
 }
 
-void Cpu::addrZeroPage() {
-    addr_ = readByte(pc_++);
-}
+void Cpu::addrZeroPage() { addr_ = readByte(pc_++); }
 
 void Cpu::addrIndirect() {
     addr_ = readAddress(pc_);
     pc_ += 2;
-    addr_ = bus_.read(addr_) | bus_.read(addr_ & 0xFF00 | (addr_ + 1) & 0xFF) << 8;
+    addr_ = bus_.read(addr_) | bus_.read(addr_ & 0xFF00 | (addr_ + 1) & 0xFF)
+                                   << 8;
 }
 
 void Cpu::addrAbsoluteX() {
@@ -406,7 +391,7 @@ bool Cpu::execBranch(std::uint8_t opcode) {
         }
 
         addrRelative();
-        if (condition) {            
+        if (condition) {
             if ((addr_ & 0xFF00) != (pc_ & 0xFF00)) {
                 ++cycle_;
             }
@@ -430,7 +415,7 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
                 mode = "zpg";
                 break;
             case 0b011:
-                if (opcode == 0x6C) { // JMP (abs)
+                if (opcode == 0x6C) {  // JMP (abs)
                     addrIndirect();
                     mode = "ind";
                 } else {
@@ -450,13 +435,12 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
                 return false;
         }
         switch ((opcode & 0xE0) >> 5) {
-            case 0b001:
-                {
-                    std::uint8_t operand = readByte(addr_);
-                    setZ(!(operand & a_));
-                    setV(operand & 0x40);
-                    setN(operand & 0x80);
-                }
+            case 0b001: {
+                std::uint8_t operand = readByte(addr_);
+                setZ(!(operand & a_));
+                setV(operand & 0x40);
+                setN(operand & 0x80);
+            }
                 instr = "BIT";
                 break;
             case 0b010:
@@ -473,20 +457,19 @@ bool Cpu::execGroup0(std::uint8_t opcode) {
                 setZN(y_);
                 instr = "LDY";
                 break;
-            case 0b110:
-                {
-                    std::uint16_t diff = y_ - readByte(addr_);
-                    setC(!(diff & 0x100));
-                    setZN(static_cast<std::uint8_t>(diff));
-                }
+            case 0b110: {
+                std::uint16_t diff = y_ - readByte(addr_);
+                setC(!(diff & 0x100));
+                setZN(static_cast<std::uint8_t>(diff));
+            }
                 instr = "CPY";
                 break;
-            case 0b111: // CPX
-                {
-                    std::uint16_t diff = x_ - readByte(addr_);
-                    setC(!(diff & 0x100));
-                    setZN(static_cast<std::uint8_t>(diff));
-                }
+            case 0b111:  // CPX
+            {
+                std::uint16_t diff = x_ - readByte(addr_);
+                setC(!(diff & 0x100));
+                setZN(static_cast<std::uint8_t>(diff));
+            }
                 instr = "CPX";
                 break;
         }
@@ -549,14 +532,13 @@ bool Cpu::execGroup1(std::uint8_t opcode) {
                 setZN(a_);
                 instr = "EOR";
                 break;
-            case 0b011:
-                {
-                    std::uint8_t operand = readByte(addr_);
-                    std::uint16_t sum = a_ + operand + (p_ & kC);
-                    setC(sum & 0x100);
-                    setV(~(a_ ^ operand) & (a_ ^ sum) & 0x80);
-                    a_ = static_cast<std::uint8_t>(sum);
-                }
+            case 0b011: {
+                std::uint8_t operand = readByte(addr_);
+                std::uint16_t sum = a_ + operand + (p_ & kC);
+                setC(sum & 0x100);
+                setV(~(a_ ^ operand) & (a_ ^ sum) & 0x80);
+                a_ = static_cast<std::uint8_t>(sum);
+            }
                 setZN(a_);
                 instr = "ADC";
                 break;
@@ -569,22 +551,20 @@ bool Cpu::execGroup1(std::uint8_t opcode) {
                 setZN(a_);
                 instr = "LDA";
                 break;
-            case 0b110:
-                {
-                    std::uint16_t diff = a_ - readByte(addr_);
-                    setC(!(diff & 0x100));
-                    setZN(static_cast<std::uint8_t>(diff));
-                }
+            case 0b110: {
+                std::uint16_t diff = a_ - readByte(addr_);
+                setC(!(diff & 0x100));
+                setZN(static_cast<std::uint8_t>(diff));
+            }
                 instr = "CMP";
                 break;
-            case 0b111:
-                {
-                    std::uint8_t operand = readByte(addr_);
-                    std::uint16_t diff = a_ - operand - !(p_ & kC);
-                    setC(!(diff & 0x100));
-                    setV((a_ ^ operand) & (a_ ^ diff) & 0x80);
-                    a_ = static_cast<std::uint8_t>(diff);
-                }
+            case 0b111: {
+                std::uint8_t operand = readByte(addr_);
+                std::uint16_t diff = a_ - operand - !(p_ & kC);
+                setC(!(diff & 0x100));
+                setV((a_ ^ operand) & (a_ ^ diff) & 0x80);
+                a_ = static_cast<std::uint8_t>(diff);
+            }
                 setZN(a_);
                 instr = "SBC";
                 break;
@@ -608,13 +588,12 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                     setZN(a_);
                     instr = "ASL";
                     break;
-                case 0b001:
-                    {
-                        std::uint8_t old_c = p_ & kC;
-                        setC(a_ & 0x80);
-                        a_ <<= 1;
-                        a_ |= old_c;
-                    }
+                case 0b001: {
+                    std::uint8_t old_c = p_ & kC;
+                    setC(a_ & 0x80);
+                    a_ <<= 1;
+                    a_ |= old_c;
+                }
                     setZN(a_);
                     instr = "ROL";
                     break;
@@ -624,13 +603,12 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                     setZN(a_);
                     instr = "LSR";
                     break;
-                case 0b011:
-                    {
-                        bool old_c = p_ & kC;
-                        setC(a_ & 0x01);
-                        a_ >>= 1;
-                        a_ |= old_c << 7;
-                    }
+                case 0b011: {
+                    bool old_c = p_ & kC;
+                    setC(a_ & 0x01);
+                    a_ >>= 1;
+                    a_ |= old_c << 7;
+                }
                     setZN(a_);
                     instr = "ROR";
                     break;
@@ -649,7 +627,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                     break;
                 case 0b011:
                     addrAbsolute();
-                    mode = "abs";                    
+                    mode = "abs";
                     break;
                 case 0b101:
                     if (opcode == 0x96 || opcode == 0xB6) {
@@ -661,7 +639,7 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                     }
                     break;
                 case 0b111:
-                    if (opcode == 0xBE) { // LDX
+                    if (opcode == 0xBE) {  // LDX
                         addrAbsoluteY();
                         mode = "abs, Y";
                     } else {
@@ -674,52 +652,48 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
             }
 
             switch ((opcode & 0xE0) >> 5) {
-                case 0b000:
-                    {
-                        std::uint8_t operand = readByte(addr_);
-                        setC(operand & 0x80);
-                        operand <<= 1;
-                        ++cycle_;
-                        writeByte(addr_, operand);
-                        setZN(operand);
-                    }
+                case 0b000: {
+                    std::uint8_t operand = readByte(addr_);
+                    setC(operand & 0x80);
+                    operand <<= 1;
+                    ++cycle_;
+                    writeByte(addr_, operand);
+                    setZN(operand);
+                }
                     instr = "ASL";
                     break;
-                case 0b001:
-                    {
-                        std::uint8_t operand = readByte(addr_);
-                        std::uint8_t old_c = p_ & kC;
-                        setC(operand & 0x80);
-                        operand <<= 1;
-                        ++cycle_;
-                        operand |= old_c;
-                        writeByte(addr_, operand);
-                        setZN(operand);
-                    }
+                case 0b001: {
+                    std::uint8_t operand = readByte(addr_);
+                    std::uint8_t old_c = p_ & kC;
+                    setC(operand & 0x80);
+                    operand <<= 1;
+                    ++cycle_;
+                    operand |= old_c;
+                    writeByte(addr_, operand);
+                    setZN(operand);
+                }
                     instr = "ROL";
                     break;
-                case 0b010:
-                    {
-                        auto operand = readByte(addr_);
-                        setC(operand & 0x01);
-                        operand >>= 1;
-                        ++cycle_;
-                        writeByte(addr_, operand);
-                        setZN(operand);
-                    }
+                case 0b010: {
+                    auto operand = readByte(addr_);
+                    setC(operand & 0x01);
+                    operand >>= 1;
+                    ++cycle_;
+                    writeByte(addr_, operand);
+                    setZN(operand);
+                }
                     instr = "LSR";
                     break;
-                case 0b011:
-                    {
-                        std::uint8_t operand = readByte(addr_);
-                        bool old_c = p_ & kC;
-                        setC(operand & 0x01);
-                        operand >>= 1;
-                        ++cycle_;
-                        operand |= old_c << 7;
-                        writeByte(addr_, operand);
-                        setZN(operand);
-                    }
+                case 0b011: {
+                    std::uint8_t operand = readByte(addr_);
+                    bool old_c = p_ & kC;
+                    setC(operand & 0x01);
+                    operand >>= 1;
+                    ++cycle_;
+                    operand |= old_c << 7;
+                    writeByte(addr_, operand);
+                    setZN(operand);
+                }
                     instr = "ROR";
                     break;
                 case 0b100:
@@ -731,24 +705,22 @@ bool Cpu::execGroup2(std::uint8_t opcode) {
                     setZN(x_);
                     instr = "LDX";
                     break;
-                case 0b110:
-                    {
-                        std::uint8_t operand = readByte(addr_);
-                        --operand;
-                        ++cycle_;
-                        writeByte(addr_, operand);
-                        setZN(operand);
-                    }
+                case 0b110: {
+                    std::uint8_t operand = readByte(addr_);
+                    --operand;
+                    ++cycle_;
+                    writeByte(addr_, operand);
+                    setZN(operand);
+                }
                     instr = "DEC";
                     break;
-                case 0b111:
-                    {
-                        std::uint8_t operand = readByte(addr_);
-                        ++operand;
-                        ++cycle_;
-                        writeByte(addr_, operand);
-                        setZN(operand);
-                    }
+                case 0b111: {
+                    std::uint8_t operand = readByte(addr_);
+                    ++operand;
+                    ++cycle_;
+                    writeByte(addr_, operand);
+                    setZN(operand);
+                }
                     instr = "INC";
                     break;
             }

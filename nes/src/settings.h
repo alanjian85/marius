@@ -6,18 +6,18 @@
 #include "io/controller_keymap.h"
 
 namespace nes {
-    struct Settings final {
-        Settings(const char* path);
+struct Settings final {
+    Settings(const char* path);
 
-        void loadDefaults();
+    void loadDefaults();
 
-        SDL_Scancode getScancode(const std::string& name);
+    SDL_Scancode getScancode(const std::string& name);
 
-        int dump_size;
-        SDL_Scancode dump;
-        SDL_Scancode reset;
-        ControllerKeymap keymap1, keymap2;
-    };
-}
+    int dump_size;
+    SDL_Scancode dump;
+    SDL_Scancode reset;
+    ControllerKeymap keymap1, keymap2;
+};
+}  // namespace nes
 
-#endif // NES_SETTINGS_H_
+#endif  // NES_SETTINGS_H_
