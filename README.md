@@ -1,21 +1,54 @@
 # NES
-NES Emulation Software
+NES (NES Emulation Software) is a simple and a proof-of-concept emulator of Nintendo Entertainment System. Its single-threaded and interpreter-based design makes it a demonstration emulator. The underlying mechanisms are implemented using C++17 and SDL2. And It can now run on the web because of WASM.
 
 ![Mario GIF](media/mario.gif) ![Pacman GIF](media/pacman.gif) ![Donkey Kong GIF](media/donkeykong.gif)
 
 ## Features
-* 6502 CPU Emulation
-* PPU Rendering
-* Keyboard Input
-* Configurable JSON Key Mapping
-* iNES ROM Format Support
+* A Simple iNES ROM loader included
+* Integrated emulation of the 6502 CPU
+* Partial support of PPU (Picture Processing Unit)
+* Customizable mappings between the keyboard and the virtual controller
+* Tweakable settings in the JSON config file
+* Object-oriented wrappers of the hardwares
+
+## Default Key Mappings
+
+### Controller 1
+| Controller | Keyboard |
+|------------|----------|
+|     A      |    J     |
+|     B      |    K     |
+|   SELECT   |  RSHIFT  |
+|   START    |  ENTER   |
+|     ←      |    A     |
+|     ↑      |    w     |
+|     →      |    D     |
+|     ↓      |    S     |
+
+### Controller 2
+| Controller | Keyboard |
+|------------|----------|
+|     A      |    X     |
+|     B      |    Z     |
+|   SELECT   |  LSHIFT  |
+|   START    |   TAB    |
+|     ←      |    ←     |
+|     ↑      |    ↑     |
+|     →      |    →     |
+|     ↓      |    ↓     |
+
+### Other Keys
+| Keyboard | Function |
+|----------|----------|
+|    F1    | Dump log |
+|    F2    | Reset    |
 
 ## Supported Mappers
-* NROM
+* [NROM](https://www.nesdev.org/wiki/NROM)
 
 ## Dependencies
-* [JSON for Modern C++](https://json.nlohmann.me/)
 * [SDL2](https://www.libsdl.org/)
+* [JSON for Modern C++](https://json.nlohmann.me/)
 * [spdlog](https://github.com/gabime/spdlog)
 
 ## References
