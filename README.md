@@ -4,7 +4,7 @@ NES (NES Emulation Software) is a simple and a proof-of-concept emulator of Nint
 ![Mario GIF](media/mario.gif) ![Pacman GIF](media/pacman.gif) ![Donkey Kong GIF](media/donkeykong.gif)
 
 ## Features
-* A Simple iNES ROM loader included
+* A simple iNES ROM loader included
 * Integrated emulation of the 6502 CPU
 * Partial support of PPU (Picture Processing Unit)
 * Customizable mappings between the keyboard and the virtual controller
