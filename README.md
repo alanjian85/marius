@@ -1,5 +1,5 @@
 # NES
-NES (NES Emulation Software) is a simple and a proof-of-concept emulator of Nintendo Entertainment System. Its single-threaded and interpreter-based design makes it a demonstration emulator. The underlying mechanisms are implemented using C++17 and SDL2. And It can now run on the web because of WASM.
+NES (NES Emulation Software) is a simple and a proof-of-concept emulator of Nintendo Entertainment System. Its single-threaded and interpreter-based design makes it a emulator for demonstration. The underlying mechanisms are implemented using C++17 and SDL2. And It can now run on the web because of WASM.
 
 ![Mario GIF](media/mario.gif) ![Pacman GIF](media/pacman.gif) ![Donkey Kong GIF](media/donkeykong.gif)
 
