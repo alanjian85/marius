@@ -2,7 +2,7 @@ if (EMSCRIPTEN)
     set(CMAKE_CXX_FLAGS "-s USE_SDL=2 -O3")
 endif()
 
-set(NES_SRCS
+set(MARIUS_SRCS
     src/components/cpu_bus.cc
     src/components/cpu_bus.h
     src/components/cpu.cc
@@ -33,28 +33,28 @@ set(NES_SRCS
     src/settings.h
     src/main.cc
 )
-add_executable(nes ${NES_SRCS})
+add_executable(marius ${MARIUS_SRCS})
 
 find_package(nlohmann_json REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(spdlog REQUIRED)
 
-target_include_directories(nes PRIVATE
+target_include_directories(marius PRIVATE
     src
     ${SDL2_INCLUDE_DIRS}
 )
 
 if (EMSCRIPTEN)
-    target_link_libraries(nes
+    target_link_libraries(marius
         ${SDL2_LIBRARIES}
     )
 
     configure_file(res/index.html index.html COPYONLY)
     configure_file(res/icon.png icon.png COPYONLY)
 
-    set_target_properties(nes PROPERTIES LINK_FLAGS "--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/mario.nes@mario.nes")
+    set_target_properties(marius PROPERTIES LINK_FLAGS "--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/mario.marius@mario.marius")
 else()
-    target_link_libraries(nes
+    target_link_libraries(marius
         nlohmann_json::nlohmann_json
         ${SDL2_LIBRARIES}
         spdlog::spdlog
