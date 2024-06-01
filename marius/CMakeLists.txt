@@ -52,7 +52,7 @@ if (EMSCRIPTEN)
     configure_file(res/index.html index.html COPYONLY)
     configure_file(res/icon.png icon.png COPYONLY)
 
-    set_target_properties(marius PROPERTIES LINK_FLAGS "--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/mario.marius@mario.marius")
+    set_target_properties(marius PROPERTIES LINK_FLAGS "--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/mario.nes@mario.nes")
 else()
     target_link_libraries(marius
         nlohmann_json::nlohmann_json
