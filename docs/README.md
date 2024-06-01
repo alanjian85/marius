@@ -11,7 +11,7 @@ Marius (/ˈma.ri.us/, the Latin root of the Italian name "Mario") is a tiny emul
 | SELECT |    RSHIFT    |    LSHIFT    |
 | START  |    ENTER     |     TAB      |
 |   ←    |      A       |      ←       |
-|   ↑    |      w       |      ↑       |
+|   ↑    |      W       |      ↑       |
 |   →    |      D       |      →       |
 |   ↓    |      S       |      ↓       |
 

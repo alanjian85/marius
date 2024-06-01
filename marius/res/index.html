@@ -3,60 +3,17 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-        <link rel="shortcut icon" type="image/png" href="icon.png">
-
         <style>
-            body {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0; 
-                overflow: hidden;
-                background-color: rgb(170, 60, 61);
-            }
-
             canvas {
                 position: absolute;
-                outline: 125px solid rgb(229, 226, 217);
                 top: 50%;
                 left: 50%;
-                transform: translate(-50%, -50%)
-            }
-
-            div {
-                font-family: Arial, sans-serif;
-                outline: 5px solid rgb(113, 5, 29);
-                background: rgb(159, 2, 31);
-                color: ivory;
-                position: absolute;
-                left: 0.5%;
+                transform: translate(-50%, -50%);
             }
         </style>
-
         <title>Marius</title>
     </head>
     <body>
-        <a href="https://alanjian85.github.io/nes"><img src="icon.png" width="128" height="128"></a>
-
-        <div>
-            LEFT - A
-            <br>
-            RIGHT - D
-            <br>
-            JUMP - J
-            <br>
-            BOOST - K
-            <br>
-            SELECT - RIGHT SHIFT
-            <br>
-            START - ENTER
-            <br>
-            F2 - Reset game states
-            <hr>
-            F1 - Dump instruction log
-        </div>
-
         <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
         <script type="text/javascript">
             var Module = {

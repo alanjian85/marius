@@ -35,8 +35,7 @@ Emulator::Emulator(int width, int height, const std::filesystem::path& path,
     cpu_.reset();
     ppu_.reset();
 
-    window_ = Window(fmt::format("NES {}", path.filename().string()).c_str(),
-                     width, height, SDL_WINDOW_RESIZABLE);
+    window_ = Window("Marius", width, height, SDL_WINDOW_RESIZABLE);
     renderer_ = Renderer(window_, -1,
                          SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     framebuffer_ = Framebuffer(renderer_, Ppu::kWidth, Ppu::kHeight);
