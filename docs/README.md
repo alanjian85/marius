@@ -1,5 +1,5 @@
 # Marius
-Marius (/ˈma.ri.us/, the Latin root of the Italian name "Mario") is a tiny emulator of NES (Nintendo Entertainment System). It illustrates the fundamental workings of NES by emulating its core components through straightforward algorithms. It also supports various configuration options, debug utilities and a range of common catridge mappers. Moreover, it can be run directly in modern browsers thanks to the powerful WebAssembly technology.
+Marius ([ˈmäriʊs̠], the Latin root of the Italian name "Mario") is a tiny emulator of NES (Nintendo Entertainment System). It illustrates the fundamental workings of NES by emulating its core components through straightforward algorithms. It also supports various configuration options, debug utilities and a range of common catridge mappers. Moreover, it can be run directly in modern browsers thanks to the powerful WebAssembly technology.
 
 ![Mario GIF](mario.gif) ![Pacman GIF](pacman.gif) ![Donkey Kong GIF](donkeykong.gif)
 
